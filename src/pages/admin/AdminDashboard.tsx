@@ -141,75 +141,79 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Row 1: Top Statistics */}
+      {/* Row 1: Top Statistics with SNS Design Thinking Colors */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-teal-500">
+        {/* 🟡 Amber Gold (#F59E0B) */}
+        <Card className="border-l-4 border-l-amber-500 bg-gradient-to-br from-white to-amber-50/50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Patients</p>
+              <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Total Patients</p>
               <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.totalPatients}</h3>
-              <span className="inline-flex items-center text-xs font-bold text-emerald-600 mt-1">
+              <span className="inline-flex items-center text-xs font-bold text-amber-700 mt-1">
                 <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +12% this month
               </span>
             </div>
-            <div className="p-3 bg-teal-50 rounded-2xl text-teal-600">
+            <div className="p-3 bg-amber-100/80 rounded-2xl text-amber-600 shadow-sm">
               <Users className="w-6 h-6" />
             </div>
           </div>
         </Card>
 
-        <Card className="border-l-4 border-l-sky-500">
+        {/* 💙 Royal Blue (#3B82F6) */}
+        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-white to-blue-50/50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Doctors</p>
+              <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">Active Doctors</p>
               <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.totalDoctors}</h3>
-              <span className="inline-flex items-center text-xs font-semibold text-slate-500 mt-1">
+              <span className="inline-flex items-center text-xs font-semibold text-blue-700 mt-1">
                 Across 6 Departments
               </span>
             </div>
-            <div className="p-3 bg-sky-50 rounded-2xl text-sky-600">
+            <div className="p-3 bg-blue-100/80 rounded-2xl text-blue-600 shadow-sm">
               <Stethoscope className="w-6 h-6" />
             </div>
           </div>
         </Card>
 
-        <Card className="border-l-4 border-l-purple-500">
+        {/* 💜 Purple (#8B5CF6) */}
+        <Card className="border-l-4 border-l-purple-500 bg-gradient-to-br from-white to-purple-50/50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Appointments</p>
+              <p className="text-xs font-bold text-purple-800 uppercase tracking-wider">Total Appointments</p>
               <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.totalAppointments}</h3>
-              <span className="inline-flex items-center text-xs font-bold text-emerald-600 mt-1">
+              <span className="inline-flex items-center text-xs font-bold text-purple-700 mt-1">
                 <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +8.4% volume
               </span>
             </div>
-            <div className="p-3 bg-purple-50 rounded-2xl text-purple-600">
+            <div className="p-3 bg-purple-100/80 rounded-2xl text-purple-600 shadow-sm">
               <Calendar className="w-6 h-6" />
             </div>
           </div>
         </Card>
 
-        <Card className="border-l-4 border-l-emerald-500">
+        {/* 🟢 Emerald & Teal (#0D9488 & #10B981) */}
+        <Card className="border-l-4 border-l-emerald-500 bg-gradient-to-br from-white to-emerald-50/50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Today's Appointments</p>
+              <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Today's Appointments</p>
               <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.todayAppointments}</h3>
-              <span className="inline-flex items-center text-xs font-semibold text-teal-600 mt-1">
+              <span className="inline-flex items-center text-xs font-semibold text-teal-700 mt-1">
                 Scheduled Today
               </span>
             </div>
-            <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600">
+            <div className="p-3 bg-emerald-100/80 rounded-2xl text-emerald-600 shadow-sm">
               <Clock className="w-6 h-6" />
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Row 2: Performance KPIs with Trend Indicators */}
+      {/* Row 2: Performance KPIs with Multi-Color Trend Indicators */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Attendance Rate (Positive Trend) */}
-        <Card className="bg-gradient-to-br from-white to-emerald-50/40 border-emerald-200">
+        {/* 🟢 Emerald & Teal (#10B981) */}
+        <Card className="bg-gradient-to-br from-white to-emerald-50/60 border-emerald-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase text-emerald-800 tracking-wider">Attendance Rate</span>
+            <span className="text-xs font-extrabold uppercase text-emerald-800 tracking-wider">Attendance Rate</span>
             <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
               <TrendingUp className="w-3.5 h-3.5 text-emerald-600" /> Positive Trend
             </span>
@@ -220,10 +224,10 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </Card>
 
-        {/* No-Show Rate (Negative Trend Indicator when High) */}
-        <Card className="bg-gradient-to-br from-white to-rose-50/40 border-rose-200">
+        {/* 🔴 Crimson Red (#EF4444) */}
+        <Card className="bg-gradient-to-br from-white to-rose-50/60 border-rose-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase text-rose-800 tracking-wider">No-Show Rate</span>
+            <span className="text-xs font-extrabold uppercase text-rose-800 tracking-wider">No-Show Rate</span>
             <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 flex items-center gap-1">
               <TrendingDown className="w-3.5 h-3.5 text-rose-600" /> -1.2% Reduction
             </span>
@@ -234,11 +238,11 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </Card>
 
-        {/* Cancellation Rate */}
-        <Card>
+        {/* 💖 Pink (#EC4899) */}
+        <Card className="bg-gradient-to-br from-white to-pink-50/60 border-pink-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase text-slate-600 tracking-wider">Cancellation Rate</span>
-            <span className="text-xs text-slate-400">Normal range</span>
+            <span className="text-xs font-extrabold uppercase text-pink-800 tracking-wider">Cancellation Rate</span>
+            <span className="text-xs font-bold text-pink-600 bg-pink-100 px-2 py-0.5 rounded-full">Normal range</span>
           </div>
           <div className="flex items-baseline space-x-2">
             <h3 className="text-3xl font-black text-slate-900">{analytics.cancellationRate}%</h3>
@@ -246,17 +250,15 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </Card>
 
-        {/* Waitlist Recovery Rate */}
-        <Card className="bg-gradient-to-br from-white to-teal-50/40 border-teal-200">
+        {/* 💙 Royal Blue (#3B82F6) */}
+        <Card className="bg-gradient-to-br from-white to-blue-50/60 border-blue-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase text-teal-800 tracking-wider">Waitlist Recovery</span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-teal-100 text-teal-800 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-teal-600" /> Auto-Recovered
-            </span>
+            <span className="text-xs font-extrabold uppercase text-blue-800 tracking-wider">Waitlist Recovery</span>
+            <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">Auto-Recovered</span>
           </div>
           <div className="flex items-baseline space-x-2">
             <h3 className="text-3xl font-black text-slate-900">{analytics.waitlistRecoveryRate}%</h3>
-            <span className="text-xs font-bold text-teal-700">Slots Refilled</span>
+            <span className="text-xs font-bold text-blue-600">Slots Refilled</span>
           </div>
         </Card>
       </div>

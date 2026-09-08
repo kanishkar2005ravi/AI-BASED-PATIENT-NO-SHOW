@@ -33,30 +33,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
   };
 
   const adminNavItems = [
-    { label: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { label: 'Patients', path: '/admin/patients', icon: <Users className="w-5 h-5" /> },
-    { label: 'Doctors', path: '/admin/doctors', icon: <Stethoscope className="w-5 h-5" /> },
-    { label: 'Appointments', path: '/admin/appointments', icon: <Calendar className="w-5 h-5" /> },
-    { label: 'Waitlist', path: '/admin/waitlist', icon: <Clock className="w-5 h-5" /> },
-    { label: 'Analytics', path: '/admin/analytics', icon: <BarChart3 className="w-5 h-5" /> },
-    { label: 'Notifications', path: '/admin/notifications', icon: <Bell className="w-5 h-5" /> },
-    { label: 'Reports', path: '/admin/reports', icon: <FileText className="w-5 h-5" /> },
-    { label: 'Profile', path: '/admin/profile', icon: <User className="w-5 h-5" /> }
+    { label: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/30' },
+    { label: 'Patients', path: '/admin/patients', icon: <Users className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' },
+    { label: 'Doctors', path: '/admin/doctors', icon: <Stethoscope className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-500/30' },
+    { label: 'Appointments', path: '/admin/appointments', icon: <Calendar className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/30' },
+    { label: 'Waitlist', path: '/admin/waitlist', icon: <Clock className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/30' },
+    { label: 'Analytics', path: '/admin/analytics', icon: <BarChart3 className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-md shadow-red-500/30' },
+    { label: 'Notifications', path: '/admin/notifications', icon: <Bell className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/30' },
+    { label: 'Reports', path: '/admin/reports', icon: <FileText className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30' },
+    { label: 'Profile', path: '/admin/profile', icon: <User className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/30' }
   ];
 
   const patientNavItems = [
-    { label: 'Dashboard', path: '/patient/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { label: 'Book Appointment', path: '/patient/book', icon: <Calendar className="w-5 h-5" /> },
-    { label: 'My Appointments', path: '/patient/appointments', icon: <HeartPulse className="w-5 h-5" /> },
-    { label: 'Waitlist', path: '/patient/waitlist', icon: <Clock className="w-5 h-5" /> },
-    { label: 'Notifications', path: '/patient/notifications', icon: <Bell className="w-5 h-5" /> },
-    { label: 'Profile', path: '/patient/profile', icon: <User className="w-5 h-5" /> }
+    { label: 'Dashboard', path: '/patient/dashboard', icon: <LayoutDashboard className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/30' },
+    { label: 'Book Appointment', path: '/patient/book', icon: <Calendar className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-500/30' },
+    { label: 'My Appointments', path: '/patient/appointments', icon: <HeartPulse className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/30' },
+    { label: 'Waitlist', path: '/patient/waitlist', icon: <Clock className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/30' },
+    { label: 'Notifications', path: '/patient/notifications', icon: <Bell className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' },
+    { label: 'Profile', path: '/patient/profile', icon: <User className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/30' }
   ];
 
   const navItems = role === 'admin' ? adminNavItems : patientNavItems;
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 min-h-screen flex flex-col justify-between p-4 hidden md:flex border-r border-slate-800 flex-shrink-0">
+    <aside className="w-64 bg-slate-950 text-slate-300 min-h-screen flex flex-col justify-between p-4 hidden md:flex border-r border-slate-800/80 flex-shrink-0 relative overflow-hidden">
+      {/* Top Rainbow Accent Line */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-rose-500 via-purple-500 via-blue-500 to-teal-400" />
+
       <div>
         {/* Brand Header */}
         <div className="px-2 py-3 mb-4">
@@ -65,26 +68,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
 
         {/* Role Badge */}
         <div className="px-3 mb-6">
-          <div className="bg-slate-800/80 border border-slate-700/60 rounded-xl p-2.5 flex items-center space-x-2.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+          <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex items-center space-x-2.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
             <div className="text-xs">
-              <p className="font-bold text-white uppercase tracking-wider text-[11px]">{role} Portal</p>
+              <p className="font-extrabold text-white uppercase tracking-wider text-[11px]">{role} Portal</p>
               <p className="text-slate-400 text-[10px] truncate max-w-[150px]">{user?.name || user?.email}</p>
             </div>
           </div>
         </div>
 
         {/* Navigation List */}
-        <nav className="space-y-1">
+        <nav className="space-y-1.5">
           {navItems.map(item => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 ${
+                `flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 ${
                   isActive
-                    ? 'bg-teal-600 text-white font-semibold shadow-sm shadow-teal-900/40'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    ? item.activeBg
+                    : 'text-slate-400 hover:text-white hover:bg-slate-900/80'
                 }`
               }
             >
