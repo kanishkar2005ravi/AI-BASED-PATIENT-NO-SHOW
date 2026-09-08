@@ -382,6 +382,79 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         };
       }
 
+      // Handle JOIN_WAITLIST Action Specifically
+      if (payload.action === 'JOIN_WAITLIST') {
+        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
+        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+
+        const pId = payload.data?.patientId || 'PAT-001';
+        const dId = payload.data?.doctorId || 'DOC-001';
+        const selDoc = localDocs.find(d => d.id === dId) || localDocs[0];
+        const selPat = localPats.find(p => p.id === pId) || { name: payload.data?.patientName || 'Kiran Raj' };
+
+        const newItem: WaitlistItem = {
+          id: `WTL-${Date.now()}`,
+          patientId: pId,
+          patientName: selPat.name,
+          doctorId: dId,
+          doctorName: selDoc.name,
+          requestedDate: payload.data?.requestedDate || '2026-09-10',
+          requestedTimeSlot: payload.data?.requestedTimeSlot || 'Morning',
+          position: 1,
+          status: 'WAITING',
+          createdAt: new Date().toISOString().split('T')[0]
+        };
+
+        const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+        localWaitlist.unshift(newItem);
+        setLocalData(STORAGE_KEYS.WAITLIST, localWaitlist);
+
+        return {
+          success: true,
+          message: resData.message || 'Joined waitlist queue successfully!',
+          data: newItem as any
+        };
+      }
+
+      // Handle GET_WAITLIST Action Specifically
+      if (payload.action === 'GET_WAITLIST') {
+        const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+        const wtlData = (Array.isArray(resData.data) && resData.data.length > 0) ? resData.data : localWaitlist;
+        return {
+          success: true,
+          message: 'Waitlist retrieved successfully.',
+          data: wtlData as any
+        };
+      }
+
+      // Handle ACCEPT_WAITLIST_SLOT Action Specifically
+      if (payload.action === 'ACCEPT_WAITLIST_SLOT') {
+        const wId = payload.data?.waitlistId || payload.data?.id;
+        const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+        const updated = localWaitlist.map(w => w.id === wId ? { ...w, status: 'CLAIMED' as const } : w);
+        setLocalData(STORAGE_KEYS.WAITLIST, updated);
+
+        return {
+          success: true,
+          message: resData.message || 'Slot confirmed! Your appointment has been booked.',
+          data: updated as any
+        };
+      }
+
+      // Handle LEAVE_WAITLIST Action Specifically
+      if (payload.action === 'LEAVE_WAITLIST') {
+        const wId = payload.data?.waitlistId || payload.data?.id;
+        const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+        const updated = localWaitlist.filter(w => w.id !== wId);
+        setLocalData(STORAGE_KEYS.WAITLIST, updated);
+
+        return {
+          success: true,
+          message: resData.message || 'Removed from waitlist.',
+          data: updated as any
+        };
+      }
+
       // Default Webhook Fallback for Other Queries
       const responseMessage = resData.message || (isSuccess ? 'Operation completed successfully' : 'Operation failed');
       const fallbackData = resData.data || (payload.action === 'GET_DOCTORS' ? INITIAL_DOCTORS : payload.action === 'GET_PATIENTS' ? getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS) : payload.action === 'GET_APPOINTMENTS' ? getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS) : payload.action === 'GET_ANALYTICS' ? INITIAL_ANALYTICS : payload.action === 'GET_WAITLIST' ? INITIAL_WAITLIST : payload.action === 'GET_NOTIFICATIONS' ? INITIAL_NOTIFICATIONS : resData);
