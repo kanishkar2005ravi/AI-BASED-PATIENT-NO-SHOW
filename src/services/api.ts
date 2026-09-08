@@ -1139,7 +1139,45 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
     // 18. ANALYTICS & MODEL PERFORMANCE
     case 'GET_ANALYTICS': {
-      return { success: true, message: 'Analytics data loaded.', data: analytics as any };
+      const realPatients = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+      const realDoctors = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
+      const realApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
+      const realWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todayAptsCount = realApts.filter(a => a.appointmentDate === todayStr).length;
+
+      const totalAptsCount = realApts.length;
+      const totalPatsCount = realPatients.length;
+      const totalDocsCount = realDoctors.length;
+
+      const confirmedCount = realApts.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN').length;
+      const noShowCount = realApts.filter(a => a.status === 'NO_SHOW').length;
+      const cancelledCount = realApts.filter(a => a.status === 'CANCELLED').length;
+
+      const attendanceRate = totalAptsCount > 0 ? Number(((confirmedCount / totalAptsCount) * 100).toFixed(1)) : 84.5;
+      const noShowRate = totalAptsCount > 0 ? Number(((noShowCount / totalAptsCount) * 100).toFixed(1)) : 9.2;
+      const cancellationRate = totalAptsCount > 0 ? Number(((cancelledCount / totalAptsCount) * 100).toFixed(1)) : 6.3;
+
+      const highRiskCount = realApts.filter(a => a.risk?.level === 'HIGH').length;
+      const mediumRiskCount = realApts.filter(a => a.risk?.level === 'MEDIUM').length;
+      const lowRiskCount = Math.max(0, totalAptsCount - highRiskCount - mediumRiskCount);
+
+      const dynamicAnalytics: AnalyticsData = {
+        ...INITIAL_ANALYTICS,
+        totalPatients: totalPatsCount,
+        totalDoctors: totalDocsCount,
+        totalAppointments: totalAptsCount,
+        todayAppointments: todayAptsCount,
+        attendanceRate,
+        noShowRate,
+        cancellationRate,
+        highRiskCount,
+        mediumRiskCount,
+        lowRiskCount
+      };
+
+      return { success: true, message: 'Real-time analytics data loaded.', data: dynamicAnalytics as any };
     }
 
     case 'GET_MODEL_PERFORMANCE': {
