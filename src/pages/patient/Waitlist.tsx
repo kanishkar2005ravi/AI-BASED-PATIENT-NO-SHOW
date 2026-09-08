@@ -45,6 +45,11 @@ export const Waitlist: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoConfirmId = urlParams.get('confirm');
+    if (autoConfirmId) {
+      handleAccept(autoConfirmId);
+    }
   }, [user?.id]);
 
   const handleJoin = async (e: React.FormEvent) => {
