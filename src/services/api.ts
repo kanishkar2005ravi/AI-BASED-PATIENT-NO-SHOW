@@ -86,6 +86,47 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           action: 'BOOK_APPOINTMENT',
           data: payload.data
         };
+      } else if (payload.action === 'CREATE_PATIENT') {
+        requestBody = {
+          action: 'CREATE_PATIENT',
+          patientId: payload.data?.patientId || payload.data?.id,
+          patient_id: payload.data?.patientId || payload.data?.id,
+          name: payload.data?.name,
+          email: payload.data?.email,
+          phone: payload.data?.phone,
+          dateOfBirth: payload.data?.dateOfBirth,
+          date_of_birth: payload.data?.dateOfBirth,
+          gender: payload.data?.gender,
+          address: payload.data?.address,
+          data: {
+            ...payload.data,
+            patientId: payload.data?.patientId || payload.data?.id,
+            patient_id: payload.data?.patientId || payload.data?.id,
+            date_of_birth: payload.data?.dateOfBirth
+          }
+        };
+      } else if (payload.action === 'CREATE_DOCTOR') {
+        requestBody = {
+          action: 'CREATE_DOCTOR',
+          doctorId: payload.data?.doctorId || payload.data?.id,
+          doctor_id: payload.data?.doctorId || payload.data?.id,
+          name: payload.data?.name,
+          specialization: payload.data?.specialization,
+          department: payload.data?.department,
+          email: payload.data?.email,
+          phone: payload.data?.phone,
+          roomNumber: payload.data?.roomNumber,
+          room_number: payload.data?.roomNumber,
+          experience: payload.data?.experience,
+          experience_years: payload.data?.experience,
+          data: {
+            ...payload.data,
+            doctorId: payload.data?.doctorId || payload.data?.id,
+            doctor_id: payload.data?.doctorId || payload.data?.id,
+            room_number: payload.data?.roomNumber,
+            experience_years: payload.data?.experience
+          }
+        };
       } else {
         requestBody = {
           action: payload.action,
