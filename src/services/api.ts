@@ -12,7 +12,8 @@ import {
 } from '../utils/mockData';
 import { calculateAIRisk } from '../utils/aiPredictor';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_WEBHOOK_URL || '';
+const DEFAULT_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/a2918487-c8b3-45ba-aed2-2b725e35b286';
+const BACKEND_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_WEBHOOK_URL || DEFAULT_WEBHOOK_URL;
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 
 // Demo Mode Storage Key Management
