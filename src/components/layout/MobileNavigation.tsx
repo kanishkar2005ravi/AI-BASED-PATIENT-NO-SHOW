@@ -39,7 +39,6 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ role }) => {
     { label: 'Doctors', path: '/admin/doctors', icon: <Stethoscope className="w-5 h-5" /> },
     { label: 'Appointments', path: '/admin/appointments', icon: <Calendar className="w-5 h-5" /> },
     { label: 'Waitlist', path: '/admin/waitlist', icon: <Clock className="w-5 h-5" /> },
-    { label: 'Analytics', path: '/admin/analytics', icon: <BarChart3 className="w-5 h-5" /> },
     { label: 'Notifications', path: '/admin/notifications', icon: <Bell className="w-5 h-5" /> },
     { label: 'Reports', path: '/admin/reports', icon: <FileText className="w-5 h-5" /> },
     { label: 'Profile', path: '/admin/profile', icon: <User className="w-5 h-5" /> }

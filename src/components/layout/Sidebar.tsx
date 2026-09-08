@@ -38,7 +38,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
     { label: 'Doctors', path: '/admin/doctors', icon: <Stethoscope className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-500/30' },
     { label: 'Appointments', path: '/admin/appointments', icon: <Calendar className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/30' },
     { label: 'Waitlist', path: '/admin/waitlist', icon: <Clock className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/30' },
-    { label: 'Analytics', path: '/admin/analytics', icon: <BarChart3 className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-md shadow-red-500/30' },
     { label: 'Notifications', path: '/admin/notifications', icon: <Bell className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/30' },
     { label: 'Reports', path: '/admin/reports', icon: <FileText className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30' },
     { label: 'Profile', path: '/admin/profile', icon: <User className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/30' }

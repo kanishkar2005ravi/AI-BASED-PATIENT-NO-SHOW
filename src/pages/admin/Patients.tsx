@@ -77,24 +77,30 @@ export const Patients: React.FC = () => {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setStatusFilter('ALL')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              statusFilter === 'ALL' ? 'bg-teal-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
+              statusFilter === 'ALL'
+                ? 'bg-gradient-to-r from-amber-500 via-rose-500 to-teal-500 text-white shadow-sm'
+                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
             }`}
           >
             All Patients ({patients.length})
           </button>
           <button
             onClick={() => setStatusFilter('Active')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              statusFilter === 'Active' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
+              statusFilter === 'Active'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm'
+                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
             }`}
           >
             Active ({patients.filter(p => p.status === 'Active').length})
           </button>
           <button
             onClick={() => setStatusFilter('Inactive')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              statusFilter === 'Inactive' ? 'bg-rose-600 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
+              statusFilter === 'Inactive'
+                ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-sm'
+                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
             }`}
           >
             Inactive ({patients.filter(p => p.status === 'Inactive').length})

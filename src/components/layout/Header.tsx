@@ -60,14 +60,16 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Center Title: SNS Medical College & Hospital + Page Name */}
+      {/* Center Title: SNS Medical College & Hospital (Circle / Pill Shape) + Page Name */}
       <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
-        <h1 className="text-xs font-black uppercase tracking-widest text-slate-800 flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-          SNS Medical College & Hospital
-        </h1>
-        <p className="text-base font-extrabold text-slate-900 leading-tight mt-0.5">
-          {title}
+        <div className="inline-flex items-center space-x-2 px-4 py-1 rounded-full bg-gradient-to-r from-amber-500/10 via-rose-500/10 via-purple-500/10 via-blue-500/10 to-teal-500/10 border border-slate-300/80 shadow-xs">
+          <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-amber-500 to-teal-500 animate-pulse flex-shrink-0" />
+          <span className="text-[11px] font-black uppercase tracking-widest text-slate-800">
+            SNS Medical College & Hospital
+          </span>
+        </div>
+        <p className="text-base font-black text-slate-900 leading-tight mt-1">
+          {title === 'Admin Hospital Dashboard' || title === 'Hospital Overview & AI Intelligence' ? 'Admin Dashboard' : title}
         </p>
       </div>
 

@@ -115,13 +115,13 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <Header title="Admin Hospital Dashboard" />
+      <Header title="Admin Dashboard" />
 
       {/* Date Range Selector Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <h2 className="text-base font-bold text-slate-900">Hospital Overview & AI Intelligence</h2>
-          <p className="text-xs text-slate-500">Real-time attendance metrics, no-show predictions & waitlist stats</p>
+          <h2 className="text-base font-bold text-slate-900">Hospital Overview & Patient Stats</h2>
+          <p className="text-xs text-slate-500">Real-time attendance metrics & waitlist stats</p>
         </div>
 
         <div className="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
@@ -131,7 +131,7 @@ export const AdminDashboard: React.FC = () => {
               onClick={() => setDateRange(range)}
               className={`px-3 py-1.5 rounded-lg transition-all capitalize ${
                 dateRange === range
-                  ? 'bg-teal-600 text-white shadow-sm'
+                  ? 'bg-gradient-to-r from-amber-500 via-rose-500 to-teal-500 text-white shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -208,67 +208,7 @@ export const AdminDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Row 2: AI Risk Distribution & Utilization */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Appointment Trend Chart */}
-        <Card title="Appointment Attendance Trends" className="lg:col-span-2">
-          <div className="h-72 w-full mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={analytics.appointmentTrends}>
-                <defs>
-                  <linearGradient id="colorAttended" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0d9488" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#0d9488" stopOpacity={0.0} />
-                  </linearGradient>
-                  <linearGradient id="colorNoShow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} />
-                <YAxis stroke="#94a3b8" fontSize={12} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}
-                />
-                <Legend />
-                <Area type="monotone" dataKey="attended" name="Attended" stroke="#0d9488" fillOpacity={1} fill="url(#colorAttended)" />
-                <Area type="monotone" dataKey="noShow" name="No-Show Risk" stroke="#f43f5e" fillOpacity={1} fill="url(#colorNoShow)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        {/* Risk Level Distribution Pie */}
-        <Card title="Current Risk Level Breakdown">
-          <div className="h-64 w-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={riskPieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={85}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {riskPieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-2 text-center text-xs text-slate-500">
-            Total active predictions evaluated by AI model
-          </div>
-        </Card>
-      </div>
-
-      {/* Row 4: Recent Appointments Table */}
+      {/* Row 2: Recent Appointments Table */}
       <Card
         title="Recent Hospital Appointments & AI Risk"
         action={

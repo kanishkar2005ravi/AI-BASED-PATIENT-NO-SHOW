@@ -70,10 +70,6 @@ export const Login: React.FC = () => {
         <div className="mb-2">
           <CarePilotLogo size="lg" textLight={true} />
         </div>
-        <p className="mt-2 text-center text-xs font-bold text-amber-400 flex items-center justify-center gap-1.5 tracking-wide">
-          <Sparkles className="w-4 h-4 text-emerald-400" />
-          Empowering Intelligent Healthcare & Patient-Centered Care
-        </p>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
