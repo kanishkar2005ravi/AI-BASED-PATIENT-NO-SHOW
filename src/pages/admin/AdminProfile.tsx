@@ -29,11 +29,12 @@ export const AdminProfile: React.FC = () => {
     }, 400);
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (window.confirm('Are you sure you want to clear all entered patient details, appointments, waitlists, and start fresh?')) {
       setClearing(true);
+      await callBackend({ action: 'CLEAR_ALL_DATA' });
       clearAllAppData();
-      showToast('All local application data cleared! Reloading...', 'info');
+      showToast('All local application & database data cleared! Reloading...', 'info');
       setTimeout(() => {
         window.location.reload();
       }, 1000);

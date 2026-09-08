@@ -563,6 +563,14 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           message: 'Notifications retrieved successfully.',
           data: notifsData as any
         };
+      // Handle CLEAR_ALL_DATA Action Specifically
+      if (payload.action === 'CLEAR_ALL_DATA') {
+        clearAllAppData();
+        return {
+          success: true,
+          message: resData.message || 'All application data and database records cleared successfully.',
+          data: [] as any
+        };
       }
 
       // Default Webhook Fallback for Other Queries
@@ -1191,6 +1199,12 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         message: `Report ${data.reportType || 'General'} generated successfully.`,
         data: { reportUrl: '#', generatedAt: new Date().toISOString() } as any
       };
+    }
+
+    // 20. CLEAR_ALL_DATA
+    case 'CLEAR_ALL_DATA': {
+      clearAllAppData();
+      return { success: true, message: 'All local application data cleared.' };
     }
 
     default:
