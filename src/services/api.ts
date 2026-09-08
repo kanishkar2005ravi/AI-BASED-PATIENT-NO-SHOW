@@ -52,6 +52,63 @@ function mergeListsById<T extends { id?: string }>(listA: T[], listB: T[]): T[] 
   return Array.from(map.values());
 }
 
+function normalizePatient(p: any): Patient {
+  if (!p) {
+    return {
+      id: `PAT-${Date.now()}`,
+      name: 'New Patient',
+      email: 'patient@example.com',
+      password: 'password',
+      phone: '9876543210',
+      dateOfBirth: '1995-05-15',
+      gender: 'Male',
+      address: '',
+      status: 'Active',
+      totalAppointments: 0,
+      attendedAppointments: 0,
+      noShowAppointments: 0,
+      cancelledAppointments: 0,
+      rescheduledAppointments: 0,
+      noShowRate: 0,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+  }
+
+  const id = p.id || p.patient_id || p.patientId || `PAT-${Math.floor(100 + Math.random() * 900)}`;
+  const name = p.name || p.patient_name || p.patientName || p.full_name || p.fullName || 'Patient Record';
+  const email = p.email || p.patient_email || p.patientEmail || `${id.toLowerCase()}@example.com`;
+  const phone = p.phone || p.phone_number || p.phoneNumber || '9876543210';
+  const dateOfBirth = p.dateOfBirth || p.date_of_birth || p.dob || '1995-05-15';
+  const gender = p.gender || 'Male';
+  const address = p.address || p.home_address || '';
+  const status = p.status === 'Inactive' || p.is_active === false ? 'Inactive' : 'Active';
+  const totalAppointments = Number(p.totalAppointments ?? p.total_appointments ?? p.appointments_count ?? 0);
+  const attendedAppointments = Number(p.attendedAppointments ?? p.attended_appointments ?? 0);
+  const noShowAppointments = Number(p.noShowAppointments ?? p.no_show_appointments ?? 0);
+  const cancelledAppointments = Number(p.cancelledAppointments ?? p.cancelled_appointments ?? 0);
+  const rescheduledAppointments = Number(p.rescheduledAppointments ?? p.rescheduled_appointments ?? 0);
+  const noShowRate = Number(p.noShowRate ?? p.noshow_rate ?? (totalAppointments > 0 ? Math.round((noShowAppointments / totalAppointments) * 100) : 0));
+
+  return {
+    id,
+    name,
+    email,
+    password: p.password || 'password',
+    phone,
+    dateOfBirth,
+    gender,
+    address,
+    status,
+    totalAppointments,
+    attendedAppointments,
+    noShowAppointments,
+    cancelledAppointments,
+    rescheduledAppointments,
+    noShowRate,
+    createdAt: p.createdAt || p.created_at || new Date().toISOString().split('T')[0]
+  };
+}
+
 export const isDemoMode = (): boolean => IS_DEMO_MODE;
 
 export const clearAllAppData = (): void => {
@@ -275,31 +332,21 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle CREATE_PATIENT Action Specifically
       if (payload.action === 'CREATE_PATIENT') {
-        const newPat: Patient = resData.patient || {
-          id: payload.data?.patientId || `PAT-${Date.now()}`,
-          name: payload.data?.name || 'New Patient',
-          email: payload.data?.email || 'patient@example.com',
-          password: payload.data?.password || 'password',
-          phone: payload.data?.phone || '9876543210',
-          dateOfBirth: payload.data?.dateOfBirth || '1995-05-15',
-          gender: payload.data?.gender || 'Male',
-          address: payload.data?.address || '',
-          status: 'Active',
-          totalAppointments: 0,
-          attendedAppointments: 0,
-          noShowAppointments: 0,
-          cancelledAppointments: 0,
-          rescheduledAppointments: 0,
-          noShowRate: 0,
-          createdAt: new Date().toISOString().split('T')[0]
-        };
+        const rawNewPat = resData.patient || resData.data || payload.data;
+        const newPat: Patient = normalizePatient({
+          ...payload.data,
+          ...(typeof rawNewPat === 'object' ? rawNewPat : {})
+        });
 
         // Sync with local memory & storage so UI updates immediately
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-        if (!localPats.some(p => p.id === newPat.id || (newPat.email && p.email === newPat.email))) {
+        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient);
+        const existingIdx = localPats.findIndex(p => p.id === newPat.id || (newPat.email && p.email === newPat.email));
+        if (existingIdx >= 0) {
+          localPats[existingIdx] = newPat;
+        } else {
           localPats.unshift(newPat);
-          setLocalData(STORAGE_KEYS.PATIENTS, localPats);
         }
+        setLocalData(STORAGE_KEYS.PATIENTS, localPats);
 
         return {
           success: isSuccess,
@@ -311,9 +358,10 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle GET_PATIENTS Action Specifically
       if (payload.action === 'GET_PATIENTS') {
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-        const remotePats = Array.isArray(resData.data) ? resData.data : [];
-        const combined = mergeListsById(localPats, remotePats);
+        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient);
+        const remoteRaw = Array.isArray(resData.data) ? resData.data : Array.isArray(resData.patients) ? resData.patients : [];
+        const remotePats = remoteRaw.map(normalizePatient);
+        const combined = mergeListsById(localPats, remotePats).map(normalizePatient);
         return {
           success: true,
           message: 'Patients retrieved successfully.',
