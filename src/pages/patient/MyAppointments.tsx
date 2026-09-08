@@ -135,7 +135,7 @@ export const MyAppointments: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-3 justify-end pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                  {apt.status === 'CONFIRMED' && (
+                  {(apt.status === 'CONFIRMED' || apt.status === 'RESCHEDULED' || apt.status === 'CHECKED_IN') && (
                     <>
                       <Button
                         variant="outline"
