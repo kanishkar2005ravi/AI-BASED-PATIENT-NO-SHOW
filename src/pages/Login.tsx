@@ -9,8 +9,8 @@ import { isDemoMode } from '../services/api';
 
 export const Login: React.FC = () => {
   const [role, setRole] = useState<UserRole>('admin');
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login, loading } = useAuth();
   const navigate = useNavigate();
@@ -18,13 +18,8 @@ export const Login: React.FC = () => {
   const handleRoleChange = (selectedRole: UserRole) => {
     setRole(selectedRole);
     setError('');
-    if (selectedRole === 'admin') {
-      setEmail('admin@example.com');
-      setPassword('password');
-    } else {
-      setEmail('');
-      setPassword('');
-    }
+    setEmail('');
+    setPassword('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
