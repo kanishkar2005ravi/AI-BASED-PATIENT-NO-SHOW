@@ -17,6 +17,8 @@ import {
   HeartPulse
 } from 'lucide-react';
 
+import { CarePilotLogo } from '../common/CarePilotLogo';
+
 interface SidebarProps {
   role: 'admin' | 'patient';
 }
@@ -57,17 +59,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
     <aside className="w-64 bg-slate-900 text-slate-300 min-h-screen flex flex-col justify-between p-4 hidden md:flex border-r border-slate-800 flex-shrink-0">
       <div>
         {/* Brand Header */}
-        <div className="flex items-center space-x-3 px-3 py-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-md shadow-teal-900/50">
-            <HeartPulse className="w-6 h-6 animate-pulse" />
-          </div>
-          <div>
-            <h1 className="text-base font-extrabold text-white tracking-tight leading-none">AI CareSchedule</h1>
-            <span className="text-[10px] font-semibold text-teal-400 uppercase tracking-widest flex items-center gap-1 mt-1">
-              <Sparkles className="w-3 h-3 text-teal-400" />
-              Smart Healthcare
-            </span>
-          </div>
+        <div className="px-2 py-3 mb-4">
+          <CarePilotLogo size="sm" textLight={true} />
         </div>
 
         {/* Role Badge */}

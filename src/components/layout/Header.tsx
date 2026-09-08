@@ -64,6 +64,12 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center space-x-4">
+        {/* Hospital Badge */}
+        <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold border bg-amber-50 text-amber-900 border-amber-200 uppercase tracking-wider">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+          <span>SNS Medical College & Hospital</span>
+        </div>
+
         {/* Connection Status Indicator */}
         <div className="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border bg-slate-50 text-slate-600 border-slate-200">
           {demoActive ? (

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserRole } from '../types';
-import { HeartPulse, Lock, Mail, Sparkles, ShieldCheck, UserCheck, AlertCircle } from 'lucide-react';
+import { Lock, Mail, Sparkles, ShieldCheck, UserCheck, AlertCircle } from 'lucide-react';
 import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
+import { CarePilotLogo } from '../components/common/CarePilotLogo';
 import { isDemoMode } from '../services/api';
 
 export const Login: React.FC = () => {
@@ -58,39 +59,45 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden selection:bg-teal-500 selection:text-white">
-      {/* Background Glow Deco */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden selection:bg-teal-500 selection:text-white">
+      {/* Background Multi-Color Glow (SNS Design Thinking Framework Palette) */}
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 -right-40 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        {/* Brand Header */}
-        <div className="flex justify-center mb-4">
-          <div className="w-14 h-14 rounded-2xl bg-teal-600 flex items-center justify-center text-white shadow-xl shadow-teal-950 border border-teal-400/30">
-            <HeartPulse className="w-8 h-8 animate-pulse text-white" />
-          </div>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 flex flex-col items-center">
+        {/* Brand Header with SNS Design Thinking CFC Logo */}
+        <div className="mb-2">
+          <CarePilotLogo size="lg" textLight={true} />
         </div>
-        <h1 className="text-center text-3xl font-black tracking-tight text-white">AI CareSchedule</h1>
-        <p className="mt-1 text-center text-sm font-medium text-teal-400 flex items-center justify-center gap-1.5">
-          <Sparkles className="w-4 h-4 text-teal-400" />
-          Smart Appointment Management & No-Show Prediction
+        <p className="mt-2 text-center text-xs font-semibold text-teal-300 flex items-center justify-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          Design Thinking Framework Patient No-Show Prediction
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
+      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
         <div className="bg-white/95 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-3xl sm:px-10 border border-slate-200/80">
+          {/* Hospital Header Badge */}
+          <div className="mb-6 p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-teal-500/10 to-purple-500/10 border border-slate-200/80 text-center">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">
+              SNS Medical College & Hospital
+            </h3>
+            <p className="text-[11px] text-slate-500 font-medium">Smart Patient & Clinic Scheduling Portal</p>
+          </div>
+
           {/* Role Selector Tabs */}
           <div className="mb-6">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">
               Select User Role
             </label>
             <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
               <button
                 type="button"
                 onClick={() => handleRoleChange('admin')}
-                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2 ${
+                className={`py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center space-x-2 ${
                   role === 'admin'
-                    ? 'bg-teal-600 text-white shadow-md shadow-teal-700/30'
+                    ? 'bg-gradient-to-r from-amber-500 to-teal-600 text-white shadow-md shadow-amber-600/20'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -101,9 +108,9 @@ export const Login: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleRoleChange('patient')}
-                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2 ${
+                className={`py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center space-x-2 ${
                   role === 'patient'
-                    ? 'bg-teal-600 text-white shadow-md shadow-teal-700/30'
+                    ? 'bg-gradient-to-r from-teal-600 to-purple-600 text-white shadow-md shadow-teal-600/20'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >

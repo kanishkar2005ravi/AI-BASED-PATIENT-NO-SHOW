@@ -66,7 +66,7 @@ export const AIRiskExplanationModal: React.FC<AIRiskExplanationModalProps> = ({
             </div>
             <div className="text-right">
               <span className="text-xs text-teal-200 bg-teal-900/60 px-2.5 py-1 rounded-full border border-teal-700/50">
-                {isAdmin ? 'XGBoost Model v2.4' : 'AI CareSchedule Smart Assessment'}
+                {isAdmin ? 'XGBoost Model v2.4' : 'CarePilot Smart Assessment'}
               </span>
             </div>
           </div>

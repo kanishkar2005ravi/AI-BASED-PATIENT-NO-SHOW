@@ -17,6 +17,8 @@ import {
   LogOut
 } from 'lucide-react';
 
+import { CarePilotLogo } from '../common/CarePilotLogo';
+
 interface MobileNavigationProps {
   role: 'admin' | 'patient';
 }
@@ -57,13 +59,8 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ role }) => {
   return (
     <div className="md:hidden">
       {/* Top Mobile Bar */}
-      <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800">
-        <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center text-white">
-            <HeartPulse className="w-5 h-5" />
-          </div>
-          <span className="font-extrabold text-sm tracking-tight">AI CareSchedule</span>
-        </div>
+      <div className="bg-slate-900 text-white px-4 py-2.5 flex items-center justify-between border-b border-slate-800">
+        <CarePilotLogo size="sm" textLight={true} />
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800"
