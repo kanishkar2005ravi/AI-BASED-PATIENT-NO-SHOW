@@ -41,7 +41,7 @@ export const CarePilotLogo: React.FC<CarePilotLogoProps> = ({
         <div className="leading-tight">
           <div className="flex items-center gap-1.5">
             <span className={`${textSize} font-black tracking-tight ${textLight ? 'text-white' : 'text-slate-900'}`}>
-              Care<span className="text-teal-600">Pilot</span>
+              Care<span className={textLight ? 'text-amber-400 font-black' : 'text-teal-600'}>Pilot</span>
             </span>
             <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-gradient-to-r from-amber-500 via-rose-500 to-teal-500 text-white tracking-widest shadow-sm">
               SNS

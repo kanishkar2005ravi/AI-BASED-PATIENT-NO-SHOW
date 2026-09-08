@@ -190,25 +190,36 @@ export const BookAppointment: React.FC = () => {
                 1. Choose Active Physician
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {doctors.map(doc => (
-                  <div
-                    key={doc.id}
-                    onClick={() => setSelectedDoctorId(doc.id)}
-                    className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center space-x-3.5 ${
-                      selectedDoctorId === doc.id
-                        ? 'border-teal-600 bg-teal-50/50 ring-2 ring-teal-500/20 shadow-sm'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
-                    }`}
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center font-bold text-sm">
-                      {doc.name.replace('Dr. ', '').charAt(0)}
+                {doctors.map((doc, idx) => {
+                  const docColors = [
+                    { bg: 'bg-amber-100 text-amber-900', border: 'border-amber-500 bg-amber-50/60 ring-amber-500/20', text: 'text-amber-700' },
+                    { bg: 'bg-blue-100 text-blue-900', border: 'border-blue-500 bg-blue-50/60 ring-blue-500/20', text: 'text-blue-700' },
+                    { bg: 'bg-purple-100 text-purple-900', border: 'border-purple-500 bg-purple-50/60 ring-purple-500/20', text: 'text-purple-700' },
+                    { bg: 'bg-emerald-100 text-emerald-900', border: 'border-emerald-500 bg-emerald-50/60 ring-emerald-500/20', text: 'text-emerald-700' },
+                    { bg: 'bg-rose-100 text-rose-900', border: 'border-rose-500 bg-rose-50/60 ring-rose-500/20', text: 'text-rose-700' },
+                    { bg: 'bg-pink-100 text-pink-900', border: 'border-pink-500 bg-pink-50/60 ring-pink-500/20', text: 'text-pink-700' }
+                  ][idx % 6];
+
+                  return (
+                    <div
+                      key={doc.id}
+                      onClick={() => setSelectedDoctorId(doc.id)}
+                      className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center space-x-3.5 ${
+                        selectedDoctorId === doc.id
+                          ? `${docColors.border} ring-2 shadow-sm font-bold`
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                      }`}
+                    >
+                      <div className={`w-11 h-11 rounded-xl ${docColors.bg} flex items-center justify-center font-black text-base shadow-xs`}>
+                        {doc.name.replace('Dr. ', '').charAt(0)}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-extrabold text-slate-900">{doc.name}</h4>
+                        <p className={`text-xs font-bold ${docColors.text}`}>{doc.specialization}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">{doc.name}</h4>
-                      <p className="text-xs text-teal-600 font-semibold">{doc.specialization}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

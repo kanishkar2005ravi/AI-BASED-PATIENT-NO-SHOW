@@ -208,62 +208,7 @@ export const AdminDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Row 2: Performance KPIs with Multi-Color Trend Indicators */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* 🟢 Emerald & Teal (#10B981) */}
-        <Card className="bg-gradient-to-br from-white to-emerald-50/60 border-emerald-200 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-extrabold uppercase text-emerald-800 tracking-wider">Attendance Rate</span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-600" /> Positive Trend
-            </span>
-          </div>
-          <div className="flex items-baseline space-x-2">
-            <h3 className="text-3xl font-black text-slate-900">{analytics.attendanceRate}%</h3>
-            <span className="text-xs font-bold text-emerald-600">+2.4% vs last week</span>
-          </div>
-        </Card>
-
-        {/* 🔴 Crimson Red (#EF4444) */}
-        <Card className="bg-gradient-to-br from-white to-rose-50/60 border-rose-200 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-extrabold uppercase text-rose-800 tracking-wider">No-Show Rate</span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 flex items-center gap-1">
-              <TrendingDown className="w-3.5 h-3.5 text-rose-600" /> -1.2% Reduction
-            </span>
-          </div>
-          <div className="flex items-baseline space-x-2">
-            <h3 className="text-3xl font-black text-slate-900">{analytics.noShowRate}%</h3>
-            <span className="text-xs font-medium text-slate-500">Industry avg: 18%</span>
-          </div>
-        </Card>
-
-        {/* 💖 Pink (#EC4899) */}
-        <Card className="bg-gradient-to-br from-white to-pink-50/60 border-pink-200 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-extrabold uppercase text-pink-800 tracking-wider">Cancellation Rate</span>
-            <span className="text-xs font-bold text-pink-600 bg-pink-100 px-2 py-0.5 rounded-full">Normal range</span>
-          </div>
-          <div className="flex items-baseline space-x-2">
-            <h3 className="text-3xl font-black text-slate-900">{analytics.cancellationRate}%</h3>
-            <span className="text-xs text-slate-500">6.3% overall</span>
-          </div>
-        </Card>
-
-        {/* 💙 Royal Blue (#3B82F6) */}
-        <Card className="bg-gradient-to-br from-white to-blue-50/60 border-blue-200 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-extrabold uppercase text-blue-800 tracking-wider">Waitlist Recovery</span>
-            <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">Auto-Recovered</span>
-          </div>
-          <div className="flex items-baseline space-x-2">
-            <h3 className="text-3xl font-black text-slate-900">{analytics.waitlistRecoveryRate}%</h3>
-            <span className="text-xs font-bold text-blue-600">Slots Refilled</span>
-          </div>
-        </Card>
-      </div>
-
-      {/* Row 3: AI Risk Distribution & Utilization */}
+      {/* Row 2: AI Risk Distribution & Utilization */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Appointment Trend Chart */}
         <Card title="Appointment Attendance Trends" className="lg:col-span-2">

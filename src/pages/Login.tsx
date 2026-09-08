@@ -70,20 +70,20 @@ export const Login: React.FC = () => {
         <div className="mb-2">
           <CarePilotLogo size="lg" textLight={true} />
         </div>
-        <p className="mt-2 text-center text-xs font-semibold text-teal-300 flex items-center justify-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          Design Thinking Framework Patient No-Show Prediction
+        <p className="mt-2 text-center text-xs font-bold text-amber-400 flex items-center justify-center gap-1.5 tracking-wide">
+          <Sparkles className="w-4 h-4 text-emerald-400" />
+          Empowering Intelligent Healthcare & Patient-Centered Care
         </p>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
         <div className="bg-white/95 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-3xl sm:px-10 border border-slate-200/80">
           {/* Hospital Header Badge */}
-          <div className="mb-6 p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-teal-500/10 to-purple-500/10 border border-slate-200/80 text-center">
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800">
-              SNS Medical College & Hospital
+          <div className="mb-6 p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-teal-500/10 to-purple-500/10 border border-slate-200/80 text-center">
+            <h3 className="text-sm font-black uppercase tracking-wider text-slate-900">
+              SNS Medical College & Hospital Welcomes You
             </h3>
-            <p className="text-[11px] text-slate-500 font-medium">Smart Patient & Clinic Scheduling Portal</p>
+            <p className="text-[11px] text-teal-700 font-bold mt-0.5">Smart Patient & Clinic Scheduling Portal</p>
           </div>
 
           {/* Role Selector Tabs */}
@@ -166,7 +166,7 @@ export const Login: React.FC = () => {
 
         {/* Footer Note */}
         <p className="mt-4 text-center text-xs text-slate-400">
-          AI CareSchedule &copy; 2026. Hospital-Grade Appointment Optimization.
+          CarePilot &copy; 2026. SNS Medical College & Hospital.
         </p>
       </div>
     </div>
