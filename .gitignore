@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Production build
+dist/
+build/
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE and OS
+.DS_Store
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Turbo C / legacy binaries in folder
+*.EXE
+*.exe
+*.COM
+*.com
+*.OVL
+*.ovl
+*.DLL
+*.dll
+*.SWP
+*.PIF
+*.MAK
+*.TCH
+*.CFG
+*.DPR
+*.DSK
+*.TC
+*.tc
+*.c
+*.C
+*.csv
+hospital
+PROJECT/
