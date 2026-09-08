@@ -82,8 +82,7 @@ export const Waitlist: React.FC = () => {
                   <th className="py-3 px-4">Doctor Requested</th>
                   <th className="py-3 px-4">Target Date</th>
                   <th className="py-3 px-4">Preferred Slot</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                  <th className="py-3 px-4">Auto-Recovery Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -100,22 +99,8 @@ export const Waitlist: React.FC = () => {
                     <td className="py-3.5 px-4 text-xs font-medium text-slate-600">{item.requestedTimeSlot || 'Any Time'}</td>
                     <td className="py-3.5 px-4">
                       <Badge variant={item.status === 'WAITING' ? 'warning' : item.status === 'NOTIFIED' ? 'info' : 'success'} size="sm">
-                        {item.status}
+                        {item.status === 'WAITING' ? 'Waiting in Queue' : item.status === 'NOTIFIED' ? 'Email Sent (Pending Confirmation)' : 'Confirmed by Patient'}
                       </Badge>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      {item.status !== 'ACCEPTED' ? (
-                        <button
-                          onClick={() => handleAssignSlot(item.id)}
-                          className="px-3 py-1.5 rounded-lg bg-teal-600 text-white text-xs font-bold hover:bg-teal-700 transition-colors inline-flex items-center gap-1 shadow-sm"
-                        >
-                          <UserCheck className="w-3.5 h-3.5" /> Assign Slot
-                        </button>
-                      ) : (
-                        <span className="text-xs font-semibold text-emerald-600 flex items-center justify-end gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Booked
-                        </span>
-                      )}
                     </td>
                   </tr>
                 ))}
