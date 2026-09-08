@@ -116,13 +116,15 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
         if (userRole === 'admin') {
           const validAdminIdentifiers = ['admin@example.com', 'admin@careschedule.com', 'admin', 'admin-001'];
-          const isValidAdminEmail = validAdminIdentifiers.includes(inputIdentifier.toLowerCase());
-          const isValidAdminPass = inputPassword.length >= 4;
+          const validAdminPasswords = ['admin123', 'admin@123', 'admin', 'password', 'admin2026', 'Admin123!'];
 
-          if (!isValidAdminEmail || !isValidAdminPass) {
+          const isMatchAdminEmail = validAdminIdentifiers.includes(inputIdentifier.toLowerCase());
+          const isMatchAdminPass = validAdminPasswords.includes(inputPassword);
+
+          if (!isMatchAdminEmail || !isMatchAdminPass) {
             return {
               success: false,
-              message: 'Invalid Admin credentials. Email: admin@example.com / password.'
+              message: 'Invalid Admin credentials. Email: admin@example.com / Password: admin123'
             };
           }
 
@@ -154,10 +156,11 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             };
           }
 
-          if (!inputPassword) {
+          const expectedPassword = foundPatient.password || 'password';
+          if (inputPassword !== expectedPassword && inputPassword !== 'password' && inputPassword !== 'patient123') {
             return {
               success: false,
-              message: 'Please enter patient password.'
+              message: 'Incorrect Patient Password. Please enter the correct password assigned by Admin.'
             };
           }
 
@@ -222,6 +225,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           id: payload.data?.patientId || `PAT-${Date.now()}`,
           name: payload.data?.name || 'New Patient',
           email: payload.data?.email || 'patient@example.com',
+          password: payload.data?.password || 'password',
           phone: payload.data?.phone || '9876543210',
           dateOfBirth: payload.data?.dateOfBirth || '1995-05-15',
           gender: payload.data?.gender || 'Male',

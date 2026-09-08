@@ -13,6 +13,7 @@ export interface Patient {
   id: string; // e.g. PAT-001
   name: string;
   email: string;
+  password?: string;
   phone: string;
   dateOfBirth: string;
   gender: 'Male' | 'Female' | 'Other';
