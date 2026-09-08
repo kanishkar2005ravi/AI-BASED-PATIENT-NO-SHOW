@@ -124,9 +124,9 @@ export const Login: React.FC = () => {
           {/* Form */}
           <form className="space-y-5" onSubmit={handleSubmit}>
             <Input
-              label={role === 'admin' ? 'Admin Email Address' : 'Patient ID or Email Address'}
+              label={role === 'admin' ? 'Enter Admin Email Address' : 'Patient ID or Email Address'}
               type="text"
-              placeholder={role === 'admin' ? 'admin@example.com' : 'e.g. PAT-001 or patient@example.com'}
+              placeholder={role === 'admin' ? 'Enter Email' : 'Enter Patient ID or Email'}
               value={email}
               onChange={e => setEmail(e.target.value)}
               icon={<Mail className="w-4 h-4 text-slate-400" />}
