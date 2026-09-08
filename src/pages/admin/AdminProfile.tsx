@@ -4,8 +4,9 @@ import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { useAuth } from '../../context/AuthContext';
-import { User, ShieldCheck, Mail, Phone, Lock, Save } from 'lucide-react';
+import { User, ShieldCheck, Mail, Phone, Lock, Save, Trash2, RefreshCw } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { clearAllAppData } from '../../services/api';
 
 export const AdminProfile: React.FC = () => {
   const { user, setUser } = useAuth();
@@ -14,6 +15,7 @@ export const AdminProfile: React.FC = () => {
   const [email, setEmail] = useState(user?.email || 'admin@example.com');
   const [phone, setPhone] = useState(user?.phone || '+1 (555) 019-2831');
   const [saving, setSaving] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +27,17 @@ export const AdminProfile: React.FC = () => {
       setSaving(false);
       showToast('Admin profile updated successfully.', 'success');
     }, 400);
+  };
+
+  const handleClearAll = () => {
+    if (window.confirm('Are you sure you want to clear all entered patient details, appointments, waitlists, and start fresh?')) {
+      setClearing(true);
+      clearAllAppData();
+      showToast('All local application data cleared! Reloading...', 'info');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
   };
 
   return (
@@ -44,20 +57,39 @@ export const AdminProfile: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="md:col-span-2" title="Account Details" subtitle="Update administrative credentials">
-          <form onSubmit={handleSave} className="space-y-4">
-            <Input label="Full Name" value={name} onChange={e => setName(e.target.value)} required />
-            <Input label="Email Address" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-            <Input label="Phone Contact" value={phone} onChange={e => setPhone(e.target.value)} />
+        <div className="md:col-span-2 space-y-6">
+          <Card title="Account Details" subtitle="Update administrative credentials">
+            <form onSubmit={handleSave} className="space-y-4">
+              <Input label="Full Name" value={name} onChange={e => setName(e.target.value)} required />
+              <Input label="Email Address" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+              <Input label="Phone Contact" value={phone} onChange={e => setPhone(e.target.value)} />
 
-            <div className="pt-4 border-t border-slate-100 flex justify-end">
-              <Button variant="primary" type="submit" isLoading={saving} icon={<Save className="w-4 h-4" />}>
-                Save Profile
+              <div className="pt-4 border-t border-slate-100 flex justify-end">
+                <Button variant="primary" type="submit" isLoading={saving} icon={<Save className="w-4 h-4" />}>
+                  Save Profile
+                </Button>
+              </div>
+            </form>
+          </Card>
+
+          <Card title="System Data Reset" subtitle="Clear all stored patient, appointment, and waitlist data to start completely fresh">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-red-50/50 border border-red-100 rounded-lg">
+              <div>
+                <h4 className="text-sm font-semibold text-red-900 flex items-center gap-2">
+                  <Trash2 className="w-4 h-4 text-red-600" /> Clear All Local App Data
+                </h4>
+                <p className="text-xs text-red-700 mt-1">
+                  This will wipe all cached patient records, appointment bookings, and waitlist items from your browser.
+                </p>
+              </div>
+              <Button variant="danger" onClick={handleClearAll} isLoading={clearing} icon={<RefreshCw className="w-4 h-4" />}>
+                Clear All Data
               </Button>
             </div>
-          </form>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );
 };
+

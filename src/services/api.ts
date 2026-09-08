@@ -47,6 +47,12 @@ function setLocalData<T>(key: string, data: T): void {
 
 export const isDemoMode = (): boolean => IS_DEMO_MODE;
 
+export const clearAllAppData = (): void => {
+  Object.values(STORAGE_KEYS).forEach(key => {
+    localStorage.removeItem(key);
+  });
+};
+
 /**
  * Universal backend caller for SNS Agent Workbench Webhook API
  */
