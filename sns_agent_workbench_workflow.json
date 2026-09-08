@@ -1,0 +1,158 @@
+{
+  "name": "AI CareSchedule - Complete Supabase & Webhook Router Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a2918487-c8b3-45ba-aed2-2b725e35b286",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook (POST Entry)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.body.action }}",
+        "rules": {
+          "rules": [
+            { "value2": "LOGIN" },
+            { "value2": "CREATE_PATIENT" },
+            { "value2": "BOOK_APPOINTMENT" },
+            { "value2": "GET_PATIENTS" },
+            { "value2": "GET_APPOINTMENTS" },
+            { "value2": "ACCEPT_WAITLIST_SLOT" },
+            { "value2": "GET_DOCTOR_AVAILABILITY" },
+            { "value2": "GET_ANALYTICS" }
+          ]
+        }
+      },
+      "id": "switch-router",
+      "name": "Switch Router (Action)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [320, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, name, email FROM patients WHERE (id = '{{json.body.data.email}}' OR email = '{{json.body.data.email}}') AND password = '{{json.body.data.password}}' LIMIT 1;"
+      },
+      "id": "query-login",
+      "name": "Execute Query: LOGIN",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [580, 100]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.id }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "if-login-success",
+      "name": "If Credentials Match",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [800, 100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"user\": {\n    \"id\": \"{{$json.id}}\",\n    \"name\": \"{{$json.name}}\",\n    \"email\": \"{{$json.email}}\",\n    \"role\": \"patient\"\n  }\n}"
+      },
+      "id": "respond-login-success",
+      "name": "Respond: Login Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1020, 50]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": false,\n  \"message\": \"Invalid credentials. Patient ID/Email or Password incorrect.\"\n}"
+      },
+      "id": "respond-login-fail",
+      "name": "Respond: Login Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1020, 180]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO patients (id, name, email, password, phone, date_of_birth, gender, address) VALUES ('{{json.body.data.patientId}}', '{{json.body.data.name}}', '{{json.body.data.email}}', '{{json.body.data.password}}', '{{json.body.data.phone}}', CAST('{{json.body.data.dateOfBirth}}' AS DATE), '{{json.body.data.gender}}', '{{json.body.data.address}}') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, password = EXCLUDED.password RETURNING *;"
+      },
+      "id": "query-create-patient",
+      "name": "Execute Query: CREATE_PATIENT",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [580, 250]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO appointments (id, patient_id, doctor_id, appointment_date, appointment_time, appointment_type, status, no_show_risk_score, no_show_risk_level) VALUES (CONCAT('APT-', CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT)), '{{json.body.patient_id}}', '{{json.body.doctor_id}}', CAST('{{json.body.appointment_date}}' AS DATE), '{{json.body.appointment_time}}', '{{json.body.reason}}', 'SCHEDULED', 20, 'LOW') RETURNING *;"
+      },
+      "id": "query-book-appointment",
+      "name": "Execute Query: BOOK_APPOINTMENT",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [580, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM patients ORDER BY created_at DESC;"
+      },
+      "id": "query-get-patients",
+      "name": "Execute Query: GET_PATIENTS",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [580, 550]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT a.id, a.patient_id AS \"patientId\", p.name AS \"patientName\", p.email AS \"patientEmail\", a.doctor_id AS \"doctorId\", d.name AS \"doctorName\", d.specialization AS \"doctorSpecialization\", a.appointment_date AS \"appointmentDate\", a.appointment_time AS \"appointmentTime\", a.appointment_type AS \"appointmentType\", a.status FROM appointments a LEFT JOIN patients p ON a.patient_id = p.id LEFT JOIN doctors d ON a.doctor_id = d.id ORDER BY a.appointment_date DESC;"
+      },
+      "id": "query-get-appointments",
+      "name": "Execute Query: GET_APPOINTMENTS",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [580, 700]
+    }
+  ],
+  "connections": {
+    "Webhook (POST Entry)": {
+      "main": [[{ "node": "Switch Router (Action)", "type": "main", "index": 0 }]]
+    },
+    "Switch Router (Action)": {
+      "main": [
+        [{ "node": "Execute Query: LOGIN", "type": "main", "index": 0 }],
+        [{ "node": "Execute Query: CREATE_PATIENT", "type": "main", "index": 0 }],
+        [{ "node": "Execute Query: BOOK_APPOINTMENT", "type": "main", "index": 0 }],
+        [{ "node": "Execute Query: GET_PATIENTS", "type": "main", "index": 0 }],
+        [{ "node": "Execute Query: GET_APPOINTMENTS", "type": "main", "index": 0 }]
+      ]
+    },
+    "Execute Query: LOGIN": {
+      "main": [[{ "node": "If Credentials Match", "type": "main", "index": 0 }]]
+    },
+    "If Credentials Match": {
+      "main": [
+        [{ "node": "Respond: Login Success", "type": "main", "index": 0 }],
+        [{ "node": "Respond: Login Failed", "type": "main", "index": 0 }]
+      ]
+    }
+  }
+}
