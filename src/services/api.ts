@@ -563,6 +563,8 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           message: 'Notifications retrieved successfully.',
           data: notifsData as any
         };
+      }
+
       // Handle CLEAR_ALL_DATA Action Specifically
       if (payload.action === 'CLEAR_ALL_DATA') {
         clearAllAppData();

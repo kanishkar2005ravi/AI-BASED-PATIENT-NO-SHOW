@@ -6,7 +6,7 @@ import { Button } from '../../components/common/Button';
 import { useAuth } from '../../context/AuthContext';
 import { User, ShieldCheck, Mail, Phone, Lock, Save, Trash2, RefreshCw } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { clearAllAppData } from '../../services/api';
+import { clearAllAppData, callBackend } from '../../services/api';
 
 export const AdminProfile: React.FC = () => {
   const { user, setUser } = useAuth();
