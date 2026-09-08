@@ -45,6 +45,13 @@ function setLocalData<T>(key: string, data: T): void {
   }
 }
 
+function mergeListsById<T extends { id?: string }>(listA: T[], listB: T[]): T[] {
+  const map = new Map<string, T>();
+  (listA || []).forEach(item => { if (item && item.id) map.set(item.id, item); });
+  (listB || []).forEach(item => { if (item && item.id) map.set(item.id, item); });
+  return Array.from(map.values());
+}
+
 export const isDemoMode = (): boolean => IS_DEMO_MODE;
 
 export const clearAllAppData = (): void => {
@@ -264,11 +271,12 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_PATIENTS Action Specifically
       if (payload.action === 'GET_PATIENTS') {
         const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-        const patsData = (Array.isArray(resData.data) && resData.data.length > 0) ? resData.data : localPats;
+        const remotePats = Array.isArray(resData.data) ? resData.data : [];
+        const combined = mergeListsById(localPats, remotePats);
         return {
           success: true,
           message: 'Patients retrieved successfully.',
-          data: patsData as any
+          data: combined as any
         };
       }
 
@@ -322,14 +330,15 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_APPOINTMENTS Action Specifically
       if (payload.action === 'GET_APPOINTMENTS') {
         const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
-        let aptsData = (Array.isArray(resData.data) && resData.data.length > 0) ? resData.data : localApts;
+        const remoteApts = Array.isArray(resData.data) ? resData.data : [];
+        let combined = mergeListsById(localApts, remoteApts);
         if (payload.data?.patientId) {
-          aptsData = aptsData.filter((a: Appointment) => a.patientId === payload.data.patientId);
+          combined = combined.filter((a: Appointment) => a.patientId === payload.data.patientId);
         }
         return {
           success: true,
           message: 'Appointments retrieved successfully.',
-          data: aptsData as any
+          data: combined as any
         };
       }
 
@@ -435,11 +444,12 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_DOCTORS Action Specifically
       if (payload.action === 'GET_DOCTORS') {
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-        const docsData = (Array.isArray(resData.data) && resData.data.length > 0) ? resData.data : localDocs;
+        const remoteDocs = Array.isArray(resData.data) ? resData.data : [];
+        const combined = mergeListsById(localDocs, remoteDocs);
         return {
           success: true,
           message: 'Doctors retrieved successfully.',
-          data: docsData as any
+          data: combined as any
         };
       }
 
