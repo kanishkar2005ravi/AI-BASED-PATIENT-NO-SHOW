@@ -124,7 +124,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           if (!isMatchAdminEmail || !isMatchAdminPass) {
             return {
               success: false,
-              message: 'Invalid Admin credentials. Email: admin@example.com / Password: admin123'
+              message: 'Invalid Admin email or password. Access denied.'
             };
           }
 
@@ -152,7 +152,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           if (!foundPatient) {
             return {
               success: false,
-              message: `Patient ID / Email "${inputIdentifier}" not found. Admin must create patient account first.`
+              message: 'Invalid Patient ID or Email. Access denied.'
             };
           }
 
@@ -160,7 +160,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           if (inputPassword !== expectedPassword && inputPassword !== 'password' && inputPassword !== 'patient123') {
             return {
               success: false,
-              message: 'Incorrect Patient Password. Please enter the correct password assigned by Admin.'
+              message: 'Invalid Patient password. Access denied.'
             };
           }
 

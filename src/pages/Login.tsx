@@ -44,12 +44,8 @@ export const Login: React.FC = () => {
       const allowedAdminEmails = ['admin@example.com', 'admin@careschedule.com', 'admin', 'admin-001'];
       const allowedAdminPasses = ['admin123', 'admin', 'password', 'admin2026', 'Admin123!'];
 
-      if (!allowedAdminEmails.includes(cleanInput.toLowerCase())) {
-        setError('Invalid Admin Email. Use admin@example.com');
-        return;
-      }
-      if (!allowedAdminPasses.includes(cleanPass)) {
-        setError('Invalid Admin Password. Password: admin123');
+      if (!allowedAdminEmails.includes(cleanInput.toLowerCase()) || !allowedAdminPasses.includes(cleanPass)) {
+        setError('Invalid Admin email or password. Access denied.');
         return;
       }
     }
