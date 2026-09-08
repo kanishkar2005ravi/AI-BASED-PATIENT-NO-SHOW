@@ -31,12 +31,30 @@ export const Login: React.FC = () => {
     e.preventDefault();
     setError('');
 
-    if (!email.trim() || !password.trim()) {
+    const cleanInput = email.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanInput || !cleanPass) {
       setError('Please enter both Email / Patient ID and password.');
       return;
     }
 
-    const res = await login(role, email, password);
+    // Direct Failsafe Guard for Admin Login
+    if (role === 'admin') {
+      const allowedAdminEmails = ['admin@example.com', 'admin@careschedule.com', 'admin', 'admin-001'];
+      const allowedAdminPasses = ['admin123', 'admin', 'password', 'admin2026', 'Admin123!'];
+
+      if (!allowedAdminEmails.includes(cleanInput.toLowerCase())) {
+        setError('Invalid Admin Email. Use admin@example.com');
+        return;
+      }
+      if (!allowedAdminPasses.includes(cleanPass)) {
+        setError('Invalid Admin Password. Password: admin123');
+        return;
+      }
+    }
+
+    const res = await login(role, cleanInput, cleanPass);
     if (res.success) {
       if (role === 'admin') {
         navigate('/admin/dashboard');
@@ -44,7 +62,7 @@ export const Login: React.FC = () => {
         navigate('/patient/dashboard');
       }
     } else {
-      setError(res.message || 'Login failed. Please check credentials.');
+      setError(res.message || 'Invalid credentials. Please check your Patient ID/Email and password.');
     }
   };
 
