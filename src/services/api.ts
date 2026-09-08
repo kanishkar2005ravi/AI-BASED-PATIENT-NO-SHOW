@@ -298,6 +298,47 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         };
       }
 
+      // Handle CANCEL_APPOINTMENT Action Specifically
+      if (payload.action === 'CANCEL_APPOINTMENT') {
+        const aptId = payload.data?.appointmentId || payload.data?.id;
+        const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
+        const updatedApts = localApts.map(a => a.id === aptId ? { ...a, status: 'CANCELLED' as const } : a);
+        setLocalData(STORAGE_KEYS.APPOINTMENTS, updatedApts);
+
+        return {
+          success: true,
+          message: resData.message || 'Appointment cancelled successfully.',
+          data: updatedApts as any
+        };
+      }
+
+      // Handle RESCHEDULE_APPOINTMENT Action Specifically
+      if (payload.action === 'RESCHEDULE_APPOINTMENT') {
+        const aptId = payload.data?.appointmentId || payload.data?.id;
+        const newDate = payload.data?.newDate || payload.data?.appointmentDate;
+        const newTime = payload.data?.newTime || payload.data?.appointmentTime;
+
+        const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
+        const updatedApts = localApts.map(a => {
+          if (a.id === aptId) {
+            return {
+              ...a,
+              appointmentDate: newDate || a.appointmentDate,
+              appointmentTime: newTime || a.appointmentTime,
+              status: 'RESCHEDULED' as const
+            };
+          }
+          return a;
+        });
+        setLocalData(STORAGE_KEYS.APPOINTMENTS, updatedApts);
+
+        return {
+          success: true,
+          message: resData.message || 'Appointment rescheduled successfully.',
+          data: updatedApts as any
+        };
+      }
+
       // Handle GET_DOCTOR_AVAILABILITY Action Specifically
       if (payload.action === 'GET_DOCTOR_AVAILABILITY') {
         const docId = payload.data?.doctorId || payload.data?.doctor_id || 'DOC-001';
