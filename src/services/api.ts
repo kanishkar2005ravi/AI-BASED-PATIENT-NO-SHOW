@@ -904,19 +904,19 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       };
       notifications.unshift(newNotif);
 
-      // Automated 1-Day Prior Pre-Appointment Reminder & Email Notification Scheduler
+      // Automated 12-Hour Prior Pre-Appointment Reminder & Email Notification Scheduler
       const apptDateObj = new Date(aDate);
       apptDateObj.setDate(apptDateObj.getDate() - 1);
       const reminderDateStr = isNaN(apptDateObj.getTime()) ? aDate : apptDateObj.toISOString().split('T')[0];
 
       notifications.unshift({
-        id: `NOT-REMIND-${Date.now()}`,
+        id: `NOT-REMIND12H-${Date.now()}`,
         userId: pId,
         type: 'Reminder',
-        title: risk.level === 'HIGH' ? '⚠️ High-Risk 1-Day Prior Priority Reminder' : '📅 Pre-Appointment 1-Day Prior Reminder',
+        title: risk.level === 'HIGH' ? '⚠️ 12-Hour High-Risk Priority Reminder' : '⏰ 12-Hour Pre-Appointment Reminder',
         message: risk.level === 'HIGH'
-          ? `Automated 1-Day Prior Reminder (${reminderDateStr}): Urgent! Your visit with ${doc.name} is tomorrow at ${aTime}. High no-show risk detected. Please confirm attendance.`
-          : `Automated 1-Day Prior Reminder (${reminderDateStr}): You have an upcoming appointment with ${doc.name} on ${aDate} at ${aTime}.`,
+          ? `Automated 12-Hour Prior Reminder: Urgent! Your visit with ${doc.name} is scheduled for ${aDate} at ${aTime} (in ~12 hours). High no-show risk detected. Please confirm attendance.`
+          : `Automated 12-Hour Prior Reminder: You have an upcoming appointment with ${doc.name} scheduled for ${aDate} at ${aTime} (in ~12 hours). Please arrive 10 mins early.`,
         timestamp: new Date().toISOString(),
         read: false
       });
