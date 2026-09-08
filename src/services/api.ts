@@ -550,9 +550,24 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         };
       }
 
+      // Handle GET_NOTIFICATIONS Action Specifically
+      if (payload.action === 'GET_NOTIFICATIONS') {
+        const uId = payload.data?.userId || payload.data?.user_id;
+        const localNotifs = getLocalData<NotificationItem[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS);
+        let notifsData = (Array.isArray(resData.data) && resData.data.length > 0) ? resData.data : localNotifs;
+        if (uId) {
+          notifsData = notifsData.filter((n: NotificationItem) => n.userId === uId);
+        }
+        return {
+          success: true,
+          message: 'Notifications retrieved successfully.',
+          data: notifsData as any
+        };
+      }
+
       // Default Webhook Fallback for Other Queries
       const responseMessage = resData.message || (isSuccess ? 'Operation completed successfully' : 'Operation failed');
-      const fallbackData = resData.data || (payload.action === 'GET_DOCTORS' ? INITIAL_DOCTORS : payload.action === 'GET_PATIENTS' ? getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS) : payload.action === 'GET_APPOINTMENTS' ? getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS) : payload.action === 'GET_ANALYTICS' ? INITIAL_ANALYTICS : payload.action === 'GET_WAITLIST' ? INITIAL_WAITLIST : payload.action === 'GET_NOTIFICATIONS' ? INITIAL_NOTIFICATIONS : resData);
+      const fallbackData = resData.data || (payload.action === 'GET_DOCTORS' ? INITIAL_DOCTORS : payload.action === 'GET_PATIENTS' ? getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS) : payload.action === 'GET_APPOINTMENTS' ? getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS) : payload.action === 'GET_ANALYTICS' ? INITIAL_ANALYTICS : payload.action === 'GET_WAITLIST' ? INITIAL_WAITLIST : payload.action === 'GET_NOTIFICATIONS' ? getLocalData<NotificationItem[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS).filter(n => n.userId === (payload.data?.userId || 'ADMIN')) : resData);
 
       return {
         success: isSuccess,

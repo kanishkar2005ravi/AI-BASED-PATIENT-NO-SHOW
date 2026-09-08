@@ -359,40 +359,79 @@ export const INITIAL_WAITLIST: WaitlistItem[] = [
 ];
 
 export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+  // PATIENT NOTIFICATIONS (PAT-001)
   {
-    id: 'NOT-1',
+    id: 'NOT-P1',
+    userId: 'PAT-001',
+    type: 'Appointment',
+    title: 'Booking Confirmed',
+    message: 'Your appointment with Dr. Arun Kumar is confirmed for 2026-09-10 at 11:00 AM.',
+    timestamp: '2026-09-08T08:00:00Z',
+    read: false
+  },
+  {
+    id: 'NOT-P2',
     userId: 'PAT-001',
     type: 'Reminder',
     title: 'Upcoming Appointment Reminder',
-    message: 'Your appointment with Dr. Arun Kumar is scheduled for tomorrow at 11:00 AM. Please confirm your attendance.',
+    message: 'Reminder: You have an upcoming appointment with Dr. Arun Kumar tomorrow at 11:00 AM. Please arrive 10 mins early.',
     timestamp: '2026-09-07T09:00:00Z',
     read: false
   },
   {
-    id: 'NOT-2',
+    id: 'NOT-P3',
     userId: 'PAT-001',
-    type: 'AI Risk',
-    title: 'High No-Show Risk Advisory',
-    message: 'Our smart scheduler flagged your appointment as high risk (76%). Click here to re-confirm or reschedule if needed.',
-    timestamp: '2026-09-07T09:05:00Z',
-    read: false
+    type: 'Waitlist',
+    title: 'Waitlist Booking Added',
+    message: 'You have joined the waitlist for Dr. Arun Kumar (Position #1). We will notify you if a slot opens up.',
+    timestamp: '2026-09-06T10:15:00Z',
+    read: true
   },
   {
-    id: 'NOT-3',
+    id: 'NOT-P4',
+    userId: 'PAT-001',
+    type: 'Waitlist',
+    title: 'Waitlist Slot Available to Confirm',
+    message: 'A slot freed up with Dr. Arun Kumar on 2026-09-11 at 02:00 PM! Click to confirm your booking.',
+    timestamp: '2026-09-08T07:30:00Z',
+    read: false
+  },
+
+  // ADMIN SYSTEM ALERTS (ADMIN)
+  {
+    id: 'NOT-A1',
     userId: 'ADMIN',
     type: 'AI Risk',
-    title: 'High No-Show Risk Alert',
-    message: 'Appointment APT-1001 for Kiran Raj has a predicted 76% no-show risk.',
-    timestamp: '2026-09-07T08:30:00Z',
+    title: 'High No-Show Risk Patient Flagged',
+    message: 'High Risk Alert: Patient Rahul Kumar (APT-1002) has a predicted 78% no-show risk. Priority automated reminder dispatched.',
+    timestamp: '2026-09-08T08:30:00Z',
     read: false
   },
   {
-    id: 'NOT-4',
+    id: 'NOT-A2',
+    userId: 'ADMIN',
+    type: 'Appointment',
+    title: 'Patient Appointment Cancelled',
+    message: 'Cancellation Alert: Patient Kiran Raj cancelled appointment APT-1001 with Dr. Arun Kumar. Waitlist auto-recovery triggered.',
+    timestamp: '2026-09-08T07:45:00Z',
+    read: false
+  },
+  {
+    id: 'NOT-A3',
+    userId: 'ADMIN',
+    type: 'Appointment',
+    title: 'New Patient Booking Registered',
+    message: 'New Appointment: Patient Priya Sharma booked a Cardiology consultation with Dr. Arun Kumar for 2026-09-12 at 10:00 AM.',
+    timestamp: '2026-09-08T06:15:00Z',
+    read: true
+  },
+  {
+    id: 'NOT-A4',
     userId: 'ADMIN',
     type: 'Waitlist',
-    title: 'Waitlist Opportunity Ready',
-    message: 'Waitlist recovery is ready for Dr. Arun Kumar on 2026-09-08.',
-    timestamp: '2026-09-06T14:20:00Z',
+    title: 'Waitlist Slot Claimed',
+    message: 'Waitlist Recovery Success: Patient Ananya Roy confirmed a recovered slot with Dr. Sneha Patel.',
+    timestamp: '2026-09-07T14:20:00Z',
     read: true
   }
 ];
