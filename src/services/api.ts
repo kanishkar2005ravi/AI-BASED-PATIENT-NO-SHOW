@@ -371,14 +371,103 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_DOCTOR_AVAILABILITY Action Specifically
       if (payload.action === 'GET_DOCTOR_AVAILABILITY') {
         const docId = payload.data?.doctorId || payload.data?.doctor_id || 'DOC-001';
+        const availMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, INITIAL_AVAILABILITY);
         const docSchedule = (resData.data && resData.data.weeklySchedule)
           ? resData.data
-          : (INITIAL_AVAILABILITY[docId] || INITIAL_AVAILABILITY['DOC-001']);
+          : (availMap[docId] || INITIAL_AVAILABILITY[docId] || INITIAL_AVAILABILITY['DOC-001']);
 
         return {
-          success: isSuccess,
+          success: true,
           message: resData.message || 'Availability retrieved successfully',
           data: docSchedule as any
+        };
+      }
+
+      // Handle CREATE_DOCTOR Action Specifically
+      if (payload.action === 'CREATE_DOCTOR') {
+        const newDoc: Doctor = resData.doctor || {
+          id: payload.data?.doctorId || `DOC-${Math.floor(100 + Math.random() * 900)}`,
+          name: payload.data?.name || 'New Doctor',
+          specialization: payload.data?.specialization || 'General Medicine',
+          department: payload.data?.department || 'General Medicine',
+          email: payload.data?.email || 'doctor@example.com',
+          phone: payload.data?.phone || '9876543210',
+          experience: Number(payload.data?.experience) || 5,
+          status: 'Active'
+        };
+
+        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
+        if (!localDocs.some(d => d.id === newDoc.id)) {
+          localDocs.unshift(newDoc);
+          setLocalData(STORAGE_KEYS.DOCTORS, localDocs);
+        }
+
+        return {
+          success: true,
+          message: resData.message || 'Doctor added successfully!',
+          doctor: newDoc,
+          data: newDoc as any
+        };
+      }
+
+      // Handle UPDATE_DOCTOR Action Specifically
+      if (payload.action === 'UPDATE_DOCTOR') {
+        const dId = payload.data?.doctorId || payload.data?.id;
+        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
+        const updatedDocs = localDocs.map(d => d.id === dId ? { ...d, ...payload.data } : d);
+        setLocalData(STORAGE_KEYS.DOCTORS, updatedDocs);
+
+        const updatedDoc = updatedDocs.find(d => d.id === dId) || updatedDocs[0];
+        return {
+          success: true,
+          message: resData.message || 'Doctor profile updated successfully!',
+          doctor: updatedDoc,
+          data: updatedDoc as any
+        };
+      }
+
+      // Handle GET_DOCTORS Action Specifically
+      if (payload.action === 'GET_DOCTORS') {
+        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
+        const docsData = (Array.isArray(resData.data) && resData.data.length > 0) ? resData.data : localDocs;
+        return {
+          success: true,
+          message: 'Doctors retrieved successfully.',
+          data: docsData as any
+        };
+      }
+
+      // Handle GET_DOCTOR Action Specifically
+      if (payload.action === 'GET_DOCTOR') {
+        const dId = payload.data?.doctorId || payload.data?.id;
+        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
+        const found = (resData.doctor && resData.doctor.name)
+          ? resData.doctor
+          : (resData.data && resData.data.name)
+          ? resData.data
+          : (localDocs.find(d => d.id === dId) || localDocs[0]);
+
+        return {
+          success: true,
+          message: 'Doctor retrieved successfully.',
+          doctor: found,
+          data: found as any
+        };
+      }
+
+      // Handle UPDATE_DOCTOR_AVAILABILITY Action Specifically
+      if (payload.action === 'UPDATE_DOCTOR_AVAILABILITY') {
+        const dId = payload.data?.doctorId || 'DOC-001';
+        const newSched = payload.data?.weeklySchedule || [];
+        const availMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, INITIAL_AVAILABILITY);
+        
+        availMap[dId] = { doctorId: dId, weeklySchedule: newSched };
+        setLocalData(STORAGE_KEYS.AVAILABILITY, availMap);
+
+        return {
+          success: true,
+          message: resData.message || 'Doctor availability schedule updated successfully.',
+          data: availMap[dId] as any
         };
       }
 

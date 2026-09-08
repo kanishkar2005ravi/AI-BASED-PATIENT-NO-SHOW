@@ -5,6 +5,7 @@ import { Badge } from '../../components/common/Badge';
 import { Loading } from '../../components/common/Loading';
 import { callBackend, isDemoMode } from '../../services/api';
 import { ModelPerformance } from '../../types';
+import { INITIAL_MODEL_PERFORMANCE } from '../../utils/mockData';
 import { Brain, Sparkles, Target, Activity, Award, BarChart3, CheckCircle2, AlertCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -18,9 +19,10 @@ export const Analytics: React.FC = () => {
     setLoading(true);
     callBackend({ action: 'GET_MODEL_PERFORMANCE' }).then(res => {
       if (isMounted) {
-        if (res.success && res.data) {
-          setModelPerf(res.data);
-        }
+        const perfData = (res.success && res.data && typeof res.data.accuracy === 'number') 
+          ? res.data 
+          : INITIAL_MODEL_PERFORMANCE;
+        setModelPerf(perfData);
         setLoading(false);
       }
     });
