@@ -47,12 +47,16 @@ export const MyAppointments: React.FC = () => {
       return;
     }
 
+    // Optimistically update state so card moves to Cancelled tab instantly
+    setAppointments(prev => prev.map(a => a.id === aptId ? { ...a, status: 'CANCELLED' as const } : a));
+
     const res = await callBackend({ action: 'CANCEL_APPOINTMENT', data: { appointmentId: aptId } });
     if (res.success) {
-      showToast(res.message, 'success');
+      showToast(res.message || 'Appointment cancelled successfully!', 'success');
       fetchAppointments();
     } else {
       showToast(res.message || 'Cancellation failed.', 'error');
+      fetchAppointments();
     }
   };
 
