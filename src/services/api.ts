@@ -111,37 +111,70 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle LOGIN Action Specifically
       if (payload.action === 'LOGIN') {
         const userRole = payload.data?.role || 'patient';
-        const userEmail = payload.data?.email || (userRole === 'admin' ? 'admin@example.com' : 'patient@example.com');
+        const inputIdentifier = (payload.data?.email || payload.data?.username || '').trim();
+        const inputPassword = (payload.data?.password || '').trim();
 
-        let userName = userRole === 'admin' ? 'Administrator' : 'Patient User';
-        let userId = userRole === 'admin' ? 'ADMIN-001' : 'PAT-001';
+        if (userRole === 'admin') {
+          const validAdminIdentifiers = ['admin@example.com', 'admin@careschedule.com', 'admin', 'admin-001'];
+          const isValidAdminEmail = validAdminIdentifiers.includes(inputIdentifier.toLowerCase());
+          const isValidAdminPass = inputPassword.length >= 4;
 
-        // Check if patient exists in local storage
-        if (userRole === 'patient') {
-          const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-          const found = localPats.find(p => p.email.toLowerCase() === userEmail.toLowerCase());
-          if (found) {
-            userName = found.name;
-            userId = found.id;
-          } else {
-            const parts = userEmail.split('@')[0].split('.');
-            userName = parts.map((part: string) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+          if (!isValidAdminEmail || !isValidAdminPass) {
+            return {
+              success: false,
+              message: 'Invalid Admin credentials. Email: admin@example.com / password.'
+            };
           }
+
+          const userObj: User = {
+            id: 'ADMIN-001',
+            name: 'Administrator',
+            email: inputIdentifier.includes('@') ? inputIdentifier : 'admin@example.com',
+            role: 'admin'
+          };
+
+          return {
+            success: true,
+            message: 'Admin login successful',
+            user: userObj,
+            data: userObj as any
+          };
+        } else {
+          // Patient Login validation against registered patients
+          const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+          const foundPatient = localPats.find(p => 
+            p.id.toLowerCase() === inputIdentifier.toLowerCase() || 
+            (p.email && p.email.toLowerCase() === inputIdentifier.toLowerCase())
+          );
+
+          if (!foundPatient) {
+            return {
+              success: false,
+              message: `Patient ID / Email "${inputIdentifier}" not found. Admin must create patient account first.`
+            };
+          }
+
+          if (!inputPassword) {
+            return {
+              success: false,
+              message: 'Please enter patient password.'
+            };
+          }
+
+          const userObj: User = {
+            id: foundPatient.id,
+            name: foundPatient.name,
+            email: foundPatient.email,
+            role: 'patient'
+          };
+
+          return {
+            success: true,
+            message: 'Patient login successful',
+            user: userObj,
+            data: userObj as any
+          };
         }
-
-        const userObj: User = resData.user || {
-          id: userId,
-          name: userName,
-          email: userEmail,
-          role: userRole
-        };
-
-        return {
-          success: true,
-          message: resData.message || 'Login successful',
-          user: userObj,
-          data: userObj as any
-        };
       }
 
       // Handle BOOK_APPOINTMENT Action Specifically
