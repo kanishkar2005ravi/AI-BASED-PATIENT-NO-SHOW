@@ -284,6 +284,35 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         };
       }
 
+      // Handle UPDATE_PATIENT Action Specifically
+      if (payload.action === 'UPDATE_PATIENT') {
+        const pId = payload.data?.patientId || payload.data?.id;
+        const newPhone = payload.data?.phone;
+        const newAddress = payload.data?.address;
+
+        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+        const updatedPats = localPats.map(p => {
+          if (p.id === pId || p.email === pId) {
+            return {
+              ...p,
+              phone: newPhone !== undefined ? newPhone : p.phone,
+              address: newAddress !== undefined ? newAddress : p.address
+            };
+          }
+          return p;
+        });
+        setLocalData(STORAGE_KEYS.PATIENTS, updatedPats);
+
+        const updatedPatient = updatedPats.find(p => p.id === pId || p.email === pId) || updatedPats[0];
+
+        return {
+          success: true,
+          message: resData.message || 'Contact details updated successfully.',
+          patient: updatedPatient,
+          data: updatedPatient as any
+        };
+      }
+
       // Handle GET_APPOINTMENTS Action Specifically
       if (payload.action === 'GET_APPOINTMENTS') {
         const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
