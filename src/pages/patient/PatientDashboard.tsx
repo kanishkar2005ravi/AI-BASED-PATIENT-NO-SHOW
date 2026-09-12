@@ -401,54 +401,71 @@ export const PatientDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* 📋 IMPORTANT PATIENT ADVISORY & HOSPITAL NOTE 📋 */}
-      <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-teal-500/10 border-2 border-amber-400/60 shadow-md space-y-3">
-        <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center shadow-xs text-sm">
-            📋
+      {/* 📋 VIBRANT GOLDEN YELLOW HOSPITAL ADVISORY NOTE 📋 */}
+      <div className="p-6 md:p-7 rounded-3xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-400 shadow-xl shadow-amber-500/10 space-y-4 relative overflow-hidden">
+        {/* Top Decorative Yellow Tag */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-300/30 rounded-full blur-xl pointer-events-none" />
+
+        <div className="flex items-center justify-between relative z-10 border-b border-amber-300/80 pb-3">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-slate-950 font-black flex items-center justify-center shadow-md text-base flex-shrink-0">
+              📋
+            </div>
+            <div>
+              <h4 className="text-base font-extrabold text-amber-950 flex items-center gap-2">
+                <span>Important Hospital Advisory & Patient Guidelines</span>
+              </h4>
+              <p className="text-xs text-amber-900 font-semibold">SNS Medical College & Hospital Patient Desk Guidelines</p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-              <span>Important Hospital Advisory & Patient Guidelines</span>
-              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 shadow-2xs">Note</span>
-            </h4>
-          </div>
+          <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-500 text-slate-950 shadow-sm border border-amber-600/30 tracking-wider">
+            Official Note
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-700 font-medium">
-          <div className="p-3 rounded-2xl bg-white/80 border border-amber-200/80 space-y-1">
-            <p className="font-extrabold text-amber-950 flex items-center gap-1.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-slate-800 font-medium relative z-10">
+          <div className="p-3.5 rounded-2xl bg-white/90 border border-amber-300 shadow-xs space-y-1">
+            <p className="font-extrabold text-amber-950 flex items-center gap-1.5 text-xs">
               <span>⏰ Reporting Time & Identity Verification</span>
             </p>
-            <p className="text-slate-600 leading-relaxed text-[11px]">
-              Please report to reception 15 mins prior to your scheduled consultation time. Bring your Patient ID (<strong className="text-slate-900">{user?.id || 'PAT-686'}</strong>) or registered phone number.
+            <p className="text-slate-700 leading-relaxed text-[11px]">
+              Please report to reception 15 mins prior to your scheduled slot. Present your Patient ID (<strong className="text-amber-950">{user?.id || 'PAT-686'}</strong>) or registered phone number.
             </p>
           </div>
 
-          <div className="p-3 rounded-2xl bg-white/80 border border-teal-200/80 space-y-1">
-            <p className="font-extrabold text-teal-950 flex items-center gap-1.5">
-              <span>📞 Phone Call-In Booking Helpline</span>
+          <div className="p-3.5 rounded-2xl bg-white/90 border border-blue-300 shadow-xs space-y-1">
+            <p className="font-extrabold text-blue-950 flex items-center gap-1.5 text-xs">
+              <span>📞 Telephone Call-In Booking Helpline (1st Come, 1st Serve)</span>
             </p>
-            <p className="text-slate-600 leading-relaxed text-[11px]">
-              For patients without smartphone/digital access, telephone call-in booking helpline (<strong className="text-slate-900">+91 422 2661100</strong>) allocates limited reserved daily slots on a 1st Come, 1st Serve basis.
-            </p>
-          </div>
-
-          <div className="p-3 rounded-2xl bg-white/80 border border-rose-200/80 space-y-1">
-            <p className="font-extrabold text-rose-950 flex items-center gap-1.5">
-              <span>⚡ Priority Care & Emergency Casualty</span>
-            </p>
-            <p className="text-slate-600 leading-relaxed text-[11px]">
-              If regular slots are full, request an urgent priority consultation. For acute emergencies, visit our Casualty Unit or call emergency helpline (<strong className="text-slate-900">0422-2666222</strong>).
+            <p className="text-slate-700 leading-relaxed text-[11px]">
+              For non-smartphone users without digital access, call helpline (<strong className="text-blue-950">+91 422 2661100</strong>). Reserved limited daily slots are assigned on a strict First-Come, First-Served priority.
             </p>
           </div>
 
-          <div className="p-3 rounded-2xl bg-white/80 border border-purple-200/80 space-y-1">
-            <p className="font-extrabold text-purple-950 flex items-center gap-1.5">
-              <span>🔄 Automatic Slot Reallocation</span>
+          <div className="p-3.5 rounded-2xl bg-white/90 border border-emerald-300 shadow-xs space-y-1">
+            <p className="font-extrabold text-emerald-950 flex items-center gap-1.5 text-xs">
+              <span>📩 Instant Multi-Channel Alerts (Gmail & WhatsApp)</span>
             </p>
-            <p className="text-slate-600 leading-relaxed text-[11px]">
-              If you need to cancel or reschedule, please do so at least 2 hours in advance so your slot can be offered automatically to waitlisted patients.
+            <p className="text-slate-700 leading-relaxed text-[11px]">
+              Automated notifications are sent via Email (<strong className="text-emerald-950">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp for Account Signup, Booking, Cancellations, Rescheduling & Waitlist Confirmations.
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-white/90 border border-rose-300 shadow-xs space-y-1">
+            <p className="font-extrabold text-rose-950 flex items-center gap-1.5 text-xs">
+              <span>⚡ Urgent Priority Care & 24/7 Casualty</span>
+            </p>
+            <p className="text-slate-700 leading-relaxed text-[11px]">
+              If regular slots are full, request an Urgent Priority Consultation. For acute emergencies, visit our Casualty Unit directly or call Emergency Helpline (<strong className="text-rose-950">0422-2666222</strong>).
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-white/90 border border-purple-300 shadow-xs space-y-1 md:col-span-2">
+            <p className="font-extrabold text-purple-950 flex items-center gap-1.5 text-xs">
+              <span>🔄 Automatic Slot Cancellation & Real-Time Waitlist Reallocation</span>
+            </p>
+            <p className="text-slate-700 leading-relaxed text-[11px]">
+              If you need to cancel or reschedule, please do so at least 2 hours in advance. Cancelled slots are automatically reallocated in real-time to the highest-priority waitlisted patient.
             </p>
           </div>
         </div>
