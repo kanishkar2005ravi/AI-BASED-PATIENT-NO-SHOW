@@ -330,8 +330,8 @@ export const AdminDashboard: React.FC = () => {
       {/* 🏥 HOSPITAL OVERVIEW & PATIENT STATS HEADER BAR 🏥 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <h2 className="text-base font-black text-slate-900">Hospital Overview & Patient Stats</h2>
-          <p className="text-xs text-slate-500">Real-time attendance metrics & waitlist stats</p>
+          <h2 className="text-base font-black text-slate-900">Daily Hospital Operations & Patient Attendance</h2>
+          <p className="text-xs text-slate-500">Real-time daily physician schedules, consultation outcomes & emergency waitlist tracking</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
