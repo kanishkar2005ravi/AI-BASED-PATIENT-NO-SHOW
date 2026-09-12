@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { Bell, Search, Wifi, WifiOff, Sparkles, User as UserIcon, Globe, MapPin, X, Copy, ExternalLink, Phone, RotateCw } from 'lucide-react';
+import { Bell, Search, Wifi, WifiOff, Sparkles, User as UserIcon, Globe, MapPin, X, Copy, ExternalLink, Phone, RotateCw, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { isDemoMode, callBackend } from '../../services/api';
 import { CarePilotLogo } from '../common/CarePilotLogo';
@@ -220,10 +220,16 @@ export const Header: React.FC<HeaderProps> = ({
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800 flex flex-col items-center justify-center gap-1.5 text-xs text-slate-300">
+                <div className="pt-3 border-t border-slate-800 flex flex-col items-center justify-center gap-2 text-xs text-slate-300">
                   <span className="flex items-center gap-1.5 font-bold">
                     <Phone className="w-4 h-4 text-emerald-400" /> Emergency Helpline: 0422-2666222
                   </span>
+                  <a
+                    href="mailto:kanis.r.ad.2024@snsce.ac.in"
+                    className="flex items-center gap-1.5 font-extrabold text-amber-300 hover:text-amber-200 transition-colors"
+                  >
+                    <Mail className="w-4 h-4 text-amber-400" /> Email: kanis.r.ad.2024@snsce.ac.in
+                  </a>
                   <span className="bg-emerald-500/20 text-emerald-300 px-3 py-0.5 rounded-full text-[10px] font-black border border-emerald-500/30">
                     24 Hours Emergency & Ambulance Service
                   </span>

@@ -418,19 +418,29 @@ export const PatientDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200/80 flex items-center justify-between">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black flex-shrink-0 text-sm">
-                  📞
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200/80 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black flex-shrink-0 text-sm">
+                    📞
+                  </div>
+                  <div>
+                    <p className="font-extrabold text-slate-900 text-xs">Phone Call Booking Helpline</p>
+                    <p className="text-blue-800 text-[11px] font-bold">+91 422 2661100 • Limited Call-In Slots</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-extrabold text-slate-900 text-xs">Phone Call Booking Helpline</p>
-                  <p className="text-blue-800 text-[11px] font-bold">+91 422 2661100 • Limited Call-In Slots</p>
-                </div>
+                <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-blue-600 text-white shadow-xs">
+                  1st Come 1st Serve
+                </span>
               </div>
-              <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-blue-600 text-white shadow-xs">
-                1st Come 1st Serve
-              </span>
+              <div className="pt-1.5 border-t border-blue-200/60 flex items-center justify-between text-[11px]">
+                <span className="font-bold text-slate-700 flex items-center gap-1">
+                  📧 Official Support Email:
+                </span>
+                <a href="mailto:kanis.r.ad.2024@snsce.ac.in" className="font-extrabold text-teal-700 hover:underline">
+                  kanis.r.ad.2024@snsce.ac.in
+                </a>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5 font-bold">
