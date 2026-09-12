@@ -74,19 +74,8 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Center Title: Page Title Message FIRST, with SNS Medical College & Hospital Badge BELOW IT */}
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-2 space-y-1">
-        <p className="text-base md:text-lg font-black text-slate-900 leading-tight tracking-tight">
-          {title === 'Patient Dashboard' ? t('nav.dashboard') :
-           title === 'Admin Dashboard' || title === 'Admin Hospital Dashboard' || title === 'Hospital Overview & AI Intelligence' ? t('nav.dashboard') :
-           title === 'Book Consultation' || title === 'Book Appointment' ? t('nav.book_appointment') :
-           title === 'Patient Directory' || title === 'Patients' ? t('nav.patients') :
-           title === 'Physician Directory' || title === 'Doctors' ? t('nav.doctors') :
-           title === 'Appointments Schedule' || title === 'Appointments' || title === 'My Appointments' ? t('nav.appointments') :
-           title === 'Waitlist Queue' || title === 'Waitlist' ? t('nav.waitlist') :
-           title === 'Notifications' ? t('nav.notifications') :
-           title}
-        </p>
+      {/* Center Title: SNS Medical College & Hospital Badge ON TOP + Page Title BELOW IT */}
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
         <div className="p-0.5 rounded-[22px] bg-gradient-to-r from-amber-400 via-rose-500 via-purple-500 via-teal-400 to-emerald-400 shadow-lg shadow-teal-500/15 hover:shadow-teal-500/30 transition-all hover:scale-105">
           <button
             onClick={() => setShowAddressModal(true)}
@@ -100,6 +89,17 @@ export const Header: React.FC<HeaderProps> = ({
             <MapPin className="w-3.5 h-3.5 text-amber-400 group-hover:animate-bounce" />
           </button>
         </div>
+        <p className="text-base font-black text-slate-900 leading-tight mt-1">
+          {title === 'Patient Dashboard' ? t('nav.dashboard') :
+           title === 'Admin Dashboard' || title === 'Admin Hospital Dashboard' || title === 'Hospital Overview & AI Intelligence' ? t('nav.dashboard') :
+           title === 'Book Consultation' || title === 'Book Appointment' ? t('nav.book_appointment') :
+           title === 'Patient Directory' || title === 'Patients' ? t('nav.patients') :
+           title === 'Physician Directory' || title === 'Doctors' ? t('nav.doctors') :
+           title === 'Appointments Schedule' || title === 'Appointments' || title === 'My Appointments' ? t('nav.appointments') :
+           title === 'Waitlist Queue' || title === 'Waitlist' ? t('nav.waitlist') :
+           title === 'Notifications' ? t('nav.notifications') :
+           title}
+        </p>
       </div>
 
 
@@ -145,30 +145,30 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* 📍 SNS MEDICAL COLLEGE & HOSPITAL ADDRESS MODAL (CIRCLE-SQUARE SQUIRCLE BORDER) 📍 */}
+      {/* 📍 DEAD-CENTER HOSPITAL ADDRESS MODAL (MIDDLE OF APP) 📍 */}
       {showAddressModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl animate-fade-in"
           onClick={() => setShowAddressModal(false)}
         >
           <div
-            className="p-[3px] rounded-[34px] bg-gradient-to-r from-amber-400 via-rose-500 via-purple-500 via-teal-400 to-emerald-400 shadow-2xl shadow-teal-500/30 w-full max-w-lg select-none"
+            className="p-[3px] rounded-[34px] bg-gradient-to-r from-amber-400 via-rose-500 via-purple-500 via-teal-400 to-emerald-400 shadow-2xl shadow-teal-500/40 w-full max-w-md select-none transform transition-all scale-100"
             onClick={e => e.stopPropagation()}
           >
             <div className="w-full bg-slate-950 rounded-[31px] p-6 text-white space-y-5 relative overflow-hidden text-center">
-              {/* Background Glow */}
-              <div className="absolute -top-20 -right-20 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+              {/* Background Ambient Glow */}
+              <div className="absolute -top-20 -right-20 w-60 h-60 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-teal-500/15 rounded-full blur-3xl pointer-events-none" />
 
-              {/* Modal Header */}
+              {/* Close Button */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div className="flex items-center space-x-3 text-left">
                   <CarePilotLogo size="sm" showText={false} />
                   <div>
-                    <h3 className="text-base font-black text-white leading-tight">
+                    <h3 className="text-sm font-black text-white leading-tight">
                       {t('welcome.institution')}
                     </h3>
-                    <p className="text-xs font-bold text-amber-400">SNS Group of Institutions</p>
+                    <p className="text-[11px] font-bold text-amber-400">SNS Group of Institutions</p>
                   </div>
                 </div>
 
@@ -180,25 +180,25 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               </div>
 
-              {/* Address Card Centered */}
+              {/* Centered Address Box */}
               <div className="p-5 rounded-[24px] bg-slate-900/90 border border-teal-500/40 space-y-4 text-center">
-                <div className="inline-flex p-3 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-400/40 shadow-inner">
-                  <MapPin className="w-8 h-8 animate-bounce" />
+                <div className="inline-flex p-3.5 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-400/40 shadow-inner">
+                  <MapPin className="w-9 h-9 animate-bounce" />
                 </div>
 
-                <div className="space-y-1">
-                  <p className="text-xs font-black uppercase text-teal-300 tracking-widest">Official Campus Location</p>
-                  <p className="text-sm md:text-base font-extrabold text-white leading-relaxed max-w-md mx-auto">
+                <div className="space-y-1.5">
+                  <p className="text-xs font-black uppercase text-teal-300 tracking-widest">Hospital Campus Address</p>
+                  <p className="text-sm md:text-base font-black text-white leading-relaxed max-w-sm mx-auto">
                     SNS Kalvi Nagar, Sathy Main Road, NH-209, Vazhiyampalayam, Saravanampatti, Coimbatore - 641048
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-300">
+                <div className="pt-3 border-t border-slate-800 flex flex-col items-center justify-center gap-1.5 text-xs text-slate-300">
                   <span className="flex items-center gap-1.5 font-bold">
-                    <Phone className="w-4 h-4 text-emerald-400" /> Helpline: 0422-2666222
+                    <Phone className="w-4 h-4 text-emerald-400" /> Emergency Helpline: 0422-2666222
                   </span>
-                  <span className="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-500/30">
-                    24/7 Emergency Hospital Open
+                  <span className="bg-emerald-500/20 text-emerald-300 px-3 py-0.5 rounded-full text-[10px] font-black border border-emerald-500/30">
+                    24 Hours Emergency & Ambulance Service
                   </span>
                 </div>
               </div>
@@ -210,7 +210,7 @@ export const Header: React.FC<HeaderProps> = ({
                   className="flex-1 py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold text-xs flex items-center justify-center space-x-2 transition-all"
                 >
                   <Copy className="w-4 h-4 text-amber-400" />
-                  <span>{copied ? 'Copied to Clipboard!' : 'Copy Full Address'}</span>
+                  <span>{copied ? 'Copied!' : 'Copy Address'}</span>
                 </button>
 
                 <a
