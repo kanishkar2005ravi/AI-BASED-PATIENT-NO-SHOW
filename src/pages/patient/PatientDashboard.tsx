@@ -123,9 +123,9 @@ export const PatientDashboard: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-teal-500/20 to-purple-500/20 border-2 border-amber-400/50 text-amber-300 text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-amber-500/10">
+              <span className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-teal-500/20 to-purple-500/20 border-2 border-amber-400/50 text-amber-300 text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-amber-500/10 whitespace-nowrap">
                 <Hospital className="w-4 h-4 text-amber-400 animate-pulse" />
-                <span>{t('welcome.institution')}</span>
+                <span>CarePilot SNS • {t('welcome.institution')}</span>
               </span>
               <button
                 onClick={() => setShowWelcomeSplash(true)}
