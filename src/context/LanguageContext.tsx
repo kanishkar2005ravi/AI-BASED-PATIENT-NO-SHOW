@@ -174,7 +174,30 @@ const translations: Record<Language, Record<string, string>> = {
     'emergency.admin_note': 'Admin Verification Process: Once submitted, hospital admin will verify doctor availability and confirm your priority slot based on selected urgency level. You will receive an instant confirmation notification.',
     'emergency.submit_button': 'Submit Request for Admin Verification',
     'emergency.success_title': 'Emergency Request Submitted to Admin!',
-    'emergency.success_desc': 'Your emergency consultation request has been sent to the Admin. Once verified, you will receive a confirmation message.'
+    'emergency.success_desc': 'Your emergency consultation request has been sent to the Admin. Once verified, you will receive a confirmation message.',
+
+    // Profile Page
+    'profile.patient_title': 'Patient Medical Account Profile',
+    'profile.admin_title': 'Administrator Profile Settings',
+    'profile.back_dashboard': 'Back to Dashboard',
+    'profile.total_visits': 'Total Visits:',
+    'profile.attended': 'Attended:',
+    'profile.noshow_rate': 'No-Show Rate:',
+    'profile.personal_details': 'Personal Details & Contact Settings',
+    'profile.email_managed': 'Email Address (Managed by Admin)',
+    'profile.dob_gender': 'Date of Birth & Gender',
+    'profile.editable_contact': 'Editable Contact Details',
+    'profile.phone_number': 'Phone Contact Number',
+    'profile.residential_address': 'Residential Address',
+    'profile.save_updates': 'Save Contact Updates',
+    'profile.account_details': 'Account Details',
+    'profile.update_admin_sub': 'Update administrative credentials',
+    'profile.full_name': 'Full Name',
+    'profile.email_address': 'Email Address',
+    'profile.save_profile': 'Save Profile',
+    'profile.loading_msg': 'Loading profile information...',
+    'profile.update_success': 'Contact details updated successfully.',
+    'profile.update_fail': 'Failed to update profile.'
   },
   ta: {
     // Header & Navigation
@@ -340,7 +363,30 @@ const translations: Record<Language, Record<string, string>> = {
     'emergency.admin_note': 'நிர்வாகி சரிபார்ப்பு செயல்முறை: சமர்ப்பித்தவுடன், மருத்துவமனை நிர்வாகி மருத்துவரின் இருப்பை சரிபார்த்து தேர்ந்தெடுக்கப்பட்ட அவசர நிலைக்கு ஏற்ப உங்கள் நேரத்தை உறுதி செய்வார். உங்களுக்கு உடனடி உறுதிப்படுத்தல் செய்தி அனுப்பப்படும்.',
     'emergency.submit_button': 'நிர்வாகி சரிபார்ப்பிற்கு சமர்ப்பிக்கவும் 🚀',
     'emergency.success_title': 'அவசர கோரிக்கை நிர்வாகிக்கு சமர்ப்பிக்கப்பட்டது!',
-    'emergency.success_desc': 'உங்கள் அவசர சிகிச்சை கோரிக்கை நிர்வாகிக்கு அனுப்பப்பட்டுள்ளது. சரிபார்க்கப்பட்டதும், உறுதிப்படுத்தல் செய்தியைப் பெறுவீர்கள்.'
+    'emergency.success_desc': 'உங்கள் அவசர சிகிச்சை கோரிக்கை நிர்வாகிக்கு அனுப்பப்பட்டுள்ளது. சரிபார்க்கப்பட்டதும், உறுதிப்படுத்தல் செய்தியைப் பெறுவீர்கள்.',
+
+    // Profile Page
+    'profile.patient_title': 'நோயாளி மருத்துவ கணக்கு சுயவிவரம்',
+    'profile.admin_title': 'நிர்வாகி சுயவிவர அமைப்புகள்',
+    'profile.back_dashboard': 'டாஷ்போர்டிற்கு திரும்பு',
+    'profile.total_visits': 'மொத்த வருகைகள்:',
+    'profile.attended': 'வருகை புரிந்தது:',
+    'profile.noshow_rate': 'வராத வீதம்:',
+    'profile.personal_details': 'தனிப்பட்ட விவரங்கள் & தொடர்பு அமைப்புகள்',
+    'profile.email_managed': 'மின்னஞ்சல் முகவரி (நிர்வாகியால் நிர்வகிக்கப்படுகிறது)',
+    'profile.dob_gender': 'பிறந்த தேதி & பாலினம்',
+    'profile.editable_contact': 'திருத்தக்கூடிய தொடர்பு விவரங்கள்',
+    'profile.phone_number': 'தொலைபேசி தொடர்பு எண்',
+    'profile.residential_address': 'வீட்டு முகவரி',
+    'profile.save_updates': 'தொடர்பு புதுப்பிப்புகளை சேமி',
+    'profile.account_details': 'கணக்கு விவரங்கள்',
+    'profile.update_admin_sub': 'நிர்வாக சான்றுகளை புதுப்பிக்கவும்',
+    'profile.full_name': 'முழு பெயர்',
+    'profile.email_address': 'மின்னஞ்சல் முகவரி',
+    'profile.save_profile': 'சுயவிவரத்தை சேமி',
+    'profile.loading_msg': 'சுயவிவரத் தகவலை ஏற்றுகிறது...',
+    'profile.update_success': 'தொடர்பு விவரங்கள் வெற்றிகரமாக புதுப்பிக்கப்பட்டன.',
+    'profile.update_fail': 'சுயவிவரத்தைப் புதுப்பிக்க முடியவில்லை.'
   }
 
 };

@@ -5,12 +5,14 @@ import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { User, ShieldCheck, Mail, Phone, Lock, Save, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminProfile: React.FC = () => {
   const { user, setUser } = useAuth();
   const { showToast } = useToast();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [name, setName] = useState(user?.name || 'Administrator');
   const [email, setEmail] = useState(user?.email || 'admin@example.com');
@@ -25,13 +27,13 @@ export const AdminProfile: React.FC = () => {
         setUser({ ...user, name, email, phone });
       }
       setSaving(false);
-      showToast('Admin profile updated successfully.', 'success');
+      showToast(t('profile.update_success'), 'success');
     }, 400);
   };
 
   return (
     <div className="space-y-6 pb-12">
-      <Header title="Administrator Profile Settings" />
+      <Header title={t('profile.admin_title')} />
 
       {/* 🔙 BACK TO DASHBOARD BUTTON 🔙 */}
       <div>
@@ -40,7 +42,7 @@ export const AdminProfile: React.FC = () => {
           className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold text-xs shadow-xs group cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 text-amber-600 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Dashboard</span>
+          <span>{t('profile.back_dashboard')}</span>
         </button>
       </div>
 
@@ -50,22 +52,24 @@ export const AdminProfile: React.FC = () => {
             A
           </div>
           <h3 className="text-lg font-bold text-slate-900">{name}</h3>
-          <p className="text-xs font-semibold text-teal-600 uppercase tracking-wider mt-0.5">System Administrator</p>
+          <p className="text-xs font-semibold text-teal-600 uppercase tracking-wider mt-0.5">
+            {t('label.admin')}
+          </p>
           <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
             <p>ID: {user?.id || 'ADMIN-001'}</p>
             <p>Role: Hospital Administrator</p>
           </div>
         </Card>
 
-        <Card className="md:col-span-2" title="Account Details" subtitle="Update administrative credentials">
+        <Card className="md:col-span-2" title={t('profile.account_details')} subtitle={t('profile.update_admin_sub')}>
           <form onSubmit={handleSave} className="space-y-4">
-            <Input label="Full Name" value={name} onChange={e => setName(e.target.value)} required />
-            <Input label="Email Address" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-            <Input label="Phone Contact" value={phone} onChange={e => setPhone(e.target.value)} />
+            <Input label={t('profile.full_name')} value={name} onChange={e => setName(e.target.value)} required />
+            <Input label={t('profile.email_address')} type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+            <Input label={t('profile.phone_number')} value={phone} onChange={e => setPhone(e.target.value)} />
 
             <div className="pt-4 border-t border-slate-100 flex justify-end">
               <Button variant="primary" type="submit" isLoading={saving} icon={<Save className="w-4 h-4" />}>
-                Save Profile
+                {t('profile.save_profile')}
               </Button>
             </div>
           </form>
@@ -74,5 +78,3 @@ export const AdminProfile: React.FC = () => {
     </div>
   );
 };
-
-

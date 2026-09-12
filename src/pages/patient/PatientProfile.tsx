@@ -8,12 +8,14 @@ import { useAuth } from '../../context/AuthContext';
 import { callBackend } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Patient } from '../../types';
-import { User, Mail, Phone, Calendar, MapPin, Save, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { Phone, MapPin, Save, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const PatientProfile: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -58,19 +60,25 @@ export const PatientProfile: React.FC = () => {
 
     setSaving(false);
     if (res.success) {
-      showToast('Contact details updated successfully.', 'success');
+      showToast(t('profile.update_success'), 'success');
       setPatient({ ...patient, phone, address });
     } else {
-      showToast('Failed to update profile.', 'error');
+      showToast(t('profile.update_fail'), 'error');
     }
+  };
+
+  const formatGender = (gender: string) => {
+    if (gender === 'Male') return language === 'ta' ? 'ஆண்' : 'Male';
+    if (gender === 'Female') return language === 'ta' ? 'பெண்' : 'Female';
+    return gender;
   };
 
   if (loading || !patient) {
     return (
       <div>
-        <Header title="My Profile" />
+        <Header title={t('nav.profile')} />
         <div className="py-20">
-          <Loading message="Loading profile information..." />
+          <Loading message={t('profile.loading_msg')} />
         </div>
       </div>
     );
@@ -78,7 +86,7 @@ export const PatientProfile: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <Header title="Patient Medical Account Profile" />
+      <Header title={t('profile.patient_title')} />
 
       {/* 🔙 BACK TO DASHBOARD BUTTON 🔙 */}
       <div>
@@ -87,7 +95,7 @@ export const PatientProfile: React.FC = () => {
           className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold text-xs shadow-xs group cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 text-teal-600 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Dashboard</span>
+          <span>{t('profile.back_dashboard')}</span>
         </button>
       </div>
 
@@ -103,40 +111,42 @@ export const PatientProfile: React.FC = () => {
 
           <div className="mt-6 pt-4 border-t border-slate-100 space-y-2 text-xs text-slate-600 text-left">
             <div className="flex justify-between">
-              <span className="text-slate-400">Total Visits:</span>
+              <span className="text-slate-400">{t('profile.total_visits')}</span>
               <span className="font-bold text-slate-900">{patient.totalAppointments}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Attended:</span>
+              <span className="text-slate-400">{t('profile.attended')}</span>
               <span className="font-bold text-emerald-600">{patient.attendedAppointments}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">No-Show Rate:</span>
+              <span className="text-slate-400">{t('profile.noshow_rate')}</span>
               <span className="font-bold text-slate-900">{patient.noShowRate}%</span>
             </div>
           </div>
         </Card>
 
-        <Card className="md:col-span-2" title="Personal Details & Contact Settings">
+        <Card className="md:col-span-2" title={t('profile.personal_details')}>
           <form onSubmit={handleSave} className="space-y-4">
             {/* Read-Only Admin Managed Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
               <div>
-                <span className="text-slate-400 font-medium">Email Address (Managed by Admin)</span>
+                <span className="text-slate-400 font-medium">{t('profile.email_managed')}</span>
                 <p className="font-bold text-slate-900 text-sm mt-0.5">{patient.email}</p>
               </div>
               <div>
-                <span className="text-slate-400 font-medium">Date of Birth & Gender</span>
-                <p className="font-bold text-slate-900 text-sm mt-0.5">{patient.dateOfBirth} ({patient.gender})</p>
+                <span className="text-slate-400 font-medium">{t('profile.dob_gender')}</span>
+                <p className="font-bold text-slate-900 text-sm mt-0.5">
+                  {patient.dateOfBirth} ({formatGender(patient.gender)})
+                </p>
               </div>
             </div>
 
             <p className="text-xs font-bold text-slate-700 uppercase tracking-wider pt-2">
-              Editable Contact Details
+              {t('profile.editable_contact')}
             </p>
 
             <Input
-              label="Phone Contact Number"
+              label={t('profile.phone_number')}
               value={phone}
               onChange={e => setPhone(e.target.value)}
               icon={<Phone className="w-4 h-4 text-slate-400" />}
@@ -144,7 +154,7 @@ export const PatientProfile: React.FC = () => {
             />
 
             <Input
-              label="Residential Address"
+              label={t('profile.residential_address')}
               value={address}
               onChange={e => setAddress(e.target.value)}
               icon={<MapPin className="w-4 h-4 text-slate-400" />}
@@ -152,7 +162,7 @@ export const PatientProfile: React.FC = () => {
 
             <div className="pt-4 border-t border-slate-100 flex justify-end">
               <Button variant="primary" type="submit" isLoading={saving} icon={<Save className="w-4 h-4" />}>
-                Save Contact Updates
+                {t('profile.save_updates')}
               </Button>
             </div>
           </form>
