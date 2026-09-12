@@ -233,7 +233,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
         </div>
       </div>
 
-      {/* Footer / Logout Section */}
+      {/* Footer Section */}
       <div className="relative z-10 pt-3 border-t border-slate-800/80 space-y-2">
         <div className="px-2 py-1 flex items-center justify-between text-[10px] text-slate-500 font-semibold">
           <span className="flex items-center gap-1">
@@ -242,13 +242,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
           <span className="text-teal-400">SNS Medical</span>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-900/40 transition-all"
-        >
-          <LogOut className="w-4 h-4 flex-shrink-0 text-rose-400" />
-          <span>{t('nav.logout')}</span>
-        </button>
+        {role === 'admin' && (
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-900/40 transition-all"
+          >
+            <LogOut className="w-4 h-4 flex-shrink-0 text-rose-400" />
+            <span>{t('nav.logout')}</span>
+          </button>
+        )}
       </div>
     </aside>
   );
