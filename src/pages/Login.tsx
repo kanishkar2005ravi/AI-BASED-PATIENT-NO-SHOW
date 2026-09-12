@@ -14,7 +14,7 @@ export const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [showIntro, setShowIntro] = useState(false);
   const [introProgress, setIntroProgress] = useState(0);
-  const [introStatusText, setIntroStatusText] = useState('Authenticating Secure Credentials...');
+  const [welcomeName, setWelcomeName] = useState('');
   const [targetRoute, setTargetRoute] = useState('');
 
   const { login, loading } = useAuth();
@@ -52,6 +52,8 @@ export const Login: React.FC = () => {
 
     const res = await login(role, cleanInput, cleanPass);
     if (res.success) {
+      const name = res.user?.name || (role === 'admin' ? 'Administrator' : cleanInput);
+      setWelcomeName(name);
       const destination = role === 'admin' ? '/admin/dashboard' : '/patient/dashboard';
       setTargetRoute(destination);
       setShowIntro(true);
@@ -64,17 +66,14 @@ export const Login: React.FC = () => {
   useEffect(() => {
     if (!showIntro) return;
 
-    setIntroProgress(10);
-    setIntroStatusText('🔑 Authenticating Secure Credentials...');
+    setIntroProgress(15);
 
     const step1 = setTimeout(() => {
-      setIntroProgress(45);
-      setIntroStatusText('⚡ Initializing AI Predictive Health Engine...');
+      setIntroProgress(55);
     }, 1000);
 
     const step2 = setTimeout(() => {
-      setIntroProgress(85);
-      setIntroStatusText('✨ Launching CarePilot Smart Portal...');
+      setIntroProgress(90);
     }, 2000);
 
     const step3 = setTimeout(() => {
@@ -127,24 +126,23 @@ export const Login: React.FC = () => {
             </div>
           </div>
 
-          {/* Intro Status Messaging */}
-          <div className="max-w-md w-full space-y-4">
-            <div className="flex items-center justify-center gap-2 text-teal-400 font-extrabold text-sm tracking-wider uppercase">
-              <Activity className="w-4 h-4 animate-pulse" />
-              <span>{introStatusText}</span>
-            </div>
+          {/* Welcome Greeting Messaging (As Requested) */}
+          <div className="max-w-lg w-full space-y-3 px-4">
+            <h2 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-teal-300 to-purple-400 tracking-tight">
+              Welcome to CarePilot SNS
+            </h2>
+
+            <p className="text-lg md:text-2xl font-black text-white tracking-wide">
+              Welcome <span className="text-teal-300 underline underline-offset-4 decoration-amber-400">{welcomeName}</span>!
+            </p>
 
             {/* 3-Second Animated Progress Bar */}
-            <div className="w-full bg-slate-800/80 rounded-full h-2.5 p-0.5 border border-slate-700/60 overflow-hidden shadow-inner">
+            <div className="w-full bg-slate-800/80 rounded-full h-3 p-0.5 border border-slate-700/60 overflow-hidden shadow-inner mt-4">
               <div
                 className="bg-gradient-to-r from-amber-500 via-teal-400 to-purple-500 h-full rounded-full transition-all duration-300 shadow-md shadow-teal-500/50"
                 style={{ width: `${introProgress}%` }}
               />
             </div>
-
-            <p className="text-xs text-slate-400 font-semibold tracking-wide">
-              Preparing your personalized healthcare dashboard experience...
-            </p>
           </div>
         </div>
       )}

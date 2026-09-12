@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.success && response.user) {
         setUser(response.user);
-        return { success: true, message: response.message || 'Login successful' };
+        return { success: true, message: response.message || 'Login successful', user: response.user };
       } else {
         return { success: false, message: response.message || 'Invalid credentials' };
       }
