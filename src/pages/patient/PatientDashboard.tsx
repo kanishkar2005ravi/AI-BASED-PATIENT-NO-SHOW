@@ -355,19 +355,19 @@ export const PatientDashboard: React.FC = () => {
         </div>
 
       {/* 🚨 VIBRANT STYLISH RED PRIORITY CARE CARD 🚨 */}
-      <div className="p-6 md:p-7 rounded-3xl bg-gradient-to-r from-rose-500 via-red-500 to-pink-600 text-white shadow-xl shadow-rose-500/25 border-2 border-rose-300/80 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden group">
+      <div id="priority-care-section" className="p-6 md:p-7 rounded-3xl bg-gradient-to-r from-rose-600 via-red-600 to-pink-600 text-white shadow-2xl shadow-rose-500/40 border-2 border-rose-300/90 ring-4 ring-rose-500/20 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden group animate-pulse">
         {/* Animated Background Pulse Glow */}
         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-white/20 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
         <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-48 h-48 bg-pink-400/20 rounded-full blur-2xl pointer-events-none" />
 
         <div className="flex items-center space-x-4 relative z-10">
           <div className="w-14 h-14 rounded-2xl bg-white/25 backdrop-blur-md text-white border border-white/50 shadow-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-            <HeartPulse className="w-8 h-8 text-white animate-pulse" />
+            <HeartPulse className="w-8 h-8 text-white animate-bounce" />
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center space-x-2">
-              <span className="bg-white/25 backdrop-blur-md text-white text-[10px] font-black uppercase px-3 py-0.5 rounded-full border border-white/50 tracking-wider shadow-xs flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-white animate-ping" /> PRIORITY CARE
+              <span className="bg-slate-950/80 text-white text-[10px] font-black uppercase px-3.5 py-1 rounded-full border-2 border-rose-300 tracking-wider shadow-md flex items-center gap-1.5 animate-pulse">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-300 animate-ping shadow-xs shadow-amber-400" /> PRIORITY CARE
               </span>
               <span className="text-xs font-black text-amber-200 tracking-wide">
                 ⚡ If regular slots are full
