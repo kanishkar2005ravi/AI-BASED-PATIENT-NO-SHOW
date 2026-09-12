@@ -132,7 +132,8 @@ export const PatientDashboard: React.FC = () => {
 
   const attendedCount = appointments.filter(a => a.status === 'COMPLETED' || a.status === 'CHECKED_OUT' || (a.status as string) === 'ATTENDED').length;
   const rescheduledCount = appointments.filter(a => a.status === 'RESCHEDULED').length;
-  const cancelledCount = appointments.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length;
+  const cancelledCount = appointments.filter(a => a.status === 'CANCELLED').length;
+  const missedCount = appointments.filter(a => a.status === 'NO_SHOW').length;
 
   const handleCancel = async (aptId: string) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
@@ -179,8 +180,8 @@ export const PatientDashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* 📊 PATIENT PORTAL 5 METRIC STATS BOXES IN ONE ROW 📊 */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      {/* 📊 PATIENT PORTAL 6 METRIC STATS BOXES IN ONE ROW 📊 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {/* Box 1: Total Booking */}
         <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
@@ -249,8 +250,25 @@ export const PatientDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Box 5: Total Waitlist */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group col-span-2 lg:col-span-1">
+        {/* Box 5: Total Missed */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-amber-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={appointments.length > 0 ? 125.6 - (125.6 * (missedCount / appointments.length)) : 125.6} strokeLinecap="round" className="text-amber-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2 rounded-full bg-amber-50 text-amber-600 group-hover:scale-110 transition-transform">
+              <AlertCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-amber-600 leading-none">{missedCount}</p>
+            <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wider">{t('metric.total_missed')}</p>
+          </div>
+        </div>
+
+        {/* Box 6: Total Waitlist */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-purple-100" fill="transparent" />
