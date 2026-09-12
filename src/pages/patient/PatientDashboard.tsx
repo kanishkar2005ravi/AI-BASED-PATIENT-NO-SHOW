@@ -123,12 +123,13 @@ export const PatientDashboard: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/40 text-teal-300 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-inner">
-                <Hospital className="w-3.5 h-3.5 text-teal-300" /> {t('welcome.institution')}
+              <span className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-teal-500/20 to-purple-500/20 border-2 border-amber-400/50 text-amber-300 text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-amber-500/10">
+                <Hospital className="w-4 h-4 text-amber-400 animate-pulse" />
+                <span>{t('welcome.institution')}</span>
               </span>
               <button
                 onClick={() => setShowWelcomeSplash(true)}
-                className="px-3 py-1 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 text-xs font-black transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 text-xs font-black transition-all flex items-center gap-1.5 shadow-sm"
               >
                 <Play className="w-3 h-3 fill-current text-amber-300" /> {t('action.replay')}
               </button>
