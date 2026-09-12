@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HeartPulse, ArrowRight, Play } from 'lucide-react';
+import { HeartPulse, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 interface WelcomeSplashScreenProps {
@@ -110,15 +110,14 @@ export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userNa
       <div className="relative z-10 p-6 md:p-8 w-full max-w-5xl mx-auto space-y-3">
         <div className="flex items-center justify-between text-xs font-extrabold text-slate-300 px-2">
           <div className="flex items-center space-x-2">
-            <Play className="w-4 h-4 text-teal-400 fill-teal-400 animate-pulse" />
-            <span className="text-teal-300 tracking-wider">PLAYING CINEMATIC INTRO ({secondsLeft}s)</span>
+            <span className="text-teal-300 tracking-wider">Loading Dashboard ({secondsLeft}s)</span>
           </div>
 
           <button
             onClick={onComplete}
             className="flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 transition-all hover:scale-105"
           >
-            <span>Skip Video</span>
+            <span>Skip</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
