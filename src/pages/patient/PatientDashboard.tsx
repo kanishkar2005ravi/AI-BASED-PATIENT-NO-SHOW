@@ -137,7 +137,7 @@ export const PatientDashboard: React.FC = () => {
     a => a.status === 'CONFIRMED' || a.status === 'CHECKED_IN' || a.status === 'RESCHEDULED'
   );
 
-  const attendedCount = appointments.filter(a => a.status === 'COMPLETED' || a.status === 'CHECKED_OUT' || a.status === 'ATTENDED').length;
+  const attendedCount = appointments.filter(a => a.status === 'COMPLETED' || a.status === 'CHECKED_OUT' || (a.status as string) === 'ATTENDED').length;
   const rescheduledCount = appointments.filter(a => a.status === 'RESCHEDULED').length;
   const cancelledCount = appointments.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length;
 
