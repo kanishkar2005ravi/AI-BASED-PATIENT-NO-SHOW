@@ -186,9 +186,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
         <div className="space-y-3">
           {navSections.map((section, idx) => (
             <div key={idx} className="space-y-1">
-              <p className="px-2 text-[10px] font-black uppercase tracking-widest text-teal-400/70 flex items-center gap-1">
-                <span>{section.title}</span>
-              </p>
               <nav className="space-y-1">
                 {section.items.map(item => {
                   if ((item as any).isLogout) {
