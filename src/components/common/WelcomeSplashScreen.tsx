@@ -10,12 +10,12 @@ interface WelcomeSplashScreenProps {
 
 export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userName, role = 'patient', onComplete }) => {
   const [progress, setProgress] = useState<number>(0);
-  const [secondsLeft, setSecondsLeft] = useState<number>(5);
+  const [secondsLeft, setSecondsLeft] = useState<number>(3);
   const { language, t } = useLanguage();
 
   useEffect(() => {
-    // Progress bar over 5 seconds (5000ms)
-    const intervalTime = 50; // update every 50ms (100 steps total)
+    // Progress bar over 3 seconds (3000ms)
+    const intervalTime = 30; // update every 30ms (100 steps total)
     const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {

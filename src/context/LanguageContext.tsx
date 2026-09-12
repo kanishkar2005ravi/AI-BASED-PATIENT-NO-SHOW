@@ -26,7 +26,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Branding & Welcome
     'welcome.title': 'Welcome to CarePilot SNS',
-    'welcome.institution': 'Run by SNS Medical College and Hospital',
+    'welcome.institution': 'SNS Medical College and Hospital',
     'welcome.portal': 'Patient Care Portal',
     'welcome.good_morning': 'Good morning',
     'welcome.hello': 'Hello',
