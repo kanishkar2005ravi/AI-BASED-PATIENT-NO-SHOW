@@ -586,46 +586,81 @@ export const Analytics: React.FC = () => {
       </div>
 
       {/* 🩺 HOSPITAL DOCTORS DIRECTORY & CSV DOWNLOAD SECTION 🩺 */}
-      <Card
-        title="Hospital Doctors & Medical Specialists Directory"
-        subtitle="Complete roster of medical staff, departments, contact info, and status"
-        action={
+      <div className="rounded-2xl border-2 border-indigo-100/80 bg-gradient-to-br from-white via-indigo-50/20 to-teal-50/30 p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-indigo-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-gradient-to-r from-indigo-600 to-teal-600 text-white uppercase tracking-wider shadow-xs">
+                Staff Roster
+              </span>
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                Hospital Doctors & Medical Specialists Directory
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              Complete active roster of hospital medical staff, departments, contact info, and status
+            </p>
+          </div>
+
           <button
             onClick={() => handleDownloadMetricReport('DOCTORS')}
-            className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-teal-600 to-emerald-600 hover:from-indigo-700 hover:via-teal-700 hover:to-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer transform hover:-translate-y-0.5 border border-teal-300/30 shrink-0"
             title="Download Hospital Doctors Roster CSV"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4 text-emerald-200 animate-pulse" />
             <span>Download Doctors CSV</span>
           </button>
-        }
-      >
-        <div className="overflow-x-auto mt-2">
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-slate-200/80 shadow-xs bg-white">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50 text-slate-500 font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-200">
-                <th className="py-3 px-3">Doctor ID</th>
-                <th className="py-3 px-3">Physician Name</th>
-                <th className="py-3 px-3">Specialization</th>
-                <th className="py-3 px-3">Department</th>
-                <th className="py-3 px-3">Experience</th>
-                <th className="py-3 px-3">Contact Email</th>
-                <th className="py-3 px-3">Status</th>
+              <tr className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-slate-200 font-black uppercase text-[10px] tracking-wider border-b border-slate-800">
+                <th className="py-3.5 px-4 text-indigo-300">Doctor ID</th>
+                <th className="py-3.5 px-4 text-white">Physician Name</th>
+                <th className="py-3.5 px-4 text-purple-300">Specialization</th>
+                <th className="py-3.5 px-4 text-cyan-300">Department</th>
+                <th className="py-3.5 px-4 text-amber-300">Experience</th>
+                <th className="py-3.5 px-4 text-teal-300">Contact Email</th>
+                <th className="py-3.5 px-4 text-emerald-300">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
               {doctors.map(d => (
-                <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-2.5 px-3 font-mono font-bold text-teal-700">{d.id}</td>
-                  <td className="py-2.5 px-3 font-bold text-slate-900">{d.name}</td>
-                  <td className="py-2.5 px-3">{d.specialization}</td>
-                  <td className="py-2.5 px-3 font-semibold text-slate-600">{d.department}</td>
-                  <td className="py-2.5 px-3 font-mono">{d.experience} Yrs</td>
-                  <td className="py-2.5 px-3 text-slate-500">{d.email}</td>
-                  <td className="py-2.5 px-3">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase border ${
+                <tr key={d.id} className="hover:bg-indigo-50/40 transition-colors">
+                  <td className="py-3 px-4">
+                    <span className="px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 font-mono font-bold border border-indigo-200/80 text-[11px] shadow-xs">
+                      {d.id}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 via-teal-500 to-emerald-500 text-white flex items-center justify-center font-bold text-xs shadow-xs border border-white">
+                        {d.name.replace('Dr. ', '').charAt(0)}
+                      </div>
+                      <span className="font-extrabold text-slate-900 text-xs">{d.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200/80 shadow-xs">
+                      {d.specialization}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-cyan-50 text-cyan-800 border border-cyan-200/80 shadow-xs">
+                      {d.department}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="px-2 py-0.5 rounded-lg text-xs font-extrabold bg-amber-50 text-amber-800 border border-amber-200/80 font-mono shadow-xs">
+                      {d.experience} Yrs
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-slate-600 font-mono text-[11px]">{d.email}</td>
+                  <td className="py-3 px-4">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-xs ${
                       d.status === 'Active' 
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200/90 ring-1 ring-emerald-500/20' 
                         : 'bg-slate-100 text-slate-600 border-slate-200'
                     }`}>
                       {d.status}
@@ -636,7 +671,7 @@ export const Analytics: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };
