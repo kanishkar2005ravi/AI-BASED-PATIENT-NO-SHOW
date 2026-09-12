@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { Bell, Search, Wifi, WifiOff, Sparkles, User as UserIcon, Globe, MapPin, X, Copy, ExternalLink, Phone } from 'lucide-react';
+import { Bell, Search, Wifi, WifiOff, Sparkles, User as UserIcon, Globe, MapPin, X, Copy, ExternalLink, Phone, RotateCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { isDemoMode, callBackend } from '../../services/api';
 import { CarePilotLogo } from '../common/CarePilotLogo';
@@ -26,6 +26,14 @@ export const Header: React.FC<HeaderProps> = ({
   const [unreadCount, setUnreadCount] = useState(2);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefreshApp = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 400);
+  };
   const demoActive = isDemoMode();
 
   const hospitalAddress = "SNS Kalvi Nagar, Sathy Main Road, NH-209, Vazhiyampalayam, Saravanampatti, Coimbatore - 641048";
@@ -113,6 +121,17 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Globe className="w-4 h-4 text-teal-700 animate-spin-slow" />
           <span>{language === 'en' ? '🇬🇧 EN' : '🇮🇳 தமிழ்'}</span>
+        </button>
+
+        {/* Refresh Symbol Button to Refresh App */}
+        <button
+          onClick={handleRefreshApp}
+          className={`p-2 rounded-xl text-slate-600 hover:text-teal-600 hover:bg-teal-50 border border-slate-200/80 transition-all shadow-xs flex items-center justify-center cursor-pointer group ${
+            isRefreshing ? 'bg-teal-100 text-teal-700 border-teal-300' : ''
+          }`}
+          title="Refresh App / பக்கத்தைப் புதுப்பிக்கவும்"
+        >
+          <RotateCw className={`w-4 h-4 text-slate-600 group-hover:text-teal-600 ${isRefreshing ? 'animate-spin text-teal-600' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
         </button>
 
         {/* Notifications Icon */}

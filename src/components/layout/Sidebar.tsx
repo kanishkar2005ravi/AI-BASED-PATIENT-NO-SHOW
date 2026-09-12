@@ -16,7 +16,8 @@ import {
   Sparkles,
   ChevronRight,
   ShieldCheck,
-  Activity
+  Activity,
+  Globe
 } from 'lucide-react';
 
 import { CarePilotLogo } from '../common/CarePilotLogo';
@@ -27,7 +28,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
   const { user, logout } = useAuth();
-  const { t } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -172,6 +173,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
               <p className="text-xs font-extrabold text-white truncate leading-tight mt-0.5">{user?.name || user?.email}</p>
             </div>
           </div>
+        </div>
+
+        {/* 🌐 LEFT SIDEBAR LANGUAGE SELECTION OPTION 🌐 */}
+        <div className="px-0.5">
+          <button
+            onClick={() => setLanguage(language === 'en' ? 'ta' : 'en')}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-teal-900/40 via-slate-900/60 to-emerald-950/40 border border-teal-500/30 text-teal-200 hover:text-white hover:border-teal-400 transition-all shadow-xs group cursor-pointer"
+            title="Switch Language / மொழியை மாற்றுக"
+          >
+            <div className="flex items-center space-x-2 text-xs font-black">
+              <Globe className="w-4 h-4 text-teal-400 group-hover:rotate-180 transition-transform duration-500" />
+              <span>{language === 'en' ? '🇬🇧 English' : '🇮🇳 தமிழ்'}</span>
+            </div>
+            <span className="text-[10px] font-black uppercase bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-400/30 group-hover:bg-teal-500 group-hover:text-slate-950 transition-colors">
+              {language === 'en' ? 'தமிழ்' : 'ENG'}
+            </span>
+          </button>
         </div>
 
         {/* Navigation Sections */}
