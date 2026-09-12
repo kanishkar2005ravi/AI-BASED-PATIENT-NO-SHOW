@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Hospital, HeartPulse, ArrowRight } from 'lucide-react';
+import { Sparkles, Hospital, HeartPulse, ArrowRight, Play, Film, Radio } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 interface WelcomeSplashScreenProps {
@@ -11,10 +11,10 @@ interface WelcomeSplashScreenProps {
 export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userName, role = 'patient', onComplete }) => {
   const [progress, setProgress] = useState<number>(0);
   const [secondsLeft, setSecondsLeft] = useState<number>(3);
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
   useEffect(() => {
-    // Progress bar over 3 seconds (3000ms)
+    // 3-Second (3000ms) full-screen video progress bar
     const intervalTime = 30; // update every 30ms (100 steps total)
     const timer = setInterval(() => {
       setProgress((prev) => {
@@ -27,7 +27,7 @@ export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userNa
       });
     }, intervalTime);
 
-    // Seconds countdown indicator
+    // Countdown seconds
     const countdown = setInterval(() => {
       setSecondsLeft((prev) => {
         if (prev <= 1) {
@@ -45,80 +45,107 @@ export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userNa
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl animate-fade-in">
+    <div className="fixed inset-0 w-screen h-screen z-50 bg-slate-950 flex flex-col justify-between overflow-hidden select-none animate-fade-in">
       
-      {/* Outer 7-Color Rainbow Animated Border Container */}
-      <div className="relative w-full max-w-3xl rounded-3xl p-1 bg-gradient-to-r from-teal-400 via-emerald-400 via-cyan-400 via-blue-500 via-purple-500 via-pink-500 to-amber-400 bg-[length:200%_auto] animate-gradient-x shadow-2xl overflow-hidden">
+      {/* 🎬 FULL-SCREEN HIGH-TECH ANIMATED VIDEO / GIF BACKGROUND 🎬 */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Animated Cyber Medical GIF & Holographic Waveform Image Overlay */}
+        <img
+          src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2070&auto=format&fit=crop"
+          alt="Medical Holographic Background"
+          className="w-full h-full object-cover opacity-20 scale-105 animate-pulse"
+        />
+
+        {/* 7-Color Rainbow Neon Laser Sweep Background Layer */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-teal-950/90 via-slate-950/95 via-purple-950/90 to-rose-950/90 mix-blend-multiply" />
         
-        {/* Inner Dark Glass Card */}
-        <div className="relative bg-slate-900/95 rounded-[22px] p-8 md:p-12 text-center flex flex-col items-center justify-between min-h-[420px] overflow-hidden">
-          
-          {/* Glowing Background Orbs */}
-          <div className="absolute -top-24 -left-24 w-72 h-72 bg-teal-500/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
+        {/* Animated Floating 7-Color Gradient Orbs */}
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-teal-500/25 rounded-full blur-[120px] animate-ping duration-1000" />
+        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-500/25 rounded-full blur-[120px] animate-ping duration-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-rose-500/15 rounded-full blur-[160px] animate-pulse" />
 
-          {/* Top Institutional Badge */}
-          <div className="flex items-center space-x-2 bg-slate-950/80 px-4 py-1.5 rounded-full border border-teal-500/40 shadow-inner z-10">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-xs font-black text-teal-300 tracking-widest uppercase flex items-center gap-1.5">
-              <Hospital className="w-3.5 h-3.5 text-teal-300" /> {t('welcome.institution')}
-            </span>
-          </div>
+        {/* Full-Screen Animated ECG Heartbeat Grid Waves (SVG Video Simulation) */}
+        <svg className="absolute inset-0 w-full h-full opacity-30 stroke-teal-400" xmlns="http://www.w3.org/2000/svg">
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(20, 184, 166, 0.15)" strokeWidth="1" />
+          </pattern>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
 
-          {/* Center Animated Welcome Content */}
-          <div className="my-6 space-y-4 z-10 animate-slide-up max-w-2xl">
-            <div className="inline-flex p-4 rounded-3xl bg-gradient-to-tr from-teal-500/20 to-purple-500/20 border border-white/10 shadow-lg mb-2">
-              <HeartPulse className="w-12 h-12 text-teal-300 animate-bounce" />
-            </div>
+        {/* Laser Scanner Beam sweep across full screen */}
+        <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-teal-400 via-amber-400 to-transparent shadow-[0_0_25px_#2dd4bf] animate-bounce top-1/3" />
+      </div>
 
-            <div className="space-y-2">
-              <span className="text-xs md:text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full bg-teal-950/80 border border-teal-400/30 text-teal-300">
-                {t('welcome.portal')}
-              </span>
-              
-              <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-lg">
-                {t('welcome.title')}
-              </h1>
-              
-              <p className="text-base md:text-xl font-extrabold text-amber-300 tracking-wide">
-                {t('welcome.institution')}
-              </p>
+      {/* 🔴 TOP VIDEO PLAYER STATUS HEADER 🔴 */}
+      <div className="relative z-10 p-6 md:p-8 flex items-center justify-between w-full">
+        <div className="flex items-center space-x-3 bg-slate-900/90 px-4 py-2 rounded-full border border-teal-500/40 backdrop-blur-md shadow-lg">
+          <Radio className="w-4 h-4 text-rose-500 animate-ping" />
+          <span className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+            <span>CAREPILOT INTRO VIDEO</span>
+            <span className="bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded text-[10px] border border-rose-500/30">1080p HD</span>
+          </span>
+        </div>
 
-              {userName && (
-                <p className="text-sm md:text-base text-slate-300 font-semibold pt-2">
-                  {t('welcome.hello')}, <span className="text-white font-bold">{userName}</span> ({role === 'admin' ? 'System Administrator' : 'Patient Portal'})
-                </p>
-              )}
-            </div>
-          </div>
-
-
-          {/* Bottom 5-Second Animated Progress Bar */}
-          <div className="w-full z-10 space-y-3">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-400 px-1">
-              <span className="flex items-center gap-1 text-teal-300">
-                <Sparkles className="w-3.5 h-3.5" /> Loading Dashboard in {secondsLeft}s...
-              </span>
-              <button
-                onClick={onComplete}
-                className="text-white/70 hover:text-white flex items-center gap-1 hover:underline transition-all"
-              >
-                <span>Skip</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* 7-Color Gradient Progress Bar */}
-            <div className="h-3 w-full bg-slate-950 rounded-full overflow-hidden p-0.5 border border-white/10 shadow-inner">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-teal-400 via-emerald-400 via-cyan-400 via-indigo-400 via-purple-400 via-pink-400 to-amber-400 transition-all duration-75 ease-linear shadow-lg"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-
+        <div className="flex items-center space-x-2 bg-slate-900/80 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
+          <Film className="w-4 h-4 text-teal-300" />
+          <span className="text-xs font-extrabold text-teal-200 uppercase tracking-wider">{t('welcome.institution')}</span>
         </div>
       </div>
+
+      {/* 🌟 CENTER FULL-SCREEN CINEMATIC TITLE & ANIMATION 🌟 */}
+      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto space-y-6 animate-slide-up">
+        <div className="inline-flex p-6 rounded-full bg-gradient-to-tr from-teal-500/20 via-purple-500/20 to-pink-500/20 border-2 border-teal-400/40 shadow-[0_0_50px_rgba(45,212,191,0.4)] backdrop-blur-md animate-bounce">
+          <HeartPulse className="w-16 h-16 md:w-20 md:h-20 text-teal-300 drop-shadow-[0_0_20px_#2dd4bf]" />
+        </div>
+
+        <div className="space-y-3">
+          <div className="inline-block px-4 py-1 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 text-slate-950 font-black text-xs uppercase tracking-widest shadow-lg">
+            {t('welcome.portal')}
+          </div>
+
+          <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-200 via-amber-200 to-white tracking-tight leading-tight drop-shadow-2xl">
+            {t('welcome.title')}
+          </h1>
+
+          <p className="text-xl md:text-3xl font-black text-amber-300 tracking-wide drop-shadow-md">
+            {t('welcome.institution')}
+          </p>
+
+          {userName && (
+            <p className="text-base md:text-lg text-slate-300 font-semibold pt-2">
+              {t('welcome.hello')}, <span className="text-white font-bold">{userName}</span> ({role === 'admin' ? 'System Administrator' : 'Patient Portal'})
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* 🎬 BOTTOM FULL-SCREEN VIDEO PLAYBACK CONTROLS & TIMELINE 🎬 */}
+      <div className="relative z-10 p-6 md:p-8 w-full max-w-5xl mx-auto space-y-3">
+        <div className="flex items-center justify-between text-xs font-extrabold text-slate-300 px-2">
+          <div className="flex items-center space-x-2">
+            <Play className="w-4 h-4 text-teal-400 fill-teal-400 animate-pulse" />
+            <span className="text-teal-300 tracking-wider">PLAYING CINEMATIC INTRO ({secondsLeft}s)</span>
+          </div>
+
+          <button
+            onClick={onComplete}
+            className="flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 transition-all hover:scale-105"
+          >
+            <span>Skip Video</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* 7-COLOR SPECTRUM FULL-WIDTH VIDEO PROGRESS BAR */}
+        <div className="h-4 w-full bg-slate-900/90 rounded-full overflow-hidden p-0.5 border border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.3)]">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-teal-400 via-emerald-400 via-cyan-400 via-indigo-400 via-purple-400 via-pink-400 to-amber-400 transition-all duration-75 ease-linear shadow-lg"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
     </div>
   );
 };
+
