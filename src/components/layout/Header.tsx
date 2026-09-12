@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { Bell, Search, Wifi, WifiOff, Sparkles, User as UserIcon, Globe } from 'lucide-react';
+import { Bell, Search, Wifi, WifiOff, Sparkles, User as UserIcon, Globe, MapPin, X, Copy, ExternalLink, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { isDemoMode, callBackend } from '../../services/api';
 import { CarePilotLogo } from '../common/CarePilotLogo';
@@ -24,7 +24,17 @@ export const Header: React.FC<HeaderProps> = ({
   const navigate = useNavigate();
 
   const [unreadCount, setUnreadCount] = useState(2);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [copied, setCopied] = useState(false);
   const demoActive = isDemoMode();
+
+  const hospitalAddress = "SNS Kalvi Nagar, Sathy Main Road, NH-209, Vazhiyampalayam, Saravanampatti, Coimbatore - 641048";
+
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(hospitalAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -64,16 +74,20 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Center Title: Login CarePilot Logo Icon + SNS Medical College & Hospital (One Line) */}
+      {/* Center Title: Login CarePilot Logo Icon + SNS Medical College & Hospital (One Line - Clickable Address Modal) */}
       <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
-        <div className="inline-flex items-center space-x-2.5 px-4 py-1 rounded-2xl bg-gradient-to-r from-slate-950 via-teal-950 to-slate-900 border-2 border-teal-400/40 shadow-lg shadow-teal-500/10 hover:shadow-teal-500/20 transition-all hover:scale-105 cursor-default whitespace-nowrap">
+        <button
+          onClick={() => setShowAddressModal(true)}
+          className="inline-flex items-center space-x-2.5 px-4 py-1 rounded-2xl bg-gradient-to-r from-slate-950 via-teal-950 to-slate-900 border-2 border-teal-400/40 shadow-lg shadow-teal-500/10 hover:shadow-teal-500/30 transition-all hover:scale-105 cursor-pointer whitespace-nowrap group"
+          title="Click to view full Hospital Address & Location"
+        >
           <CarePilotLogo size="sm" showText={false} />
-          <span className="text-xs font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-white to-teal-200">
+          <span className="text-xs font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-white to-teal-200 group-hover:from-amber-200 group-hover:to-teal-100">
             {t('welcome.institution')}
           </span>
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-        </div>
-        <p className="text-base font-black text-slate-900 leading-tight mt-1.5">
+          <MapPin className="w-3.5 h-3.5 text-amber-400 group-hover:animate-bounce" />
+        </button>
+        <p className="text-base font-black text-slate-900 leading-tight mt-1">
           {title === 'Patient Dashboard' ? t('nav.dashboard') :
            title === 'Admin Dashboard' || title === 'Admin Hospital Dashboard' || title === 'Hospital Overview & AI Intelligence' ? t('nav.dashboard') :
            title === 'Book Consultation' || title === 'Book Appointment' ? t('nav.book_appointment') :
@@ -128,6 +142,88 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 📍 SNS MEDICAL COLLEGE & HOSPITAL ADDRESS MODAL 📍 */}
+      {showAddressModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in"
+          onClick={() => setShowAddressModal(false)}
+        >
+          <div
+            className="w-full max-w-lg bg-slate-900 border-2 border-teal-500/40 rounded-3xl p-6 text-white shadow-2xl space-y-5 relative overflow-hidden select-none"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Background Glow */}
+            <div className="absolute -top-20 -right-20 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center space-x-3">
+                <CarePilotLogo size="sm" showText={false} />
+                <div>
+                  <h3 className="text-base font-black text-white leading-tight">
+                    {t('welcome.institution')}
+                  </h3>
+                  <p className="text-xs font-bold text-amber-400">SNS Group of Institutions</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowAddressModal(false)}
+                className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Address Card */}
+            <div className="p-4 rounded-2xl bg-slate-950/90 border border-teal-500/30 space-y-3">
+              <div className="flex items-start space-x-3">
+                <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-400/30 flex-shrink-0 mt-0.5">
+                  <MapPin className="w-6 h-6 animate-bounce" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-black uppercase text-teal-400 tracking-wider">Official Campus Address</p>
+                  <p className="text-sm font-extrabold text-white leading-relaxed">
+                    SNS Kalvi Nagar, Sathy Main Road, NH-209, Vazhiyampalayam, Saravanampatti, Coimbatore - 641048
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-300">
+                <span className="flex items-center gap-1.5 font-bold">
+                  <Phone className="w-4 h-4 text-emerald-400" /> Helpline: 0422-2666222
+                </span>
+                <span className="bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border border-emerald-500/30">
+                  24/7 Emergency Open
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-3 pt-1">
+              <button
+                onClick={handleCopyAddress}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs flex items-center justify-center space-x-2 transition-all"
+              >
+                <Copy className="w-4 h-4 text-amber-400" />
+                <span>{copied ? 'Copied!' : 'Copy Address'}</span>
+              </button>
+
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=SNS+Kalvi+Nagar+Saravanampatti+Coimbatore"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-black text-xs flex items-center justify-center space-x-2 shadow-lg shadow-teal-500/20 transition-all hover:scale-105"
+              >
+                <span>Google Maps</span>
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
+
