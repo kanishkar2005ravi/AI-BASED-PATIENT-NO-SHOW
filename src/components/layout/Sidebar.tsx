@@ -151,7 +151,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
   const navSections = role === 'admin' ? adminNavSections : patientNavSections;
 
   return (
-    <aside className="w-56 bg-gradient-to-b from-teal-950 via-slate-950 to-slate-900 text-slate-200 min-h-screen flex flex-col justify-between p-3 hidden md:flex border-r border-teal-500/20 flex-shrink-0 relative overflow-hidden select-none">
+    <aside className="w-48 bg-gradient-to-b from-teal-950 via-slate-950 to-slate-900 text-slate-200 min-h-screen flex flex-col justify-between p-2.5 hidden md:flex border-r border-teal-500/20 flex-shrink-0 relative overflow-hidden select-none">
       {/* Top 7-Color Rainbow Neon Stripe */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 via-amber-400 via-emerald-400 via-teal-400 via-cyan-400 via-indigo-500 to-purple-600 animate-pulse" />
 
@@ -159,7 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       <div className="absolute top-20 -left-12 w-36 h-36 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
       <div className="absolute bottom-32 -right-12 w-36 h-36 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
 
-      <div className="relative z-10 space-y-4">
+      <div className="relative z-10 space-y-3">
         {/* Brand Header */}
         <div className="px-1 py-1 flex items-center justify-between">
           <CarePilotLogo size="sm" textLight={true} />
@@ -167,35 +167,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
 
         {/* Role & User Badge Banner */}
         <div className="px-0.5">
-          <div className="bg-gradient-to-r from-teal-900/50 via-slate-900/80 to-emerald-950/50 border-2 border-teal-400/80 rounded-xl p-2.5 shadow-lg shadow-teal-500/25 backdrop-blur-md animate-pulse">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-teal-500/20 flex-shrink-0">
+          <div className="bg-gradient-to-r from-teal-900/50 via-slate-900/80 to-emerald-950/50 border-2 border-teal-400/80 rounded-xl p-2 shadow-lg shadow-teal-500/25 backdrop-blur-md animate-pulse">
+            <div className="flex items-center space-x-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-teal-500/20 flex-shrink-0">
                 {user?.name ? user.name.charAt(0).toUpperCase() : 'P'}
               </div>
               <div className="overflow-hidden flex-1">
-                <span className="text-[9px] font-black uppercase tracking-wider text-teal-300 block">
+                <span className="text-[8px] font-black uppercase tracking-wider text-teal-300 block">
                   {role === 'patient' ? 'Patient Portal' : 'Hospital Admin'}
                 </span>
-                <p className="text-xs font-extrabold text-white truncate leading-tight mt-0.5">{user?.name || user?.email}</p>
+                <p className="text-[11px] font-extrabold text-white truncate leading-tight mt-0.5">{user?.name || user?.email}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Navigation Sections */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           {navSections.map((section, idx) => (
             <div key={idx} className="space-y-1">
-              <nav className="space-y-1">
+              <nav className="space-y-0.5">
                 {section.items.map(item => {
                   if ((item as any).isLogout) {
                     return (
                       <button
                         key="logout-item"
                         onClick={handleLogout}
-                        className="w-full group flex items-center justify-between px-3 py-2 rounded-lg font-bold text-xs text-rose-400 hover:text-white hover:bg-rose-950/60 hover:translate-x-1 border border-transparent hover:border-rose-900/40 transition-all duration-200 text-left"
+                        className="w-full group flex items-center justify-between px-2.5 py-1.5 rounded-lg font-bold text-xs text-rose-400 hover:text-white hover:bg-rose-950/60 hover:translate-x-1 border border-transparent hover:border-rose-900/40 transition-all duration-200 text-left"
                       >
-                        <div className="flex items-center space-x-2.5">
+                        <div className="flex items-center space-x-2">
                           <span className="flex-shrink-0 transition-transform group-hover:scale-110 text-rose-400">
                             {item.icon}
                           </span>
@@ -210,14 +210,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                       key={item.path}
                       to={item.path}
                       className={({ isActive }) =>
-                        `group flex items-center justify-between px-3 py-2 rounded-lg font-bold text-xs transition-all duration-200 ${
+                        `group flex items-center justify-between px-2.5 py-1.5 rounded-lg font-bold text-xs transition-all duration-200 ${
                           isActive
                             ? `${item.activeGradient} scale-[1.01]`
                             : 'text-slate-300 hover:text-white hover:bg-teal-900/40 hover:translate-x-1 border border-transparent'
                         }`
                       }
                     >
-                      <div className="flex items-center space-x-2.5">
+                      <div className="flex items-center space-x-2">
                         <span className="flex-shrink-0 transition-transform group-hover:scale-110">
                           {item.icon}
                         </span>
