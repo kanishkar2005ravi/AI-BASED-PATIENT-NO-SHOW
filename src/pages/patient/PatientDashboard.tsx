@@ -182,141 +182,75 @@ export const PatientDashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* 📊 ANIMATED CIRCULAR PROGRESS METRIC BOXES 📊 */}
+      {/* 📊 PATIENT PORTAL SQUARE METRIC BOXES WITH CIRCULAR ANIMATIONS 📊 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Box 1: Total Visits */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex items-center space-x-3.5 min-h-[100px] group">
-          <div className="relative w-13 h-13 flex-shrink-0 flex items-center justify-center">
-            <svg className="w-13 h-13 transform -rotate-90" viewBox="0 0 52 52">
-              <circle cx="26" cy="26" r="22" stroke="currentColor" strokeWidth="4" className="text-teal-100/80" fill="transparent" />
-              <circle
-                cx="26"
-                cy="26"
-                r="22"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeDasharray={138.2}
-                strokeDashoffset={0}
-                strokeLinecap="round"
-                className="text-teal-500 transition-all duration-1000 ease-out group-hover:scale-105"
-                fill="transparent"
-              />
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-12 h-12 flex items-center justify-center">
+            <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-teal-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={0} strokeLinecap="round" className="text-teal-500 transition-all duration-700" fill="transparent" />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-teal-600 bg-teal-50/60 rounded-full m-1 border border-teal-200/60 shadow-xs">
+            <div className="p-2.5 rounded-full bg-teal-50 text-teal-600 group-hover:scale-110 transition-transform">
               <Calendar className="w-5 h-5" />
             </div>
           </div>
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-slate-900 leading-none">{appointments.length}</p>
             <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">{t('metric.total_visits')}</p>
-            <span className="inline-block text-[9px] font-extrabold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/50">100% Tracked</span>
           </div>
         </div>
 
         {/* Box 2: Attended Visits */}
-        {(() => {
-          const attendedPct = appointments.length > 0 ? Math.round((attendedCount / appointments.length) * 100) : 100;
-          const offset = 138.2 - (138.2 * (attendedPct / 100));
-          return (
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex items-center space-x-3.5 min-h-[100px] group">
-              <div className="relative w-13 h-13 flex-shrink-0 flex items-center justify-center">
-                <svg className="w-13 h-13 transform -rotate-90" viewBox="0 0 52 52">
-                  <circle cx="26" cy="26" r="22" stroke="currentColor" strokeWidth="4" className="text-emerald-100/80" fill="transparent" />
-                  <circle
-                    cx="26"
-                    cy="26"
-                    r="22"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    strokeDasharray={138.2}
-                    strokeDashoffset={offset}
-                    strokeLinecap="round"
-                    className="text-emerald-500 transition-all duration-1000 ease-out group-hover:scale-105"
-                    fill="transparent"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-emerald-600 bg-emerald-50/60 rounded-full m-1 border border-emerald-200/60 shadow-xs">
-                  <UserCheck className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="space-y-0.5">
-                <p className="text-2xl font-black text-emerald-600 leading-none">{attendedCount}</p>
-                <p className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider">{t('metric.attended')}</p>
-                <span className="inline-block text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/50">{attendedPct}% Success Rate</span>
-              </div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-12 h-12 flex items-center justify-center">
+            <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-emerald-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={appointments.length > 0 ? 125.6 - (125.6 * (attendedCount / appointments.length)) : 0} strokeLinecap="round" className="text-emerald-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2.5 rounded-full bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform">
+              <UserCheck className="w-5 h-5" />
             </div>
-          );
-        })()}
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-emerald-600 leading-none">{attendedCount}</p>
+            <p className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider">{t('metric.attended')}</p>
+          </div>
+        </div>
 
         {/* Box 3: Missed Visits */}
-        {(() => {
-          const missedPct = appointments.length > 0 ? Math.round((noShowCount / appointments.length) * 100) : 0;
-          const offset = 138.2 - (138.2 * (missedPct / 100));
-          return (
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex items-center space-x-3.5 min-h-[100px] group">
-              <div className="relative w-13 h-13 flex-shrink-0 flex items-center justify-center">
-                <svg className="w-13 h-13 transform -rotate-90" viewBox="0 0 52 52">
-                  <circle cx="26" cy="26" r="22" stroke="currentColor" strokeWidth="4" className="text-rose-100/80" fill="transparent" />
-                  <circle
-                    cx="26"
-                    cy="26"
-                    r="22"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    strokeDasharray={138.2}
-                    strokeDashoffset={offset}
-                    strokeLinecap="round"
-                    className="text-rose-500 transition-all duration-1000 ease-out group-hover:scale-105"
-                    fill="transparent"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-rose-600 bg-rose-50/60 rounded-full m-1 border border-rose-200/60 shadow-xs">
-                  <AlertCircle className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="space-y-0.5">
-                <p className="text-2xl font-black text-rose-600 leading-none">{noShowCount}</p>
-                <p className="text-[11px] font-bold text-rose-900 uppercase tracking-wider">{t('metric.missed')}</p>
-                <span className="inline-block text-[9px] font-extrabold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/50">{missedPct}% Missed Rate</span>
-              </div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-12 h-12 flex items-center justify-center">
+            <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-rose-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={appointments.length > 0 ? 125.6 - (125.6 * (noShowCount / appointments.length)) : 125.6} strokeLinecap="round" className="text-rose-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2.5 rounded-full bg-rose-50 text-rose-600 group-hover:scale-110 transition-transform">
+              <AlertCircle className="w-5 h-5" />
             </div>
-          );
-        })()}
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-rose-600 leading-none">{noShowCount}</p>
+            <p className="text-[11px] font-bold text-rose-900 uppercase tracking-wider">{t('metric.missed')}</p>
+          </div>
+        </div>
 
         {/* Box 4: Waitlist Requests */}
-        {(() => {
-          const waitlistPct = waitlist.length > 0 ? 100 : 15;
-          const offset = 138.2 - (138.2 * (waitlistPct / 100));
-          return (
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex items-center space-x-3.5 min-h-[100px] group">
-              <div className="relative w-13 h-13 flex-shrink-0 flex items-center justify-center">
-                <svg className="w-13 h-13 transform -rotate-90 animate-spin-slow" viewBox="0 0 52 52">
-                  <circle cx="26" cy="26" r="22" stroke="currentColor" strokeWidth="4" className="text-purple-100/80" fill="transparent" />
-                  <circle
-                    cx="26"
-                    cy="26"
-                    r="22"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    strokeDasharray={138.2}
-                    strokeDashoffset={offset}
-                    strokeLinecap="round"
-                    className="text-purple-500 transition-all duration-1000 ease-out group-hover:scale-105"
-                    fill="transparent"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-purple-600 bg-purple-50/60 rounded-full m-1 border border-purple-200/60 shadow-xs">
-                  <Clock className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="space-y-0.5">
-                <p className="text-2xl font-black text-purple-600 leading-none">{waitlist.length}</p>
-                <p className="text-[11px] font-bold text-purple-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
-                <span className="inline-block text-[9px] font-extrabold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200/50">{waitlist.length > 0 ? 'Active Queue' : 'Queue Idle'}</span>
-              </div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-12 h-12 flex items-center justify-center">
+            <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-purple-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={waitlist.length > 0 ? 0 : 90} strokeLinecap="round" className="text-purple-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2.5 rounded-full bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform">
+              <Clock className="w-5 h-5" />
             </div>
-          );
-        })()}
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-purple-600 leading-none">{waitlist.length}</p>
+            <p className="text-[11px] font-bold text-purple-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
+          </div>
+        </div>
       </div>
 
       {/* 🎟️ HERO FEATURED MEDICAL BOARDING PASS (NEXT APPOINTMENT) 🎟️ */}
