@@ -399,54 +399,24 @@ export const PatientDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* 🔔 HOSPITAL ALERTS & WAITLIST NOTICES 🔔 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card title="Hospital Alerts & Notices">
-          {notifications.length === 0 ? (
-            <p className="text-xs text-slate-500 text-center py-4">No new notifications.</p>
-          ) : (
-            <div className="space-y-3">
-              {notifications.map(n => (
-                <div key={n.id} className="p-3.5 rounded-2xl bg-teal-50/50 border border-teal-200/80 text-xs space-y-1">
-                  <p className="font-bold text-teal-950 flex items-center gap-1.5">
-                    <Bell className="w-3.5 h-3.5 text-teal-600" /> {n.title}
-                  </p>
-                  <p className="text-teal-800 font-medium leading-relaxed">{n.message}</p>
+      {/* 🔔 ACTIVE WAITLIST POSITION (IF ANY) 🔔 */}
+      {waitlist.length > 0 && (
+        <Card title="Active Waitlist Position">
+          <div className="space-y-2">
+            {waitlist.map(w => (
+              <div key={w.id} className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-xs flex justify-between items-center">
+                <div>
+                  <p className="font-extrabold text-purple-950">{w.doctorName}</p>
+                  <p className="text-purple-700 font-medium">{w.requestedDate}</p>
                 </div>
-              ))}
-            </div>
-          )}
+                <Badge variant="purple" size="md">
+                  Pos #{w.position}
+                </Badge>
+              </div>
+            ))}
+          </div>
         </Card>
-
-        {waitlist.length > 0 ? (
-          <Card title="Active Waitlist Position">
-            <div className="space-y-2">
-              {waitlist.map(w => (
-                <div key={w.id} className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-xs flex justify-between items-center">
-                  <div>
-                    <p className="font-extrabold text-purple-950">{w.doctorName}</p>
-                    <p className="text-purple-700 font-medium">{w.requestedDate}</p>
-                  </div>
-                  <Badge variant="purple" size="md">
-                    Pos #{w.position}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </Card>
-        ) : (
-          <Card title="SNS Healthcare Services">
-            <div className="p-2 text-xs text-slate-600 space-y-2">
-              <p className="font-bold text-slate-800 flex items-center gap-2">
-                <Hospital className="w-4 h-4 text-teal-600" /> 24/7 Outpatient & Emergency Support
-              </p>
-              <p className="text-slate-500 font-medium leading-relaxed">
-                Book appointments or join waitlists anytime. Use the square action cards above to view all faculty doctors or review past appointment details.
-              </p>
-            </div>
-          </Card>
-        )}
-      </div>
+      )}
 
       {/* 🩺 ALL FACULTY PHYSICIANS MODAL 🩺 */}
       {showAllDoctorsModal && (
