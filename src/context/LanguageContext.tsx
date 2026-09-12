@@ -132,6 +132,7 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.exp_years': 'Years Exp.',
     'dashboard.emergency_title': 'Urgent Care & Priority Consultation',
     'dashboard.emergency_desc': 'If regular slots are unavailable, request an urgent priority consultation with on-call faculty specialists.',
+    'dashboard.emergency_button': 'Request Urgent Care',
     // Guidelines 6 Cards Keys
     'guidelines.card1_title': '⏰ Reporting Time & Identity Verification',
     'guidelines.card1_desc': 'Please report to reception 15 mins prior to your scheduled slot. Present your Patient ID or registered phone number.',
@@ -293,7 +294,7 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.exp_years': 'ஆண்டுகள் அனுபவம்',
     'dashboard.emergency_title': 'உடனடி பராமரிப்பு & முன்னுரிமை ஆலோசனை',
     'dashboard.emergency_desc': 'வழக்கமான நேரங்கள் கிடைக்கவில்லை என்றால், அவசர பராமரிப்பிற்கான சிறப்பு மருத்துவரை உடனடியாக கோரலாம்.',
-    'dashboard.emergency_button': 'முன்னுரிமை இடத்தை கோருக ⚡',
+    'dashboard.emergency_button': 'உடனடி பராமரிப்பு பெறுக ⚡',
 
     // Guidelines 6 Cards Keys
     'guidelines.card1_title': '⏰ வருகை நேரம் & நோயாளி அடையாளச் சரிபார்ப்பு',
