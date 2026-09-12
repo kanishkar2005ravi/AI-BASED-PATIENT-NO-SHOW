@@ -19,21 +19,6 @@ import {
   AlertTriangle,
   AlertCircle
 } from 'lucide-react';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  Legend
-} from 'recharts';
 import { AIRiskBadge } from '../../components/ai/AIRiskBadge';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
@@ -171,12 +156,6 @@ export const AdminDashboard: React.FC = () => {
       </div>
     );
   }
-
-  const riskPieData = [
-    { name: 'Low Risk', value: analytics.lowRiskCount, color: '#10b981' },
-    { name: 'Medium Risk', value: analytics.mediumRiskCount, color: '#f59e0b' },
-    { name: 'High Risk', value: analytics.highRiskCount, color: '#f43f5e' }
-  ];
 
   return (
     <div className="space-y-6 pb-12">
@@ -533,46 +512,6 @@ export const AdminDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Row 4: Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Appointment Attendance & No-Show Trends" subtitle="Historical breakdown over selected period">
-          <div className="h-72 w-full mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={[
-                { name: 'Mon', attended: 18, noshow: 2, cancelled: 1 },
-                { name: 'Tue', attended: 22, noshow: 1, cancelled: 2 },
-                { name: 'Wed', attended: 25, noshow: 3, cancelled: 1 },
-                { name: 'Thu', attended: 20, noshow: 2, cancelled: 0 },
-                { name: 'Fri', attended: 28, noshow: 1, cancelled: 2 },
-                { name: 'Sat', attended: 15, noshow: 4, cancelled: 3 }
-              ]}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
-                <YAxis stroke="#94a3b8" fontSize={12} />
-                <Tooltip />
-                <Area type="monotone" dataKey="attended" stackId="1" stroke="#0d9488" fill="#0d9488" fillOpacity={0.2} />
-                <Area type="monotone" dataKey="noshow" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        <Card title="AI Predictive Risk Classification" subtitle="Patient risk distribution breakdown">
-          <div className="h-72 w-full mt-4 flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={riskPieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
-                  {riskPieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-      </div>
     </div>
   );
 };
