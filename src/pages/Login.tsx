@@ -59,29 +59,45 @@ export const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden selection:bg-teal-500 selection:text-white">
-      {/* Dynamic Animated Circle Line Orbits (Patient Dashboard Aesthetic) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none opacity-40">
-        <svg className="w-full h-full animate-spin-slow" viewBox="0 0 700 700" fill="none">
-          <circle cx="350" cy="350" r="320" stroke="url(#circle-grad-1)" strokeWidth="2" strokeDasharray="12 16" />
-          <circle cx="350" cy="350" r="260" stroke="url(#circle-grad-2)" strokeWidth="1.5" strokeDasharray="8 12" />
+      {/* Dynamic Animated Cross-Rotating Oval Orbits (Patient Dashboard & Atomic Design) */}
+      {/* Oval Orbit 1 (Tilted -35deg, Rotating Clockwise) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[480px] pointer-events-none opacity-45 -rotate-[35deg] animate-oval-glow">
+        <svg className="w-full h-full animate-spin-slow" viewBox="0 0 850 480" fill="none">
+          <ellipse cx="425" cy="240" rx="400" ry="210" stroke="url(#oval-grad-1)" strokeWidth="2.5" strokeDasharray="18 14" />
+          <ellipse cx="425" cy="240" rx="330" ry="170" stroke="url(#oval-grad-2)" strokeWidth="1.5" strokeDasharray="10 12" />
           <defs>
-            <linearGradient id="circle-grad-1" x1="0" y1="0" x2="700" y2="700">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.8" />
-              <stop offset="50%" stopColor="#0d9488" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.8" />
+            <linearGradient id="oval-grad-1" x1="0" y1="0" x2="850" y2="480">
+              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.9" />
+              <stop offset="50%" stopColor="#0d9488" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.9" />
             </linearGradient>
-            <linearGradient id="circle-grad-2" x1="700" y1="0" x2="0" y2="700">
-              <stop offset="0%" stopColor="#0d9488" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.6" />
+            <linearGradient id="oval-grad-2" x1="850" y1="0" x2="0" y2="480">
+              <stop offset="0%" stopColor="#0d9488" stopOpacity="0.7" />
+              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.7" />
             </linearGradient>
           </defs>
         </svg>
       </div>
 
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] pointer-events-none opacity-30">
-        <svg className="w-full h-full animate-spin-reverse" viewBox="0 0 500 500" fill="none">
-          <circle cx="250" cy="250" r="220" stroke="#0d9488" strokeWidth="2" strokeDasharray="20 15" strokeLinecap="round" />
-          <circle cx="250" cy="250" r="170" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="6 10" />
+      {/* Oval Orbit 2 (Crossly Tilted +45deg, Rotating Counter-Clockwise) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[440px] pointer-events-none opacity-40 rotate-[45deg] animate-oval-glow">
+        <svg className="w-full h-full animate-spin-reverse" viewBox="0 0 800 440" fill="none">
+          <ellipse cx="400" cy="220" rx="370" ry="190" stroke="url(#oval-grad-3)" strokeWidth="2.5" strokeDasharray="22 16" strokeLinecap="round" />
+          <ellipse cx="400" cy="220" rx="290" ry="140" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="8 10" />
+          <defs>
+            <linearGradient id="oval-grad-3" x1="0" y1="440" x2="800" y2="0">
+              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.8" />
+              <stop offset="50%" stopColor="#0d9488" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.8" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      {/* Oval Orbit 3 (Third Cross Angle -75deg, Rotating Clockwise) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[380px] pointer-events-none opacity-30 -rotate-[75deg]">
+        <svg className="w-full h-full animate-spin-slow" viewBox="0 0 720 380" fill="none">
+          <ellipse cx="360" cy="190" rx="340" ry="160" stroke="#0d9488" strokeWidth="2" strokeDasharray="14 12" />
         </svg>
       </div>
 

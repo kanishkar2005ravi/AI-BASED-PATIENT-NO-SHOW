@@ -78,3 +78,20 @@
   animation: circle-pulse 4s ease-in-out infinite;
 }
 
+/* Cross-rotating Oval Keyframes */
+@keyframes oval-pulse-glow {
+  0%, 100% {
+    opacity: 0.35;
+    filter: drop-shadow(0 0 8px rgba(13, 148, 136, 0.4));
+  }
+  50% {
+    opacity: 0.65;
+    filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.6));
+  }
+}
+
+.animate-oval-glow {
+  animation: oval-pulse-glow 5s ease-in-out infinite;
+}
+
+
