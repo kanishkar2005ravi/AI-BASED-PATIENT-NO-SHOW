@@ -114,63 +114,16 @@ export const Waitlist: React.FC = () => {
         </button>
       </div>
 
-      {/* 📋 VIBRANT GOLDEN YELLOW WAITLIST ADVISORY NOTE 📋 */}
-      <div className="p-6 md:p-7 rounded-3xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-400 shadow-xl shadow-amber-500/10 space-y-4 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-300/30 rounded-full blur-xl pointer-events-none" />
-
-        <div className="flex items-center justify-between relative z-10 border-b border-amber-300/80 pb-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-slate-950 font-black flex items-center justify-center shadow-md text-base flex-shrink-0">
-              📋
-            </div>
-            <div>
-              <h4 className="text-base font-extrabold text-amber-950 flex items-center gap-2">
-                <span>CarePilot SNS Waitlist Guidelines & Patient Alerts</span>
-              </h4>
-              <p className="text-xs text-amber-900 font-semibold">Real-Time Slot Reallocation & Instant Multi-Channel Alerts</p>
-            </div>
-          </div>
-          <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-500 text-slate-950 shadow-sm border border-amber-600/30 tracking-wider">
-            Note
-          </span>
+      {/* 📋 SIMPLE 2-LINE GOLDEN YELLOW WAITLIST NOTE 📋 */}
+      <div className="p-4 md:p-5 rounded-2xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border border-amber-300/80 shadow-md flex items-start space-x-3.5">
+        <div className="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider flex-shrink-0 shadow-xs mt-0.5">
+          NOTE
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-slate-800 font-medium relative z-10">
-          <div className="p-3.5 rounded-2xl bg-white/90 border border-amber-300 shadow-xs space-y-1">
-            <p className="font-extrabold text-amber-950 flex items-center gap-1.5 text-xs">
-              <span>🔄 Real-Time Waitlist Slot Recovery</span>
-            </p>
-            <p className="text-slate-700 leading-relaxed text-[11px]">
-              When another patient cancels an appointment, the system automatically dispatches an instant notification to the highest-priority waitlisted patient to claim the slot.
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-white/90 border border-blue-300 shadow-xs space-y-1">
-            <p className="font-extrabold text-blue-950 flex items-center gap-1.5 text-xs">
-              <span>📞 Phone Call-In Booking Helpline (1st Come, 1st Serve)</span>
-            </p>
-            <p className="text-slate-700 leading-relaxed text-[11px]">
-              For non-smartphone users without app access, call helpline (<strong className="text-blue-950">+91 422 2661100</strong>) to reserve limited daily slots on a strict First-Come, First-Served priority.
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-white/90 border border-emerald-300 shadow-xs space-y-1">
-            <p className="font-extrabold text-emerald-950 flex items-center gap-1.5 text-xs">
-              <span>📩 Instant Multi-Channel Alerts (Gmail & WhatsApp)</span>
-            </p>
-            <p className="text-slate-700 leading-relaxed text-[11px]">
-              Automated notifications sent via Gmail (<strong className="text-emerald-950">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong className="text-emerald-950">+91 8300096676</strong>) for Account Signup, Slot Booking, Cancellation, Rescheduling & Waitlist Confirmations.
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-white/90 border border-rose-300 shadow-xs space-y-1">
-            <p className="font-extrabold text-rose-950 flex items-center gap-1.5 text-xs">
-              <span>⚡ 24/7 Emergency & Casualty Helpline</span>
-            </p>
-            <p className="text-slate-700 leading-relaxed text-[11px]">
-              For acute emergencies, visit our Casualty Unit directly or call Emergency Helpline (<strong className="text-rose-950">0422-2666222</strong>).
-            </p>
-          </div>
+        <div className="text-xs text-amber-950 font-medium leading-relaxed">
+          <p className="font-extrabold text-amber-950 text-sm mb-0.5">How Waitlist Auto-Recovery Works:</p>
+          <p className="text-amber-900 text-xs">
+            If your preferred physician is fully booked, join the waitlist. When another patient cancels an appointment, the system automatically alerts you via Gmail (<strong className="text-amber-950">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong className="text-amber-950">+91 8300096676</strong>) in real time to claim the recovered slot!
+          </p>
         </div>
       </div>
 
