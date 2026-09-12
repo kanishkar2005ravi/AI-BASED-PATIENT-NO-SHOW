@@ -58,11 +58,12 @@ export const AdminDashboard: React.FC = () => {
     todayAppointments: 0,
     todayCancelled: 0,
     todayRescheduled: 0,
+    todayMissed: 0,
     waitlistCount: 0,
     acceptedWaitlistCount: 0
   });
 
-  const getFilteredMetricLabel = (type: 'appointments' | 'cancelled' | 'rescheduled') => {
+  const getFilteredMetricLabel = (type: 'appointments' | 'cancelled' | 'rescheduled' | 'missed') => {
     if (dateRange === 'yesterday') return t(`metric.yesterdays_${type}`);
     if (dateRange === 'custom') return t(`metric.custom_${type}`);
     if (dateRange === '7days') return t(`metric.7days_${type}`);
@@ -121,8 +122,9 @@ export const AdminDashboard: React.FC = () => {
           totalMissed: aptsList.filter(a => a.status === 'NO_SHOW').length,
           activeDoctors: docsList.filter(d => d.status === 'Active').length || docsList.length || 4,
           todayAppointments: dateFilteredApts.length,
-          todayCancelled: dateFilteredApts.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length,
+          todayCancelled: dateFilteredApts.filter(a => a.status === 'CANCELLED').length,
           todayRescheduled: dateFilteredApts.filter(a => a.status === 'RESCHEDULED').length,
+          todayMissed: dateFilteredApts.filter(a => a.status === 'NO_SHOW').length,
           waitlistCount: waitList.length,
           acceptedWaitlistCount: waitList.filter(w => w.status === 'ACCEPTED').length
         };
@@ -363,8 +365,8 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* 🌟 BOTTOM SECTION: TODAY'S & ACTIVE METRICS (BELOW HOSPITAL OVERVIEW) 🌟 */}
-      {/* 6-Box Single Horizontal Row with Patient Dashboard Style SVG Progress Circles */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      {/* 7-Box Horizontal Row with Patient Dashboard Style SVG Progress Circles */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         {/* Box 1: Active Doctors */}
         <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
@@ -434,19 +436,19 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Box 5: Waitlist */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
-              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-purple-100" fill="transparent" />
-              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={0} strokeLinecap="round" className="text-purple-500 transition-all duration-700" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-amber-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={0} strokeLinecap="round" className="text-amber-500 transition-all duration-700" fill="transparent" />
             </svg>
-            <div className="p-2 rounded-full bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform">
+            <div className="p-2 rounded-full bg-amber-50 text-amber-600 group-hover:scale-110 transition-transform">
               <Clock className="w-4 h-4" />
             </div>
           </div>
           <div className="space-y-0.5">
-            <p className="text-2xl font-black text-purple-600 leading-none">{metrics.waitlistCount}</p>
-            <p className="text-[10px] font-extrabold text-purple-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
+            <p className="text-2xl font-black text-amber-600 leading-none">{metrics.waitlistCount}</p>
+            <p className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
           </div>
         </div>
 
@@ -464,6 +466,23 @@ export const AdminDashboard: React.FC = () => {
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-indigo-600 leading-none">{metrics.acceptedWaitlistCount}</p>
             <p className="text-[10px] font-extrabold text-indigo-900 uppercase tracking-wider">{t('metric.accepted_waitlist')}</p>
+          </div>
+        </div>
+
+        {/* Box 7: Missed / No-Show Absences */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group col-span-2 sm:col-span-1">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-purple-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={metrics.todayAppointments > 0 ? 125.6 - (125.6 * (metrics.todayMissed / metrics.todayAppointments)) : 125.6} strokeLinecap="round" className="text-purple-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2 rounded-full bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform">
+              <AlertCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-purple-600 leading-none">{metrics.todayMissed}</p>
+            <p className="text-[10px] font-extrabold text-purple-900 uppercase tracking-wider">{getFilteredMetricLabel('missed')}</p>
           </div>
         </div>
       </div>
