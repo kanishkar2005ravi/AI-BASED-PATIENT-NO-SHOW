@@ -16,7 +16,6 @@ export const Patients: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'Active' | 'Inactive'>('ALL');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -48,11 +47,8 @@ export const Patients: React.FC = () => {
           p.phone.includes(q)
       );
     }
-    if (statusFilter !== 'ALL') {
-      result = result.filter(p => p.status === statusFilter);
-    }
     setFilteredPatients(result);
-  }, [searchQuery, statusFilter, patients]);
+  }, [searchQuery, patients]);
 
   const handleToggleStatus = async (patient: Patient) => {
     const actionName = patient.status === 'Active' ? 'DEACTIVATE_PATIENT' : 'ACTIVATE_PATIENT';
@@ -89,36 +85,9 @@ export const Patients: React.FC = () => {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-2">
-          <button
-            onClick={() => setStatusFilter('ALL')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
-              statusFilter === 'ALL'
-                ? 'bg-gradient-to-r from-amber-500 via-rose-500 to-teal-500 text-white shadow-sm'
-                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-            }`}
-          >
-            All Patients ({patients.length})
-          </button>
-          <button
-            onClick={() => setStatusFilter('Active')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
-              statusFilter === 'Active'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-sm'
-                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-            }`}
-          >
-            Active ({patients.filter(p => p.status === 'Active').length})
-          </button>
-          <button
-            onClick={() => setStatusFilter('Inactive')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
-              statusFilter === 'Inactive'
-                ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-sm'
-                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-            }`}
-          >
-            Inactive ({patients.filter(p => p.status === 'Inactive').length})
-          </button>
+          <span className="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 via-rose-500 to-teal-500 text-white shadow-sm">
+            Total Patients ({patients.length})
+          </span>
         </div>
 
         <Button
@@ -136,7 +105,7 @@ export const Patients: React.FC = () => {
         ) : filteredPatients.length === 0 ? (
           <EmptyState
             title="No Patients Found"
-            description="No patient accounts match your current search query or filter."
+            description="No patient accounts match your current search query."
             actionLabel="Create Patient"
             onAction={() => navigate('/admin/patients/create')}
           />
@@ -148,7 +117,6 @@ export const Patients: React.FC = () => {
                   <th className="py-3 px-4">Patient ID</th>
                   <th className="py-3 px-4">Name & Email</th>
                   <th className="py-3 px-4">Phone</th>
-                  <th className="py-3 px-4">Account Status</th>
                   <th className="py-3 px-4 text-center">Attended Visits</th>
                   <th className="py-3 px-4 text-center">Not Attended (No-Show)</th>
                   <th className="py-3 px-4 text-center">AI Risk Level</th>
@@ -166,11 +134,6 @@ export const Patients: React.FC = () => {
                         <p className="text-xs text-slate-500">{pat.email}</p>
                       </td>
                       <td className="py-3.5 px-4 text-slate-600 text-xs font-mono">{pat.phone}</td>
-                      <td className="py-3.5 px-4">
-                        <Badge variant={pat.status === 'Active' ? 'success' : 'danger'} size="sm">
-                          {pat.status}
-                        </Badge>
-                      </td>
                       <td className="py-3.5 px-4 text-center">
                         <span className="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
                           🟢 {pat.attendedAppointments || 0} Attended
@@ -206,17 +169,6 @@ export const Patients: React.FC = () => {
                             title="View Details"
                           >
                             <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleToggleStatus(pat)}
-                            className={`p-1.5 rounded-lg transition-colors ${
-                              pat.status === 'Active'
-                                ? 'text-slate-500 hover:text-amber-600 hover:bg-amber-50'
-                                : 'text-slate-500 hover:text-emerald-600 hover:bg-emerald-50'
-                            }`}
-                            title={pat.status === 'Active' ? 'Deactivate Patient' : 'Activate Patient'}
-                          >
-                            {pat.status === 'Active' ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
                           </button>
                           <button
                             onClick={() => handleDeletePatient(pat)}

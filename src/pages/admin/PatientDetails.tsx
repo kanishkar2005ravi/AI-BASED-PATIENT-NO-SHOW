@@ -87,11 +87,6 @@ export const PatientDetails: React.FC = () => {
             <p className="text-xs font-mono font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full mt-1">
               ID: {patient.id}
             </p>
-            <div className="mt-3">
-              <Badge variant={patient.status === 'Active' ? 'success' : 'danger'}>
-                {patient.status} Patient Account
-              </Badge>
-            </div>
           </div>
 
           <div className="space-y-3 text-xs text-slate-700">
