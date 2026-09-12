@@ -416,6 +416,21 @@ export const PatientDashboard: React.FC = () => {
               </div>
             </div>
 
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200/80 flex items-center justify-between">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black flex-shrink-0 text-sm">
+                  📞
+                </div>
+                <div>
+                  <p className="font-extrabold text-slate-900 text-xs">Phone Call Booking Helpline</p>
+                  <p className="text-blue-800 text-[11px] font-bold">+91 422 2661100 • Limited Call-In Slots</p>
+                </div>
+              </div>
+              <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-blue-600 text-white shadow-xs">
+                1st Come 1st Serve
+              </span>
+            </div>
+
             <div className="grid grid-cols-2 gap-2.5 font-bold">
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center space-x-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
@@ -440,36 +455,75 @@ export const PatientDashboard: React.FC = () => {
         {/* Card 2: Platform App Features */}
         <Card title="CarePilot Platform App Features">
           <div className="space-y-3 text-xs">
-            <div className="p-3 rounded-2xl bg-amber-50/60 border border-amber-200/70 flex items-start space-x-3">
+            <div className="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-start space-x-3">
+              <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
+                📩
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="font-extrabold text-slate-900 text-xs">Instant Gmail & WhatsApp Alerts</p>
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-200 text-emerald-900">Live</span>
+                </div>
+                <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
+                  Receive instant notifications via Email & WhatsApp for Account Creation, Slot Booking, Cancellations, Rescheduling & Waitlist Confirmations.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-blue-50/70 border border-blue-200/80 flex items-start space-x-3">
+              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
+                📞
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="font-extrabold text-slate-900 text-xs">Phone Call Booking (Limited Slots)</p>
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-blue-200 text-blue-900">1st Priority</span>
+                </div>
+                <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
+                  Telephone booking helpline for non-smartphone users with reserved limited slots assigned on a strict First Come, First Served priority.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-start space-x-3">
               <div className="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
                 🤖
               </div>
-              <div>
-                <p className="font-extrabold text-slate-900 text-xs">AI No-Show Risk Analytics</p>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="font-extrabold text-slate-900 text-xs">AI No-Show Risk Prediction</p>
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-200 text-amber-900">XGBoost</span>
+                </div>
                 <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
                   Machine learning model analyzes attendance probability to optimize schedule slotting & dispatch smart pre-visit reminders.
                 </p>
               </div>
             </div>
 
-            <div className="p-3 rounded-2xl bg-teal-50/60 border border-teal-200/70 flex items-start space-x-3">
-              <div className="w-8 h-8 rounded-xl bg-teal-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
+            <div className="p-3 rounded-2xl bg-rose-50/70 border border-rose-200/80 flex items-start space-x-3">
+              <div className="w-8 h-8 rounded-xl bg-rose-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
                 ⚡
               </div>
-              <div>
-                <p className="font-extrabold text-slate-900 text-xs">Same-Day Priority Booking</p>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="font-extrabold text-slate-900 text-xs">Urgent Priority Faculty Consults</p>
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-rose-200 text-rose-900">Admin Verified</span>
+                </div>
                 <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
-                  Request urgent faculty specialist consultations when regular slots are full with instant admin verification.
+                  Request urgent faculty specialist consultations when regular slots are full with instant admin verification & confirmation.
                 </p>
               </div>
             </div>
 
-            <div className="p-3 rounded-2xl bg-purple-50/60 border border-purple-200/70 flex items-start space-x-3">
+            <div className="p-3 rounded-2xl bg-purple-50/70 border border-purple-200/80 flex items-start space-x-3">
               <div className="w-8 h-8 rounded-xl bg-purple-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
                 🔄
               </div>
-              <div>
-                <p className="font-extrabold text-slate-900 text-xs">Smart Auto-Fill Waitlist Queue</p>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <p className="font-extrabold text-slate-900 text-xs">Smart Auto-Fill Waitlist Queue</p>
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-purple-200 text-purple-900">Real-Time</span>
+                </div>
                 <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
                   Automatically reallocates cancelled appointment slots to highest-priority waitlisted patients in real time.
                 </p>
