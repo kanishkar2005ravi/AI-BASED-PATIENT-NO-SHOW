@@ -456,18 +456,18 @@ export const PatientDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* 🏥 CAREPILOT SNS GUIDE INTERACTIVE TRIGGER BANNER 🏥 */}
+      {/* 🏥 CAREPILOT SNS GUIDELINES INTERACTIVE BANNER 🏥 */}
       <div
         onClick={() => setShowGuideNote(!showGuideNote)}
-        className="p-4 md:p-5 rounded-3xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-400 shadow-xl shadow-amber-500/10 hover:shadow-2xl hover:scale-[1.005] transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-4 group"
+        className="p-4 md:p-5 rounded-3xl bg-amber-100/90 border-2 border-amber-300 shadow-md hover:shadow-lg transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-4 group"
       >
         <div className="flex items-center space-x-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 font-black flex items-center justify-center shadow-md text-xl flex-shrink-0 group-hover:scale-105 transition-transform">
-            📋
+          <div className="w-11 h-11 rounded-2xl bg-amber-400 text-amber-950 font-black flex items-center justify-center text-xl flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+            📝
           </div>
           <div>
             <h4 className="text-sm md:text-base font-black text-amber-950 flex items-center gap-2 group-hover:text-amber-900 transition-colors">
-              <span>CarePilot SNS Guide: Hospital Advisory & Platform Features</span>
+              <span>CarePilot SNS Guidelines & Patient Note</span>
             </h4>
             <p className="text-xs text-amber-900 font-medium mt-0.5">
               Gmail & WhatsApp Alerts (+91 8300096676), Helpline, 24/7 Casualty & Auto-Waitlist Details
@@ -475,32 +475,25 @@ export const PatientDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
-          <span>{showGuideNote ? 'Close Guide' : 'Touch / Click to View Guide'}</span>
-          <ChevronRight className={`w-4 h-4 text-slate-950 transition-transform ${showGuideNote ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
+        <div className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs transition-all shadow-xs flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
+          <span>{showGuideNote ? 'Close Guidelines' : 'Touch to View Guidelines'}</span>
+          <ChevronRight className={`w-4 h-4 text-amber-950 transition-transform ${showGuideNote ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
         </div>
       </div>
 
-      {/* 📋 EXPANDABLE GOLDEN YELLOW CAREPILOT SNS ADVISORY NOTE 📋 */}
+      {/* 📋 SIMPLE GOLDEN YELLOW CAREPILOT SNS GUIDELINES NOTE 📋 */}
       {showGuideNote && (
-        <div className="p-6 md:p-7 rounded-3xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-400 shadow-xl shadow-amber-500/10 space-y-4 relative overflow-hidden animate-fade-in">
-          {/* Top Decorative Yellow Tag */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-300/30 rounded-full blur-xl pointer-events-none" />
-
+        <div className="p-6 rounded-3xl bg-yellow-100/90 border-2 border-amber-300 shadow-lg space-y-4 relative overflow-hidden animate-fade-in">
           <div className="flex items-center justify-between relative z-10 border-b border-amber-300/80 pb-3">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500 text-slate-950 font-black flex items-center justify-center shadow-md text-base flex-shrink-0">
-                📋
-              </div>
+              <span className="text-2xl">📌</span>
               <div>
-                <h4 className="text-base font-extrabold text-amber-950 flex items-center gap-2">
-                  <span>CarePilot SNS - Important Hospital Advisory & Platform Features</span>
-                </h4>
+                <h4 className="text-base font-extrabold text-amber-950">CarePilot SNS - Important Hospital Advisory & Guidelines</h4>
                 <p className="text-xs text-amber-900 font-semibold">CarePilot SNS 24/7 Healthcare Support & Multi-Channel Patient Alerts</p>
               </div>
             </div>
-            <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-500 text-slate-950 shadow-sm border border-amber-600/30 tracking-wider">
-              Note
+            <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-400 text-amber-950 shadow-xs border border-amber-500/30 tracking-wider">
+              NOTE
             </span>
           </div>
 
