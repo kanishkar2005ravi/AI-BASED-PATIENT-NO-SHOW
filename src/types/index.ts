@@ -14,7 +14,11 @@ export interface Patient {
   name: string;
   email: string;
   password?: string;
-  phone: string;
+  phone: string; // Smartphone / Mobile Contact
+  basicPhone?: string; // Contact No. for Non-Smartphone / Feature Phone Users
+  whatsappPhone?: string; // WhatsApp Number
+  emergencyPhone?: string; // Emergency Contact Phone Number
+  emergencyContactName?: string; // Emergency Contact Guardian / Relative Name
   dateOfBirth: string;
   gender: 'Male' | 'Female' | 'Other';
   address: string;

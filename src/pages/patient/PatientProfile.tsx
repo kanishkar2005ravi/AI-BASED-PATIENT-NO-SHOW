@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { callBackend } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Patient } from '../../types';
-import { Phone, MapPin, Save, ArrowLeft } from 'lucide-react';
+import { Phone, MapPin, Save, ArrowLeft, MessageSquare, PhoneCall, Smartphone, ShieldAlert } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -24,6 +24,10 @@ export const PatientProfile: React.FC = () => {
 
   // Editable fields permitted for patient self-update
   const [phone, setPhone] = useState('');
+  const [basicPhone, setBasicPhone] = useState('');
+  const [whatsappPhone, setWhatsappPhone] = useState('');
+  const [emergencyContactName, setEmergencyContactName] = useState('');
+  const [emergencyPhone, setEmergencyPhone] = useState('');
   const [address, setAddress] = useState('');
 
   useEffect(() => {
@@ -34,6 +38,10 @@ export const PatientProfile: React.FC = () => {
         if (res.success && res.data) {
           setPatient(res.data);
           setPhone(res.data.phone || '');
+          setBasicPhone(res.data.basicPhone || '');
+          setWhatsappPhone(res.data.whatsappPhone || '');
+          setEmergencyContactName(res.data.emergencyContactName || '');
+          setEmergencyPhone(res.data.emergencyPhone || '');
           setAddress(res.data.address || '');
         }
         setLoading(false);
@@ -54,6 +62,10 @@ export const PatientProfile: React.FC = () => {
       data: {
         patientId: patient.id,
         phone,
+        basicPhone,
+        whatsappPhone,
+        emergencyContactName,
+        emergencyPhone,
         address
       }
     });
@@ -61,7 +73,15 @@ export const PatientProfile: React.FC = () => {
     setSaving(false);
     if (res.success) {
       showToast(t('profile.update_success'), 'success');
-      setPatient({ ...patient, phone, address });
+      setPatient({
+        ...patient,
+        phone,
+        basicPhone,
+        whatsappPhone,
+        emergencyContactName,
+        emergencyPhone,
+        address
+      });
     } else {
       showToast(t('profile.update_fail'), 'error');
     }
@@ -145,12 +165,46 @@ export const PatientProfile: React.FC = () => {
               {t('profile.editable_contact')}
             </p>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="Primary Phone Number (Smartphone)"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                icon={<Smartphone className="w-4 h-4 text-slate-400" />}
+                required
+              />
+
+              <Input
+                label="Contact No. (For Non-Smartphone Users)"
+                value={basicPhone}
+                onChange={e => setBasicPhone(e.target.value)}
+                icon={<PhoneCall className="w-4 h-4 text-amber-500" />}
+                placeholder="Basic phone / SMS contact number"
+              />
+
+              <Input
+                label="WhatsApp Number"
+                value={whatsappPhone}
+                onChange={e => setWhatsappPhone(e.target.value)}
+                icon={<MessageSquare className="w-4 h-4 text-emerald-500" />}
+                placeholder="WhatsApp contact number"
+              />
+
+              <Input
+                label="Emergency Contact Name"
+                value={emergencyContactName}
+                onChange={e => setEmergencyContactName(e.target.value)}
+                icon={<ShieldAlert className="w-4 h-4 text-rose-500" />}
+                placeholder="Relative / Guardian name"
+              />
+            </div>
+
             <Input
-              label={t('profile.phone_number')}
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-              icon={<Phone className="w-4 h-4 text-slate-400" />}
-              required
+              label="Emergency Contact Phone"
+              value={emergencyPhone}
+              onChange={e => setEmergencyPhone(e.target.value)}
+              icon={<Phone className="w-4 h-4 text-rose-500" />}
+              placeholder="Emergency contact phone number"
             />
 
             <Input

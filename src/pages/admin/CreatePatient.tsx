@@ -19,6 +19,10 @@ export const CreatePatient: React.FC = () => {
     name: '',
     email: '',
     phone: '',
+    basicPhone: '',
+    whatsappPhone: '',
+    emergencyContactName: '',
+    emergencyPhone: '',
     dateOfBirth: '1995-05-15',
     gender: 'Male',
     address: '',
@@ -104,10 +108,44 @@ export const CreatePatient: React.FC = () => {
             />
 
             <Input
-              label="Phone Number"
+              label="Primary Phone Number (Smartphone)"
               name="phone"
-              placeholder="Enter 10-digit mobile number..."
+              placeholder="Enter 10-digit smartphone number..."
               value={formData.phone}
+              onChange={handleChange}
+            />
+
+            <Input
+              label="Contact No. (For Non-Smartphone / Feature Phone Users)"
+              name="basicPhone"
+              placeholder="Enter non-smartphone contact number..."
+              value={formData.basicPhone}
+              onChange={handleChange}
+              helperText="Used for SMS & basic voice call notifications"
+            />
+
+            <Input
+              label="WhatsApp Number"
+              name="whatsappPhone"
+              placeholder="Enter WhatsApp mobile number..."
+              value={formData.whatsappPhone}
+              onChange={handleChange}
+              helperText="Used for automated WhatsApp appointment alerts"
+            />
+
+            <Input
+              label="Emergency Contact Name"
+              name="emergencyContactName"
+              placeholder="Enter guardian or relative full name..."
+              value={formData.emergencyContactName}
+              onChange={handleChange}
+            />
+
+            <Input
+              label="Emergency Contact Phone"
+              name="emergencyPhone"
+              placeholder="Enter emergency contact phone number..."
+              value={formData.emergencyPhone}
               onChange={handleChange}
             />
 

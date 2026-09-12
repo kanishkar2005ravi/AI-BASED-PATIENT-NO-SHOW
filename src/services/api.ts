@@ -78,7 +78,11 @@ function normalizePatient(p: any): Patient {
   const id = p.id || p.patient_id || p.patientId || `PAT-${Math.floor(100 + Math.random() * 900)}`;
   const name = p.name || p.patient_name || p.patientName || p.full_name || p.fullName || 'Patient Record';
   const email = p.email || p.patient_email || p.patientEmail || `${id.toLowerCase()}@example.com`;
-  const phone = p.phone || p.phone_number || p.phoneNumber || '9876543210';
+  const phone = p.phone || p.phone_number || p.phoneNumber || '+919876543210';
+  const basicPhone = p.basicPhone || p.basic_phone || p.basicPhoneNo || p.featurePhone || '';
+  const whatsappPhone = p.whatsappPhone || p.whatsapp_phone || p.whatsappNo || '';
+  const emergencyPhone = p.emergencyPhone || p.emergency_phone || p.emergencyPhoneNo || '';
+  const emergencyContactName = p.emergencyContactName || p.emergency_contact_name || p.emergencyName || p.emergencyContact || '';
   const dateOfBirth = p.dateOfBirth || p.date_of_birth || p.dob || '1995-05-15';
   const gender = p.gender || 'Male';
   const address = p.address || p.home_address || '';
@@ -96,6 +100,10 @@ function normalizePatient(p: any): Patient {
     email,
     password: p.password || 'password',
     phone,
+    basicPhone,
+    whatsappPhone,
+    emergencyPhone,
+    emergencyContactName,
     dateOfBirth,
     gender,
     address,
@@ -398,14 +406,22 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       if (payload.action === 'UPDATE_PATIENT') {
         const pId = payload.data?.patientId || payload.data?.id;
         const newPhone = payload.data?.phone;
+        const newBasicPhone = payload.data?.basicPhone;
+        const newWhatsappPhone = payload.data?.whatsappPhone;
+        const newEmergencyPhone = payload.data?.emergencyPhone;
+        const newEmergencyContactName = payload.data?.emergencyContactName;
         const newAddress = payload.data?.address;
 
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient);
         const updatedPats = localPats.map(p => {
           if (p.id === pId || p.email === pId) {
             return {
               ...p,
               phone: newPhone !== undefined ? newPhone : p.phone,
+              basicPhone: newBasicPhone !== undefined ? newBasicPhone : p.basicPhone,
+              whatsappPhone: newWhatsappPhone !== undefined ? newWhatsappPhone : p.whatsappPhone,
+              emergencyPhone: newEmergencyPhone !== undefined ? newEmergencyPhone : p.emergencyPhone,
+              emergencyContactName: newEmergencyContactName !== undefined ? newEmergencyContactName : p.emergencyContactName,
               address: newAddress !== undefined ? newAddress : p.address
             };
           }
