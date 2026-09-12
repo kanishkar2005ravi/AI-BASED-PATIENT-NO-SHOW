@@ -126,20 +126,14 @@ export const PatientDashboard: React.FC = () => {
         />
       )}
 
-      {/* 🌟 SIMPLE CLEAN HERO BANNER 🌟 */}
-      <div className="relative rounded-3xl p-6 md:p-8 overflow-hidden bg-gradient-to-r from-slate-950 via-teal-950 to-slate-900 border-2 border-teal-500/30 shadow-2xl">
-        {/* Animated Background Mesh */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
-        <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 space-y-1">
-          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
-            Hello, <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">{user?.name || 'Patient'}</span>
-          </h1>
-          <p className="text-sm font-bold text-slate-300">
-            Patient ID: <span className="font-mono font-black text-amber-400">{user?.id || 'PAT-1001'}</span>
-          </p>
-        </div>
+      {/* 🌟 SIMPLE CLEAN TEXT GREETING MESSAGE 🌟 */}
+      <div className="space-y-1 py-1">
+        <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+          Hello, <span className="text-teal-600 font-extrabold">{user?.name || 'Patient'}</span>
+        </h1>
+        <p className="text-xs md:text-sm font-bold text-slate-500">
+          Patient ID: <span className="font-mono font-bold text-slate-800">{user?.id || 'PAT-1001'}</span>
+        </p>
       </div>
 
       {/* 📊 4-GRID DISTINCTIVE MEDICAL STATS CARDS 📊 */}
