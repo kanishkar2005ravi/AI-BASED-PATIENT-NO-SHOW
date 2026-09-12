@@ -256,9 +256,7 @@ export const PatientDashboard: React.FC = () => {
       )}
 
       {/* 📦 SQUARE ACTION BOXES: QUICK ACTIONS & MODAL TRIGGER 📦 */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-black uppercase tracking-wider text-slate-500">{t('nav.patient_portal')} Services</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Box 1: Book Appointment */}
           <div
             onClick={() => navigate('/patient/book')}
@@ -315,7 +313,6 @@ export const PatientDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
 
       {/* 🔔 HOSPITAL ALERTS & WAITLIST NOTICES 🔔 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
