@@ -9,7 +9,7 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { callBackend } from '../../services/api';
 import { Appointment } from '../../types';
-import { Calendar, Clock, ChevronRight, XCircle } from 'lucide-react';
+import { Calendar, Clock, ChevronRight, XCircle, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 export const MyAppointments: React.FC = () => {
@@ -63,6 +63,17 @@ export const MyAppointments: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header title="My Appointments" />
+
+      {/* ⬅️ BACK TO DASHBOARD BUTTON ⬅️ */}
+      <div>
+        <button
+          onClick={() => navigate('/patient/dashboard')}
+          className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold text-xs shadow-xs group cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4 text-teal-600 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Dashboard</span>
+        </button>
+      </div>
 
       {/* Tabs */}
       <div className="flex items-center justify-between">

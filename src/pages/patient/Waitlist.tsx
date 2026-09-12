@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
@@ -10,11 +11,12 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { callBackend } from '../../services/api';
 import { Doctor, WaitlistItem } from '../../types';
-import { Clock, Plus, Trash2, CheckCircle2, Sparkles } from 'lucide-react';
+import { Clock, Plus, Trash2, CheckCircle2, Sparkles, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 export const Waitlist: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { showToast } = useToast();
 
   const [waitlist, setWaitlist] = useState<WaitlistItem[]>([]);
@@ -100,6 +102,17 @@ export const Waitlist: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header title="Patient Waitlist Management" />
+
+      {/* ⬅️ BACK TO DASHBOARD BUTTON ⬅️ */}
+      <div>
+        <button
+          onClick={() => navigate('/patient/dashboard')}
+          className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold text-xs shadow-xs group cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4 text-teal-600 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Dashboard</span>
+        </button>
+      </div>
 
       {/* Info Hero Banner */}
       <div className="bg-gradient-to-r from-teal-900 to-slate-900 text-white p-6 rounded-3xl shadow-md">

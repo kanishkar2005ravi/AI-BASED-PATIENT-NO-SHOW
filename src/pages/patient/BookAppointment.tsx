@@ -180,6 +180,17 @@ export const BookAppointment: React.FC = () => {
     <div className="space-y-6 pb-12">
       <Header title={t('book.title')} />
 
+      {/* ⬅️ BACK TO DASHBOARD BUTTON ⬅️ */}
+      <div className="max-w-3xl mx-auto flex items-center justify-between">
+        <button
+          onClick={() => navigate('/patient/dashboard')}
+          className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold text-xs shadow-xs group cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4 text-teal-600 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Dashboard</span>
+        </button>
+      </div>
+
       {/* Progress Wizard Header */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between max-w-3xl mx-auto">
         <div className={`flex items-center space-x-2 text-xs font-bold ${step >= 1 ? 'text-teal-700' : 'text-slate-400'}`}>
