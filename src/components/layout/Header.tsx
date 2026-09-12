@@ -130,17 +130,27 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
 
-        {/* User Profile Quick Link */}
+        {/* User Profile Quick Link - Unique Color & Neon Pill Design */}
         <div
           onClick={() => navigate(role === 'admin' ? '/admin/profile' : '/patient/profile')}
-          className="flex items-center space-x-3 cursor-pointer pl-2 border-l border-slate-200"
+          className="group relative cursor-pointer p-[2px] rounded-2xl bg-gradient-to-r from-teal-400 via-amber-400 via-rose-400 to-indigo-500 shadow-md hover:shadow-lg transition-all hover:scale-[1.03]"
+          title="View My Patient Profile"
         >
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-            {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon className="w-4 h-4" />}
-          </div>
-          <div className="hidden lg:block text-left">
-            <p className="text-xs font-bold text-slate-900 leading-tight">{user?.name || 'User'}</p>
-            <p className="text-[11px] text-slate-500 capitalize">{role === 'admin' ? 'Administrator' : 'Patient'}</p>
+          <div className="flex items-center space-x-2.5 px-3 py-1.5 rounded-[14px] bg-slate-950 text-white">
+            <div className="relative">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-teal-400 via-emerald-400 to-amber-300 text-slate-950 font-black text-xs flex items-center justify-center shadow-inner">
+                {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon className="w-4 h-4" />}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-slate-950" />
+            </div>
+            <div className="hidden lg:block text-left">
+              <p className="text-xs font-black text-white leading-tight group-hover:text-amber-300 transition-colors">
+                {user?.name || 'User'}
+              </p>
+              <span className="text-[9px] font-extrabold uppercase tracking-widest text-teal-300 bg-teal-950/80 px-1.5 py-0.2 rounded border border-teal-500/30">
+                {role === 'admin' ? 'Administrator' : 'Patient Profile'}
+              </span>
+            </div>
           </div>
         </div>
       </div>

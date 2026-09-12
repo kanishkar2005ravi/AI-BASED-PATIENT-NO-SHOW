@@ -382,8 +382,41 @@ export const PatientDashboard: React.FC = () => {
           )}
         </Card>
 
-        {/* Notifications & Announcements Hub */}
+        {/* Right Column: Unique Patient Profile Card & Hospital Notices */}
         <div className="space-y-6">
+          {/* 🌟 UNIQUE PATIENT PROFILE CARD 🌟 */}
+          <div className="p-[2px] rounded-3xl bg-gradient-to-br from-teal-400 via-amber-400 to-indigo-500 shadow-lg">
+            <div className="p-5 rounded-[22px] bg-slate-950 text-white space-y-4 relative overflow-hidden">
+              <div className="flex items-center space-x-3.5 border-b border-slate-800 pb-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 via-teal-400 to-emerald-400 text-slate-950 font-black text-lg flex items-center justify-center shadow-md flex-shrink-0">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'P'}
+                </div>
+                <div className="overflow-hidden">
+                  <h3 className="text-base font-black text-white leading-tight truncate">{user?.name || 'Patient'}</h3>
+                  <p className="text-xs font-bold text-amber-400 mt-0.5">{t('dashboard.patient_id')}: {user?.id || 'PAT-686'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Status</span>
+                  <span className="text-xs font-black text-emerald-400 flex items-center gap-1 mt-0.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" /> Verified
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Campus</span>
+                  <span className="text-xs font-black text-teal-300 mt-0.5 truncate block">SNS Medical</span>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/patient/profile')}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs transition-all shadow-md cursor-pointer hover:scale-[1.02]"
+              >
+                {t('nav.profile')}
+              </button>
+            </div>
+          </div>
+
           <Card title="Hospital Alerts & Notices">
             {notifications.length === 0 ? (
               <p className="text-xs text-slate-500 text-center py-4">No new notifications.</p>
