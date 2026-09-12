@@ -102,7 +102,16 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.exp_years': 'Years Exp.',
     'dashboard.emergency_title': 'Premium & Emergency Priority Booking',
     'dashboard.emergency_desc': 'If regular slots are unavailable, book an instant emergency priority consultation with on-call faculty specialists.',
-    'dashboard.emergency_button': 'Book Emergency Slot'
+    'dashboard.emergency_button': 'Book Emergency Slot',
+    'emergency.modal_title': 'Emergency Priority Booking Request',
+    'emergency.select_doctor': 'Select Physician & View Details',
+    'emergency.select_date': 'Select Preferred Date',
+    'emergency.reason_label': 'Reason for Emergency Booking',
+    'emergency.reason_placeholder': 'Type the reason for emergency consultation (e.g. High fever, acute pain, urgent checkup)...',
+    'emergency.admin_note': 'Admin Verification Process: Once submitted, hospital admin will verify doctor availability and confirm your emergency slot. You will receive an instant confirmation notification.',
+    'emergency.submit_button': 'Submit Request for Admin Verification',
+    'emergency.success_title': 'Emergency Request Submitted to Admin!',
+    'emergency.success_desc': 'Your emergency consultation request has been sent to the Admin. Once verified, you will receive a confirmation message.'
   },
   ta: {
     // Header & Navigation
@@ -197,7 +206,16 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.exp_years': 'ஆண்டுகள் அனுபவம்',
     'dashboard.emergency_title': 'பிரீமியம் & அவசர சிகிச்சை முன்னுரிமை பதிவு',
     'dashboard.emergency_desc': 'வழக்கமான நேரங்கள் கிடைக்கவில்லை என்றால், அவசர சிகிச்சைக்கான சிறப்பு மருத்துவரை உடனடியாக முன்பதிவு செய்யவும்.',
-    'dashboard.emergency_button': 'அவசர பதிவை மேற்கொள்ளவும் ⚡'
+    'dashboard.emergency_button': 'அவசர பதிவை மேற்கொள்ளவும் ⚡',
+    'emergency.modal_title': 'அவசர சிகிச்சை முன்னுரிமை பதிவு கோரிக்கை',
+    'emergency.select_doctor': 'மருத்துவரைத் தேர்ந்தெடுத்து விவரங்களைக் காண்க',
+    'emergency.select_date': 'விருப்பமான தேதியைத் தேர்ந்தெடுக்கவும்',
+    'emergency.reason_label': 'அவசர பதிவிற்கான காரணம்',
+    'emergency.reason_placeholder': 'அவசர சிகிச்சைக்கான காரணத்தை தட்டச்சு செய்க (எ.கா. கடுமையான காய்ச்சல், அவசர பரிசோதனை)...',
+    'emergency.admin_note': 'நிர்வாகி சரிபார்ப்பு செயல்முறை: சமர்ப்பித்தவுடன், மருத்துவமனை நிர்வாகி மருத்துவரின் இருப்பை சரிபார்த்து உங்கள் அவசர நேரத்தை உறுதி செய்வார். உங்களுக்கு உடனடி உறுதிப்படுத்தல் செய்தி அனுப்பப்படும்.',
+    'emergency.submit_button': 'நிர்வாகி சரிபார்ப்பிற்கு சமர்ப்பிக்கவும் 🚀',
+    'emergency.success_title': 'அவசர கோரிக்கை நிர்வாகிக்கு சமர்ப்பிக்கப்பட்டது!',
+    'emergency.success_desc': 'உங்கள் அவசர சிகிச்சை கோரிக்கை நிர்வாகிக்கு அனுப்பப்பட்டுள்ளது. சரிபார்க்கப்பட்டதும், உறுதிப்படுத்தல் செய்தியைப் பெறுவீர்கள்.'
   }
 
 };

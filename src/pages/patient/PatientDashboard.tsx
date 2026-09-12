@@ -50,6 +50,45 @@ export const PatientDashboard: React.FC = () => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [showAllDoctorsModal, setShowAllDoctorsModal] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [selectedEmergencyDoctorId, setSelectedEmergencyDoctorId] = useState<string>('');
+  const [emergencyDate, setEmergencyDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [emergencyReason, setEmergencyReason] = useState<string>('');
+  const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
+  const [emergencySubmittedSuccess, setEmergencySubmittedSuccess] = useState(false);
+
+  const handleSubmitEmergencyRequest = async () => {
+    if (!emergencyReason.trim()) {
+      showToast('Please type the reason for your emergency booking request.', 'error');
+      return;
+    }
+
+    setIsSubmittingEmergency(true);
+    const selectedDoc = doctors.find(d => d.id === selectedEmergencyDoctorId) || doctors[0];
+
+    const res = await callBackend({
+      action: 'ADD_TO_WAITLIST',
+      data: {
+        patientId: user?.id,
+        patientName: user?.name,
+        doctorId: selectedDoc?.id,
+        doctorName: selectedDoc?.name,
+        requestedDate: emergencyDate,
+        reason: `[EMERGENCY PRIORITY] ${emergencyReason}`,
+        priority: 'EMERGENCY_PRIORITY'
+      }
+    });
+
+    setIsSubmittingEmergency(false);
+    if (res.success) {
+      setEmergencySubmittedSuccess(true);
+      showToast('Emergency request submitted! Admin will verify and confirm.', 'success');
+      fetchData();
+    } else {
+      showToast(res.message || 'Emergency request submission failed.', 'error');
+    }
+  };
+
   const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(() => {
     return !sessionStorage.getItem('carepilot_patient_splash_shown');
   });
@@ -335,7 +374,7 @@ export const PatientDashboard: React.FC = () => {
         </div>
 
         <button
-          onClick={() => navigate('/patient/book')}
+          onClick={() => setShowEmergencyModal(true)}
           className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-black text-xs transition-all shadow-lg hover:shadow-rose-500/30 flex items-center gap-2 flex-shrink-0 cursor-pointer"
         >
           <span>{t('dashboard.emergency_button')}</span>
@@ -460,6 +499,175 @@ export const PatientDashboard: React.FC = () => {
                 );
               })}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🚨 EMERGENCY PRIORITY BOOKING REQUEST MODAL 🚨 */}
+      {showEmergencyModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
+          onClick={() => setShowEmergencyModal(false)}
+        >
+          <div
+            className="w-full max-w-2xl bg-white rounded-3xl p-6 md:p-8 shadow-2xl border border-slate-200 space-y-6 max-h-[90vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 rounded-2xl bg-rose-100 text-rose-600 border border-rose-200">
+                  <AlertTriangle className="w-6 h-6 animate-bounce" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">{t('emergency.modal_title')}</h3>
+                  <p className="text-xs text-rose-600 font-bold">Priority Medical Verification Request</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowEmergencyModal(false)}
+                className="p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {emergencySubmittedSuccess ? (
+              /* Success View */
+              <div className="py-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 border-2 border-emerald-300 flex items-center justify-center mx-auto animate-bounce">
+                  <CheckCircle2 className="w-10 h-10" />
+                </div>
+                <div className="space-y-2 max-w-md mx-auto">
+                  <h4 className="text-xl font-black text-slate-900">{t('emergency.success_title')}</h4>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                    {t('emergency.success_desc')}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-left text-xs space-y-1 max-w-md mx-auto">
+                  <p className="font-bold text-amber-900 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-amber-600" /> Admin Verification Notice:
+                  </p>
+                  <p className="text-amber-800 font-medium leading-relaxed">
+                    Your request for <strong>{(doctors.find(d => d.id === selectedEmergencyDoctorId) || doctors[0])?.name}</strong> on <strong>{emergencyDate}</strong> (Reason: "{emergencyReason}") has been logged. Admin will review and send you a confirmation message once slot is verified.
+                  </p>
+                </div>
+
+                <div className="pt-4">
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => {
+                      setShowEmergencyModal(false);
+                      setEmergencySubmittedSuccess(false);
+                    }}
+                  >
+                    Close & Check Dashboard
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              /* Form View */
+              <div className="space-y-5">
+                {/* 1. Doctor Selection & Details */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-800 uppercase tracking-wider block">
+                    {t('emergency.select_doctor')}
+                  </label>
+                  <div className="grid grid-cols-1 gap-2.5">
+                    {doctors.map(doc => {
+                      const isSelected = (selectedEmergencyDoctorId || doctors[0]?.id) === doc.id;
+                      return (
+                        <div
+                          key={doc.id}
+                          onClick={() => setSelectedEmergencyDoctorId(doc.id)}
+                          className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+                            isSelected
+                              ? 'border-rose-500 bg-rose-50/60 shadow-sm'
+                              : 'border-slate-200 bg-slate-50/40 hover:bg-white hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm ${
+                              isSelected ? 'bg-rose-600 text-white' : 'bg-slate-900 text-teal-300'
+                            }`}>
+                              {doc.name.replace('Dr. ', '').charAt(0)}
+                            </div>
+                            <div>
+                              <h5 className="text-sm font-black text-slate-900">{doc.name}</h5>
+                              <p className="text-xs font-bold text-rose-600">{doc.specialization} &bull; {doc.department}</p>
+                              <p className="text-[11px] text-slate-500 font-medium">{doc.experience} {t('dashboard.exp_years')}</p>
+                            </div>
+                          </div>
+
+                          {isSelected && (
+                            <span className="p-1.5 rounded-full bg-rose-600 text-white">
+                              <CheckCircle2 className="w-4 h-4" />
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 2. Date Selection (Only Date) */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-800 uppercase tracking-wider block">
+                    {t('emergency.select_date')}
+                  </label>
+                  <input
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={emergencyDate}
+                    onChange={e => setEmergencyDate(e.target.value)}
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-900 font-bold text-sm bg-slate-50/50"
+                  />
+                </div>
+
+                {/* 3. Reason Textarea */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-800 uppercase tracking-wider block">
+                    {t('emergency.reason_label')} <span className="text-rose-500">*</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={emergencyReason}
+                    onChange={e => setEmergencyReason(e.target.value)}
+                    placeholder={t('emergency.reason_placeholder')}
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-900 text-xs font-medium bg-slate-50/50 resize-none"
+                  />
+                </div>
+
+                {/* Admin Verification Information Note */}
+                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs space-y-1">
+                  <p className="font-bold text-rose-950 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-rose-600" /> Admin Verification Required:
+                  </p>
+                  <p className="text-rose-900 font-medium leading-relaxed">
+                    {t('emergency.admin_note')}
+                  </p>
+                </div>
+
+                {/* Action Submit Button */}
+                <div className="pt-2 flex items-center justify-end space-x-3">
+                  <button
+                    onClick={() => setShowEmergencyModal(false)}
+                    className="px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmitEmergencyRequest}
+                    disabled={isSubmittingEmergency}
+                    className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white font-black text-xs transition-all shadow-lg flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    {isSubmittingEmergency ? 'Submitting Request...' : t('emergency.submit_button')}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
