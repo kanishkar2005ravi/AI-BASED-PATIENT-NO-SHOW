@@ -354,36 +354,36 @@ export const PatientDashboard: React.FC = () => {
           </div>
         </div>
 
-      {/* 🚨 VIBRANT STYLISH RED PRIORITY CARE CARD 🚨 */}
-      <div id="priority-care-section" className="p-6 md:p-7 rounded-3xl bg-gradient-to-r from-rose-600 via-red-600 to-pink-600 text-white shadow-2xl shadow-rose-500/40 border-2 border-rose-300/90 ring-4 ring-rose-500/20 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden group animate-pulse">
-        {/* Animated Background Pulse Glow */}
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-white/20 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-48 h-48 bg-pink-400/20 rounded-full blur-2xl pointer-events-none" />
+      {/* 🚨 SLEEK OBSIDIAN GLASSMORPHISM PRIORITY CARE CARD 🚨 */}
+      <div id="priority-care-section" className="p-6 md:p-7 rounded-3xl bg-gradient-to-r from-slate-950 via-slate-900 to-zinc-950 text-white shadow-2xl shadow-slate-950/60 border-2 border-rose-500/60 ring-2 ring-amber-400/30 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden group transition-all">
+        {/* Ambient Blurred Glowing Orbs */}
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-56 h-56 bg-rose-600/20 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-56 h-56 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex items-center space-x-4 relative z-10">
-          <div className="w-14 h-14 rounded-2xl bg-white/25 backdrop-blur-md text-white border border-white/50 shadow-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-            <HeartPulse className="w-8 h-8 text-white animate-bounce" />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 via-red-600 to-amber-600 text-white border border-rose-400/50 shadow-lg shadow-rose-900/40 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-all duration-300">
+            <HeartPulse className="w-7 h-7 text-white animate-pulse" />
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center space-x-2">
-              <span className="bg-slate-950/80 text-white text-[10px] font-black uppercase px-3.5 py-1 rounded-full border-2 border-rose-300 tracking-wider shadow-md flex items-center gap-1.5 animate-pulse">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-300 animate-ping shadow-xs shadow-amber-400" /> PRIORITY CARE
+              <span className="bg-slate-900/90 text-amber-300 text-[10px] font-black uppercase px-3.5 py-1 rounded-full border border-amber-400/50 tracking-wider shadow-md flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping shadow-xs shadow-rose-400" /> PRIORITY CONSULTATION
               </span>
-              <span className="text-xs font-black text-amber-200 tracking-wide">
-                ⚡ If regular slots are full
+              <span className="text-xs font-bold text-amber-300/90 tracking-wide">
+                ⚡ Urgent Faculty Slot Request
               </span>
             </div>
             <h3 className="text-xl md:text-2xl font-black text-white tracking-tight drop-shadow-sm">
               {t('dashboard.emergency_title')}
             </h3>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-white/90 font-bold pt-0.5">
-              <span className="bg-white/15 backdrop-blur-sm px-2.5 py-1 rounded-xl border border-white/30 flex items-center gap-1">
+            <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-300 font-medium pt-0.5">
+              <span className="bg-slate-800/80 backdrop-blur-sm px-3 py-1 rounded-xl border border-slate-700/80 text-slate-200 flex items-center gap-1.5">
                 🩺 24/7 Specialist Availability
               </span>
-              <span className="bg-white/15 backdrop-blur-sm px-2.5 py-1 rounded-xl border border-white/30 flex items-center gap-1">
+              <span className="bg-slate-800/80 backdrop-blur-sm px-3 py-1 rounded-xl border border-slate-700/80 text-slate-200 flex items-center gap-1.5">
                 ⚡ Instant Admin Verification
               </span>
-              <span className="bg-white/15 backdrop-blur-sm px-2.5 py-1 rounded-xl border border-white/30 flex items-center gap-1">
+              <span className="bg-slate-800/80 backdrop-blur-sm px-3 py-1 rounded-xl border border-slate-700/80 text-slate-200 flex items-center gap-1.5">
                 📅 Same-Day Priority Request
               </span>
             </div>
@@ -392,10 +392,10 @@ export const PatientDashboard: React.FC = () => {
 
         <button
           onClick={() => setShowEmergencyModal(true)}
-          className="px-6 py-3.5 rounded-2xl bg-white text-rose-600 hover:bg-rose-50 font-black text-xs transition-all shadow-xl hover:shadow-2xl hover:scale-105 flex items-center gap-2 flex-shrink-0 cursor-pointer border border-white/90 relative z-10 group/btn"
+          className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 via-red-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-black text-xs transition-all shadow-lg shadow-rose-600/30 hover:shadow-rose-600/50 hover:scale-105 flex items-center gap-2 flex-shrink-0 cursor-pointer border border-rose-300/40 relative z-10 group/btn"
         >
           <span>{t('dashboard.emergency_button')}</span>
-          <ArrowRight className="w-4 h-4 text-rose-600 group-hover/btn:translate-x-1 transition-transform" />
+          <ArrowRight className="w-4 h-4 text-white group-hover/btn:translate-x-1 transition-transform" />
         </button>
       </div>
 
