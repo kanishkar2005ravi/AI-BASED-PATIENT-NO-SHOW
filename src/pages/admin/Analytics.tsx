@@ -21,7 +21,8 @@ import {
   UserCheck,
   ArrowUpRight,
   Users,
-  Clock
+  Clock,
+  Download
 } from 'lucide-react';
 import {
   BarChart,
@@ -38,9 +39,12 @@ import {
 } from 'recharts';
 import { BackButton } from '../../components/common/BackButton';
 import { useLanguage } from '../../context/LanguageContext';
+import { useToast } from '../../context/ToastContext';
+import { downloadCSV } from '../../utils/helpers';
 
 export const Analytics: React.FC = () => {
   const { t } = useLanguage();
+  const { showToast } = useToast();
   const [modelPerf, setModelPerf] = useState<ModelPerformance | null>(null);
   const [aptMetrics, setAptMetrics] = useState({
     totalPatients: 200,
@@ -53,6 +57,114 @@ export const Analytics: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const demoActive = isDemoMode();
+
+  const handleDownloadMetricReport = async (type: 'PATIENTS' | 'APPOINTMENTS' | 'CANCELLED' | 'RESCHEDULED' | 'MISSED' | 'WAITLIST') => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    
+    if (type === 'PATIENTS') {
+      const res = await callBackend({ action: 'GET_PATIENTS' });
+      const patsList: Patient[] = (res.success && Array.isArray(res.data)) ? res.data : [];
+      const exportData = patsList.map(p => ({
+        PatientID: p.id,
+        Name: p.name,
+        Email: p.email,
+        Phone: p.phone,
+        Gender: p.gender,
+        DOB: p.dateOfBirth,
+        TotalVisits: p.totalAppointments,
+        AttendedVisits: p.attendedAppointments,
+        NoShowVisits: p.noShowAppointments,
+        NoShowRate: `${p.noShowRate}%`
+      }));
+      downloadCSV(`Total_Patients_Report_${todayStr}.csv`, exportData);
+      showToast('Total Patients CSV report downloaded successfully!', 'success');
+
+    } else if (type === 'APPOINTMENTS') {
+      const res = await callBackend({ action: 'GET_APPOINTMENTS' });
+      const aptsList: Appointment[] = (res.success && Array.isArray(res.data)) ? res.data : [];
+      const exportData = aptsList.map(a => ({
+        AppointmentID: a.id,
+        PatientID: a.patientId,
+        PatientName: a.patientName,
+        DoctorName: a.doctorName,
+        Specialization: a.doctorSpecialization,
+        Date: a.appointmentDate,
+        Time: a.appointmentTime,
+        Status: a.status,
+        AIRiskLevel: a.risk?.level || 'LOW',
+        AIRiskProbability: `${Math.round((a.risk?.probability || 0.15) * 100)}%`
+      }));
+      downloadCSV(`Total_Appointments_Report_${todayStr}.csv`, exportData);
+      showToast('Total Appointments CSV report downloaded successfully!', 'success');
+
+    } else if (type === 'CANCELLED') {
+      const res = await callBackend({ action: 'GET_APPOINTMENTS' });
+      const aptsList: Appointment[] = (res.success && Array.isArray(res.data)) ? res.data : [];
+      const cancelledList = aptsList.filter(a => a.status === 'CANCELLED');
+      const exportData = cancelledList.map(a => ({
+        AppointmentID: a.id,
+        PatientID: a.patientId,
+        PatientName: a.patientName,
+        DoctorName: a.doctorName,
+        Specialization: a.doctorSpecialization,
+        Date: a.appointmentDate,
+        Time: a.appointmentTime,
+        Reason: a.appointmentType || 'Cancelled by patient'
+      }));
+      downloadCSV(`Cancelled_Appointments_Report_${todayStr}.csv`, exportData);
+      showToast('Cancelled Appointments CSV report downloaded successfully!', 'success');
+
+    } else if (type === 'RESCHEDULED') {
+      const res = await callBackend({ action: 'GET_APPOINTMENTS' });
+      const aptsList: Appointment[] = (res.success && Array.isArray(res.data)) ? res.data : [];
+      const reschedList = aptsList.filter(a => a.status === 'RESCHEDULED');
+      const exportData = reschedList.map(a => ({
+        AppointmentID: a.id,
+        PatientID: a.patientId,
+        PatientName: a.patientName,
+        DoctorName: a.doctorName,
+        Specialization: a.doctorSpecialization,
+        NewDate: a.appointmentDate,
+        NewTime: a.appointmentTime,
+        Status: a.status
+      }));
+      downloadCSV(`Rescheduled_Appointments_Report_${todayStr}.csv`, exportData);
+      showToast('Rescheduled Appointments CSV report downloaded successfully!', 'success');
+
+    } else if (type === 'MISSED') {
+      const res = await callBackend({ action: 'GET_APPOINTMENTS' });
+      const aptsList: Appointment[] = (res.success && Array.isArray(res.data)) ? res.data : [];
+      const missedList = aptsList.filter(a => a.status === 'NO_SHOW');
+      const exportData = missedList.map(a => ({
+        AppointmentID: a.id,
+        PatientID: a.patientId,
+        PatientName: a.patientName,
+        DoctorName: a.doctorName,
+        Specialization: a.doctorSpecialization,
+        ScheduledDate: a.appointmentDate,
+        ScheduledTime: a.appointmentTime,
+        AIRiskScore: `${Math.round((a.risk?.probability || 0.5) * 100)}%`
+      }));
+      downloadCSV(`Missed_NoShow_Report_${todayStr}.csv`, exportData);
+      showToast('Missed / No-Show CSV report downloaded successfully!', 'success');
+
+    } else if (type === 'WAITLIST') {
+      const res = await callBackend({ action: 'GET_WAITLIST' });
+      const waitList: WaitlistItem[] = (res.success && Array.isArray(res.data)) ? res.data : [];
+      const exportData = waitList.map(w => ({
+        WaitlistID: w.id,
+        PatientID: w.patientId,
+        PatientName: w.patientName,
+        DoctorName: w.doctorName,
+        RequestedDate: w.requestedDate,
+        RequestedSlot: w.requestedTimeSlot || 'Any',
+        QueuePosition: w.position,
+        Status: w.status
+      }));
+      downloadCSV(`Waitlist_Queue_Report_${todayStr}.csv`, exportData);
+      showToast('Waitlist Queue CSV report downloaded successfully!', 'success');
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -149,86 +261,164 @@ export const Analytics: React.FC = () => {
       {/* 📊 OVERALL HOSPITAL SUMMARY METRICS (TOTAL PATIENTS, APPOINTMENTS, CANCELLED, RESCHEDULED, MISSED, WAITLIST) 📊 */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {/* 1. Total Patients */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group">
-          <div>
-            <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_patients')}</p>
-            <h3 className="text-2xl font-black text-slate-900 mt-1">{aptMetrics.totalPatients}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-amber-700 mt-1">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_patients')}</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{aptMetrics.totalPatients}</h3>
+            </div>
+            <div className="p-3 bg-amber-50 text-amber-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-amber-400/50 flex-shrink-0">
+              <Users className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+            <span className="inline-flex items-center text-[10px] font-bold text-amber-700">
               <ArrowUpRight className="w-3 h-3 mr-0.5" /> Live Records
             </span>
-          </div>
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-amber-400/50">
-            <Users className="w-6 h-6" />
+            <button
+              onClick={() => handleDownloadMetricReport('PATIENTS')}
+              className="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 hover:text-amber-950 font-extrabold text-[10px] flex items-center gap-1 border border-amber-200/80 transition-all cursor-pointer shadow-xs"
+              title="Download Total Patients CSV Report"
+            >
+              <Download className="w-3.5 h-3.5 text-amber-700" />
+              <span>Download</span>
+            </button>
           </div>
         </div>
 
         {/* 2. Total Appointments */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex items-center justify-between group">
-          <div>
-            <p className="text-[11px] font-extrabold text-teal-800 uppercase tracking-wider">{t('metric.total_appointments')}</p>
-            <h3 className="text-2xl font-black text-slate-900 mt-1">{aptMetrics.totalAppointments}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-teal-700 mt-1">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-extrabold text-teal-800 uppercase tracking-wider">{t('metric.total_appointments')}</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{aptMetrics.totalAppointments}</h3>
+            </div>
+            <div className="p-3 bg-teal-50 text-teal-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-teal-400/50 flex-shrink-0">
+              <Calendar className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+            <span className="inline-flex items-center text-[10px] font-bold text-teal-700">
               <ArrowUpRight className="w-3 h-3 mr-0.5" /> Total Bookings
             </span>
-          </div>
-          <div className="p-3 bg-teal-50 text-teal-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-teal-400/50">
-            <Calendar className="w-6 h-6" />
+            <button
+              onClick={() => handleDownloadMetricReport('APPOINTMENTS')}
+              className="px-2 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 hover:text-teal-950 font-extrabold text-[10px] flex items-center gap-1 border border-teal-200/80 transition-all cursor-pointer shadow-xs"
+              title="Download Total Appointments CSV Report"
+            >
+              <Download className="w-3.5 h-3.5 text-teal-700" />
+              <span>Download</span>
+            </button>
           </div>
         </div>
 
         {/* 3. Total Cancelled */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex items-center justify-between group">
-          <div>
-            <p className="text-[11px] font-extrabold text-rose-800 uppercase tracking-wider">{t('metric.total_cancelled')}</p>
-            <h3 className="text-2xl font-black text-rose-600 mt-1">{aptMetrics.totalCancelled}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-rose-700 mt-1">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-extrabold text-rose-800 uppercase tracking-wider">{t('metric.total_cancelled')}</p>
+              <h3 className="text-2xl font-black text-rose-600 mt-1">{aptMetrics.totalCancelled}</h3>
+            </div>
+            <div className="p-3 bg-rose-50 text-rose-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-rose-400/50 flex-shrink-0">
+              <XCircle className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+            <span className="inline-flex items-center text-[10px] font-bold text-rose-700">
               Cancelled Slots
             </span>
-          </div>
-          <div className="p-3 bg-rose-50 text-rose-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-rose-400/50">
-            <XCircle className="w-6 h-6" />
+            <button
+              onClick={() => handleDownloadMetricReport('CANCELLED')}
+              className="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 hover:text-rose-950 font-extrabold text-[10px] flex items-center gap-1 border border-rose-200/80 transition-all cursor-pointer shadow-xs"
+              title="Download Cancelled Appointments CSV Report"
+            >
+              <Download className="w-3.5 h-3.5 text-rose-700" />
+              <span>Download</span>
+            </button>
           </div>
         </div>
 
         {/* 4. Total Rescheduled */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex items-center justify-between group">
-          <div>
-            <p className="text-[11px] font-extrabold text-blue-800 uppercase tracking-wider">{t('metric.total_rescheduled')}</p>
-            <h3 className="text-2xl font-black text-blue-600 mt-1">{aptMetrics.totalRescheduled}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-blue-700 mt-1">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-extrabold text-blue-800 uppercase tracking-wider">{t('metric.total_rescheduled')}</p>
+              <h3 className="text-2xl font-black text-blue-600 mt-1">{aptMetrics.totalRescheduled}</h3>
+            </div>
+            <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-blue-400/50 flex-shrink-0">
+              <RefreshCw className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+            <span className="inline-flex items-center text-[10px] font-bold text-blue-700">
               Rescheduled Slots
             </span>
-          </div>
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-blue-400/50">
-            <RefreshCw className="w-6 h-6" />
+            <button
+              onClick={() => handleDownloadMetricReport('RESCHEDULED')}
+              className="px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 hover:text-blue-950 font-extrabold text-[10px] flex items-center gap-1 border border-blue-200/80 transition-all cursor-pointer shadow-xs"
+              title="Download Rescheduled Appointments CSV Report"
+            >
+              <Download className="w-3.5 h-3.5 text-blue-700" />
+              <span>Download</span>
+            </button>
           </div>
         </div>
 
         {/* 5. Total Missed */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex items-center justify-between group">
-          <div>
-            <p className="text-[11px] font-extrabold text-purple-800 uppercase tracking-wider">{t('metric.total_missed')}</p>
-            <h3 className="text-2xl font-black text-purple-600 mt-1">{aptMetrics.totalMissed}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-purple-700 mt-1">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-extrabold text-purple-800 uppercase tracking-wider">{t('metric.total_missed')}</p>
+              <h3 className="text-2xl font-black text-purple-600 mt-1">{aptMetrics.totalMissed}</h3>
+            </div>
+            <div className="p-3 bg-purple-50 text-purple-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-purple-400/50 flex-shrink-0">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+            <span className="inline-flex items-center text-[10px] font-bold text-purple-700">
               No-Show Absences
             </span>
-          </div>
-          <div className="p-3 bg-purple-50 text-purple-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-purple-400/50">
-            <AlertCircle className="w-6 h-6" />
+            <button
+              onClick={() => handleDownloadMetricReport('MISSED')}
+              className="px-2 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 hover:text-purple-950 font-extrabold text-[10px] flex items-center gap-1 border border-purple-200/80 transition-all cursor-pointer shadow-xs"
+              title="Download Missed / No-Show CSV Report"
+            >
+              <Download className="w-3.5 h-3.5 text-purple-700" />
+              <span>Download</span>
+            </button>
           </div>
         </div>
 
         {/* 6. Total Waitlist */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group col-span-2 sm:col-span-1">
-          <div>
-            <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_waitlist')}</p>
-            <h3 className="text-2xl font-black text-amber-600 mt-1">{aptMetrics.totalWaitlistCount}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-amber-700 mt-1">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between group col-span-2 sm:col-span-1">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_waitlist')}</p>
+              <h3 className="text-2xl font-black text-amber-600 mt-1">{aptMetrics.totalWaitlistCount}</h3>
+            </div>
+            <div className="p-3 bg-amber-50 text-amber-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-amber-400/50 flex-shrink-0">
+              <Clock className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+            <span className="inline-flex items-center text-[10px] font-bold text-amber-700">
               Entire Queue
             </span>
-          </div>
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-amber-400/50">
-            <Clock className="w-6 h-6" />
+            <button
+              onClick={() => handleDownloadMetricReport('WAITLIST')}
+              className="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 hover:text-amber-950 font-extrabold text-[10px] flex items-center gap-1 border border-amber-200/80 transition-all cursor-pointer shadow-xs"
+              title="Download Waitlist Queue CSV Report"
+            >
+              <Download className="w-3.5 h-3.5 text-amber-700" />
+              <span>Download</span>
+            </button>
           </div>
         </div>
       </div>
