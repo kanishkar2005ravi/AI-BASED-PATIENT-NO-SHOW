@@ -467,16 +467,16 @@ export const PatientDashboard: React.FC = () => {
           </div>
           <div>
             <h4 className="text-sm md:text-base font-black text-slate-900 flex items-center gap-2 group-hover:text-teal-600 transition-colors">
-              <span>CarePilot SNS Guidelines & Patient Note</span>
+              <span>{t('guidelines.banner_title')}</span>
             </h4>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Gmail & WhatsApp Alerts (+91 8300096676), Helpline, 24/7 Casualty & Auto-Waitlist Details
+              {t('guidelines.banner_sub')}
             </p>
           </div>
         </div>
 
         <div className="px-5 py-2.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs transition-all shadow-sm flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
-          <span>{showGuideNote ? 'Close Guidelines' : 'Touch to View Guidelines'}</span>
+          <span>{showGuideNote ? t('guidelines.close') : t('guidelines.open')}</span>
           <ChevronRight className={`w-4 h-4 text-white transition-transform ${showGuideNote ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
         </div>
       </div>
@@ -490,12 +490,12 @@ export const PatientDashboard: React.FC = () => {
                 📋
               </div>
               <div>
-                <h4 className="text-base font-extrabold text-slate-900">CarePilot SNS - Important Hospital Advisory & Guidelines</h4>
-                <p className="text-xs text-slate-500 font-semibold">CarePilot SNS 24/7 Healthcare Support & Multi-Channel Patient Alerts</p>
+                <h4 className="text-base font-extrabold text-slate-900">{t('guidelines.main_title')}</h4>
+                <p className="text-xs text-slate-500 font-semibold">{t('guidelines.main_sub')}</p>
               </div>
             </div>
             <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200 tracking-wider">
-              NOTE
+              {t('note.label')}
             </span>
           </div>
 

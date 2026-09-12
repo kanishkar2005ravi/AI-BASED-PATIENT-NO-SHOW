@@ -67,6 +67,36 @@ const translations: Record<Language, Record<string, string>> = {
     'label.time': 'Time Slot',
     'label.reason': 'Reason for Visit',
 
+    'note.label': 'NOTE',
+    'note.policy_title': 'Cancellation & Rescheduling Policy:',
+    'note.policy_desc': 'You can cancel or reschedule your appointment up to 6 hours prior to your scheduled time slot. Early cancellation helps waitlisted patients receive recovered slots in real time.',
+    'note.waitlist_title': 'How Waitlist Auto-Recovery Works:',
+    'note.waitlist_desc': 'If your preferred physician is fully booked, join the waitlist. When another patient cancels an appointment, the system automatically alerts you via Gmail (kanis.r.ad.2024@snsce.ac.in) & WhatsApp (+91 8300096676) in real time to claim the recovered slot!',
+
+    // Appointments & Waitlist Page Keys
+    'appointments.title': 'My Appointments',
+    'appointments.tab_upcoming': 'Upcoming',
+    'appointments.tab_past': 'Past',
+    'appointments.tab_cancelled': 'Cancelled',
+    'appointments.book_new': 'Book New Visit',
+    'appointments.reschedule': 'Reschedule',
+    'appointments.cancel': 'Cancel',
+
+    'waitlist.title': 'Patient Waitlist Management',
+    'waitlist.join_card': 'Join Doctor Waitlist',
+    'waitlist.select_doctor': 'Select Doctor',
+    'waitlist.req_date': 'Requested Date',
+    'waitlist.join_button': 'Join Waitlist Queue',
+    'waitlist.queue_title': 'My Active Waitlist Queue',
+    'waitlist.claim_button': 'Claim & Confirm Slot',
+
+    'guidelines.banner_title': 'CarePilot SNS Guidelines & Patient Note',
+    'guidelines.banner_sub': 'Gmail & WhatsApp Alerts (+91 8300096676), Helpline, 24/7 Casualty & Auto-Waitlist Details',
+    'guidelines.open': 'Touch to View Guidelines',
+    'guidelines.close': 'Close Guidelines',
+    'guidelines.main_title': 'CarePilot SNS - Important Hospital Advisory & Guidelines',
+    'guidelines.main_sub': 'CarePilot SNS 24/7 Healthcare Support & Multi-Channel Patient Alerts',
+
     // Book Appointment Keys
     'book.title': 'Book Consultation',
     'book.step1': '1. Select Doctor & Time',
@@ -175,6 +205,36 @@ const translations: Record<Language, Record<string, string>> = {
     'label.time': 'நேரம்',
     'label.reason': 'சிகிச்சைக்கான காரணம்',
 
+    'note.label': 'குறிப்பு',
+    'note.policy_title': 'ரத்து மற்றும் மறுஅட்டவணை கொள்கை:',
+    'note.policy_desc': 'உங்கள் சந்திப்பை 6 மணிநேரத்திற்கு முன்பே ரத்து செய்யவோ அல்லது நேரத்தை மாற்றவோ முடியும். முன் கூட்டியே ரத்து செய்வதன் மூலம் காத்திருப்போர் பட்டியலில் உள்ள நோயாளிகளுக்கு முன்னுரிமை வழங்கப்படும்.',
+    'note.waitlist_title': 'காத்திருப்புப் பட்டியல் எவ்வாறு செயல்படுகிறது:',
+    'note.waitlist_desc': 'உங்களுக்கு விருப்பமான மருத்துவரின் நேரம் முடிவடைந்தால், காத்திருப்புப் பட்டியலில் இணையலாம். மற்றொரு நோயாளி ரத்து செய்யும்போது ஜிமெயில் (kanis.r.ad.2024@snsce.ac.in) & வாட்ஸ்அப் (+91 8300096676) மூலம் உங்களுக்கு உடனடி தகவல் அனுப்பப்படும்!',
+
+    // Appointments & Waitlist Page Keys
+    'appointments.title': 'எனது மருத்துவ சந்திப்புகள்',
+    'appointments.tab_upcoming': 'வரவிருப்பவை',
+    'appointments.tab_past': 'முந்தையவை',
+    'appointments.tab_cancelled': 'ரத்து செய்யப்பட்டவை',
+    'appointments.book_new': 'புதிய சந்திப்பு பதிவு',
+    'appointments.reschedule': 'தேதியை மாற்றுக',
+    'appointments.cancel': 'ரத்து செய்',
+
+    'waitlist.title': 'நோயாளி காத்திருப்புப் பட்டியல் நிர்வாகம்',
+    'waitlist.join_card': 'மருத்துவர் காத்திருப்புப் பட்டியலில் சேர்க',
+    'waitlist.select_doctor': 'மருத்துவரைத் தேர்ந்தெடுக்கவும்',
+    'waitlist.req_date': 'கோரப்பட்ட தேதி',
+    'waitlist.join_button': 'காத்திருப்பு வரிசையில் சேர்க',
+    'waitlist.queue_title': 'எனது காத்திருப்பு நிலை',
+    'waitlist.claim_button': 'இடத்தை உறுதி செய்',
+
+    'guidelines.banner_title': 'CarePilot SNS வழிகாட்டுதல்கள் & நோயாளி குறிப்பு',
+    'guidelines.banner_sub': 'ஜிமெயில் & வாட்ஸ்அப் தகவல்கள் (+91 8300096676), உதவி எண் & அவசர சிகிச்சை விவரங்கள்',
+    'guidelines.open': 'வழிகாட்டுதல்களைக் காண தொடுக',
+    'guidelines.close': 'வழிகாட்டுதல்களை மூடுக',
+    'guidelines.main_title': 'CarePilot SNS - முக்கிய மருத்துவமனை வழிகாட்டுதல்கள்',
+    'guidelines.main_sub': 'CarePilot SNS 24/7 சுகாதார சேவை & நோயாளிகளுக்கான எச்சரிக்கைகள்',
+
     // Book Appointment Keys
     'book.title': 'சந்திப்பு பதிவு செய்ய',
     'book.step1': '1. மருத்துவர் & நேரம்',
@@ -212,7 +272,7 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.emergency_desc': 'வழக்கமான நேரங்கள் கிடைக்கவில்லை என்றால், அவசர பராமரிப்பிற்கான சிறப்பு மருத்துவரை உடனடியாக கோரலாம்.',
     'dashboard.emergency_button': 'முன்னுரிமை இடத்தை கோருக ⚡',
     'emergency.modal_title': 'உடனடி முன்னுரிமை மருத்துவர் கோரிக்கை',
-    'emergency.select_doctor': 'மருத்துவரைத் தேர்ந்தெடுத்து விவரங்களைக் காண்க',
+    'emergency.select_doctor': 'மருத்துவரைத் தேர்ந்தெடுக்கவும்',
     'emergency.select_date': 'விருப்பமான தேதியைத் தேர்ந்தெடுக்கவும்',
     'emergency.priority_label': 'முன்னுரிமை நிலையைத் தேர்ந்தெடுக்கவும்',
     'emergency.priority_emergency': 'அவசரம் (உடனடி பராமரிப்பு)',
