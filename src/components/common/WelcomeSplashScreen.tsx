@@ -71,9 +71,6 @@ export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userNa
           </pattern>
           <rect width="100%" height="100%" fill="url(#grid)" />
         </svg>
-
-        {/* Laser Scanner Beam sweep across full screen */}
-        <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-teal-400 via-amber-400 to-transparent shadow-[0_0_25px_#2dd4bf] animate-bounce top-1/3" />
       </div>
 
       {/* Top Spacer for Clean Layout */}
@@ -108,11 +105,7 @@ export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userNa
 
       {/* 🎬 BOTTOM FULL-SCREEN VIDEO PLAYBACK CONTROLS & TIMELINE 🎬 */}
       <div className="relative z-10 p-6 md:p-8 w-full max-w-5xl mx-auto space-y-3">
-        <div className="flex items-center justify-between text-xs font-extrabold text-slate-300 px-2">
-          <div className="flex items-center space-x-2">
-            <span className="text-teal-300 tracking-wider">Loading Dashboard ({secondsLeft}s)</span>
-          </div>
-
+        <div className="flex items-center justify-end text-xs font-extrabold text-slate-300 px-2">
           <button
             onClick={onComplete}
             className="flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 transition-all hover:scale-105"
