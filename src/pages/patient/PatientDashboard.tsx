@@ -459,95 +459,100 @@ export const PatientDashboard: React.FC = () => {
       {/* 🏥 CAREPILOT SNS GUIDELINES INTERACTIVE BANNER 🏥 */}
       <div
         onClick={() => setShowGuideNote(!showGuideNote)}
-        className="p-4 md:p-5 rounded-3xl bg-amber-100/90 border-2 border-amber-300 shadow-md hover:shadow-lg transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-4 group"
+        className="p-4 md:p-5 rounded-3xl bg-gradient-to-r from-teal-950 via-slate-900 to-emerald-950 text-white border-2 border-teal-500/40 shadow-xl hover:shadow-2xl hover:scale-[1.005] transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-4 group"
       >
         <div className="flex items-center space-x-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-amber-400 text-amber-950 font-black flex items-center justify-center text-xl flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs">
-            📝
+          <div className="w-12 h-12 rounded-2xl bg-teal-500 text-slate-950 font-black flex items-center justify-center text-xl flex-shrink-0 group-hover:scale-105 transition-transform shadow-md">
+            📋
           </div>
           <div>
-            <h4 className="text-sm md:text-base font-black text-amber-950 flex items-center gap-2 group-hover:text-amber-900 transition-colors">
+            <h4 className="text-sm md:text-base font-black text-white flex items-center gap-2 group-hover:text-teal-300 transition-colors">
               <span>CarePilot SNS Guidelines & Patient Note</span>
             </h4>
-            <p className="text-xs text-amber-900 font-medium mt-0.5">
+            <p className="text-xs text-slate-300 font-medium mt-0.5">
               Gmail & WhatsApp Alerts (+91 8300096676), Helpline, 24/7 Casualty & Auto-Waitlist Details
             </p>
           </div>
         </div>
 
-        <div className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs transition-all shadow-xs flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
+        <div className="px-5 py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
           <span>{showGuideNote ? 'Close Guidelines' : 'Touch to View Guidelines'}</span>
-          <ChevronRight className={`w-4 h-4 text-amber-950 transition-transform ${showGuideNote ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
+          <ChevronRight className={`w-4 h-4 text-slate-950 transition-transform ${showGuideNote ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
         </div>
       </div>
 
-      {/* 📋 SIMPLE GOLDEN YELLOW CAREPILOT SNS GUIDELINES NOTE 📋 */}
+      {/* 📋 SLEEK TEAL & OBSIDIAN CAREPILOT SNS GUIDELINES NOTE 📋 */}
       {showGuideNote && (
-        <div className="p-6 rounded-3xl bg-yellow-100/90 border-2 border-amber-300 shadow-lg space-y-4 relative overflow-hidden animate-fade-in">
-          <div className="flex items-center justify-between relative z-10 border-b border-amber-300/80 pb-3">
+        <div className="p-6 md:p-7 rounded-3xl bg-slate-900 border-2 border-teal-500/40 shadow-2xl text-white space-y-4 relative overflow-hidden animate-fade-in">
+          {/* Ambient Glow */}
+          <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="flex items-center justify-between relative z-10 border-b border-slate-800 pb-3">
             <div className="flex items-center space-x-3">
-              <span className="text-2xl">📌</span>
+              <div className="w-10 h-10 rounded-2xl bg-teal-500/20 border border-teal-400/30 text-teal-300 font-black flex items-center justify-center shadow-xs text-lg flex-shrink-0">
+                📋
+              </div>
               <div>
-                <h4 className="text-base font-extrabold text-amber-950">CarePilot SNS - Important Hospital Advisory & Guidelines</h4>
-                <p className="text-xs text-amber-900 font-semibold">CarePilot SNS 24/7 Healthcare Support & Multi-Channel Patient Alerts</p>
+                <h4 className="text-base font-extrabold text-white">CarePilot SNS - Important Hospital Advisory & Guidelines</h4>
+                <p className="text-xs text-slate-400 font-semibold">CarePilot SNS 24/7 Healthcare Support & Multi-Channel Patient Alerts</p>
               </div>
             </div>
-            <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-400 text-amber-950 shadow-xs border border-amber-500/30 tracking-wider">
+            <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 tracking-wider">
               NOTE
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-slate-800 font-medium relative z-10">
-            <div className="p-3.5 rounded-2xl bg-white/90 border border-amber-300 shadow-xs space-y-1">
-              <p className="font-extrabold text-amber-950 flex items-center gap-1.5 text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-slate-200 font-medium relative z-10">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-xs space-y-1">
+              <p className="font-extrabold text-teal-300 flex items-center gap-1.5 text-xs">
                 <span>⏰ Reporting Time & Identity Verification</span>
               </p>
-              <p className="text-slate-700 leading-relaxed text-[11px]">
-                Please report to reception 15 mins prior to your scheduled slot. Present your Patient ID (<strong className="text-amber-950">{user?.id || 'PAT-686'}</strong>) or registered phone number.
+              <p className="text-slate-300 leading-relaxed text-[11px]">
+                Please report to reception 15 mins prior to your scheduled slot. Present your Patient ID (<strong className="text-teal-200">{user?.id || 'PAT-686'}</strong>) or registered phone number.
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-white/90 border border-blue-300 shadow-xs space-y-1">
-              <p className="font-extrabold text-blue-950 flex items-center gap-1.5 text-xs">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-xs space-y-1">
+              <p className="font-extrabold text-blue-400 flex items-center gap-1.5 text-xs">
                 <span>📞 Telephone Call-In Booking Helpline (1st Come, 1st Serve)</span>
               </p>
-              <p className="text-slate-700 leading-relaxed text-[11px]">
-                For non-smartphone patients without app access, call helpline (<strong className="text-blue-950">+91 422 2661100</strong>). Reserved limited daily slots are assigned on a strict First-Come, First-Served priority.
+              <p className="text-slate-300 leading-relaxed text-[11px]">
+                For non-smartphone patients without app access, call helpline (<strong className="text-blue-300">+91 422 2661100</strong>). Reserved limited daily slots are assigned on a strict First-Come, First-Served priority.
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-white/90 border border-emerald-300 shadow-xs space-y-1">
-              <p className="font-extrabold text-emerald-950 flex items-center gap-1.5 text-xs">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-xs space-y-1">
+              <p className="font-extrabold text-emerald-400 flex items-center gap-1.5 text-xs">
                 <span>📩 Instant Multi-Channel Alerts (Gmail & WhatsApp)</span>
               </p>
-              <p className="text-slate-700 leading-relaxed text-[11px]">
-                Automated notifications sent via Gmail (<strong className="text-emerald-950">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong className="text-emerald-950">+91 8300096676</strong>) for Account Signup, Slot Booking, Cancellation, Rescheduling & Waitlist Confirmations.
+              <p className="text-slate-300 leading-relaxed text-[11px]">
+                Automated notifications sent via Gmail (<strong className="text-emerald-300">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong className="text-emerald-300">+91 8300096676</strong>) for Account Signup, Slot Booking, Cancellation, Rescheduling & Waitlist Confirmations.
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-white/90 border border-rose-300 shadow-xs space-y-1">
-              <p className="font-extrabold text-rose-950 flex items-center gap-1.5 text-xs">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-xs space-y-1">
+              <p className="font-extrabold text-rose-400 flex items-center gap-1.5 text-xs">
                 <span>⚡ Urgent Priority Care & 24/7 Casualty</span>
               </p>
-              <p className="text-slate-700 leading-relaxed text-[11px]">
-                If regular slots are full, request Urgent Priority Consultation. For acute emergencies, visit our Casualty Unit directly or call Emergency Helpline (<strong className="text-rose-950">0422-2666222</strong>).
+              <p className="text-slate-300 leading-relaxed text-[11px]">
+                If regular slots are full, request Urgent Priority Consultation. For acute emergencies, visit our Casualty Unit directly or call Emergency Helpline (<strong className="text-rose-300">0422-2666222</strong>).
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-white/90 border border-purple-300 shadow-xs space-y-1">
-              <p className="font-extrabold text-purple-950 flex items-center gap-1.5 text-xs">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-xs space-y-1">
+              <p className="font-extrabold text-purple-400 flex items-center gap-1.5 text-xs">
                 <span>🔄 Automatic Slot Cancellation & Real-Time Waitlist Reallocation</span>
               </p>
-              <p className="text-slate-700 leading-relaxed text-[11px]">
+              <p className="text-slate-300 leading-relaxed text-[11px]">
                 If you cancel or reschedule 2 hours in advance, slots are automatically reallocated in real-time to the highest-priority waitlisted patient.
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-white/90 border border-indigo-300 shadow-xs space-y-1">
-              <p className="font-extrabold text-indigo-950 flex items-center gap-1.5 text-xs">
+            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-xs space-y-1">
+              <p className="font-extrabold text-amber-300 flex items-center gap-1.5 text-xs">
                 <span>🤖 CarePilot SNS AI XGBoost Analytics</span>
               </p>
-              <p className="text-slate-700 leading-relaxed text-[11px]">
+              <p className="text-slate-300 leading-relaxed text-[11px]">
                 Machine learning models analyze attendance history to optimize doctor schedules and prevent appointment slot downtime.
               </p>
             </div>
