@@ -401,7 +401,7 @@ export const PatientDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* 📋 VIBRANT GOLDEN YELLOW HOSPITAL ADVISORY & APP FEATURES NOTE 📋 */}
+      {/* 📋 VIBRANT GOLDEN YELLOW CAREPILOT SNS ADVISORY & FEATURES NOTE 📋 */}
       <div className="p-6 md:p-7 rounded-3xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-400 shadow-xl shadow-amber-500/10 space-y-4 relative overflow-hidden">
         {/* Top Decorative Yellow Tag */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-amber-300/30 rounded-full blur-xl pointer-events-none" />
@@ -413,13 +413,13 @@ export const PatientDashboard: React.FC = () => {
             </div>
             <div>
               <h4 className="text-base font-extrabold text-amber-950 flex items-center gap-2">
-                <span>Important Hospital Advisory & CarePilot Platform Features</span>
+                <span>CarePilot SNS - Important Hospital Advisory & Platform Features</span>
               </h4>
-              <p className="text-xs text-amber-900 font-semibold">SNS Medical College 24/7 Healthcare Support & App Capabilities</p>
+              <p className="text-xs text-amber-900 font-semibold">CarePilot SNS 24/7 Healthcare Support & Multi-Channel Patient Alerts</p>
             </div>
           </div>
           <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-500 text-slate-950 shadow-sm border border-amber-600/30 tracking-wider">
-            Official Note
+            CarePilot SNS Official Note
           </span>
         </div>
 
@@ -438,7 +438,7 @@ export const PatientDashboard: React.FC = () => {
               <span>📞 Telephone Call-In Booking Helpline (1st Come, 1st Serve)</span>
             </p>
             <p className="text-slate-700 leading-relaxed text-[11px]">
-              For non-smartphone patients without digital access, call helpline (<strong className="text-blue-950">+91 422 2661100</strong>). Reserved limited daily slots are assigned on a strict First-Come, First-Served priority.
+              For non-smartphone patients without app access, call helpline (<strong className="text-blue-950">+91 422 2661100</strong>). Reserved limited daily slots are assigned on a strict First-Come, First-Served priority.
             </p>
           </div>
 
@@ -447,7 +447,7 @@ export const PatientDashboard: React.FC = () => {
               <span>📩 Instant Multi-Channel Alerts (Gmail & WhatsApp)</span>
             </p>
             <p className="text-slate-700 leading-relaxed text-[11px]">
-              Automated notifications are sent via Email (<strong className="text-emerald-950">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp for Account Signup, Booking, Cancellations, Rescheduling & Waitlist Confirmations.
+              Automated notifications sent via Gmail (<strong className="text-emerald-950">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong className="text-emerald-950">+91 830096676</strong>) for Account Signup, Slot Booking, Cancellation, Rescheduling & Waitlist Confirmations.
             </p>
           </div>
 
@@ -456,7 +456,7 @@ export const PatientDashboard: React.FC = () => {
               <span>⚡ Urgent Priority Care & 24/7 Casualty</span>
             </p>
             <p className="text-slate-700 leading-relaxed text-[11px]">
-              If regular slots are full, request an Urgent Priority Consultation. For acute emergencies, visit our Casualty Unit directly or call Emergency Helpline (<strong className="text-rose-950">0422-2666222</strong>).
+              If regular slots are full, request Urgent Priority Consultation. For acute emergencies, visit our Casualty Unit directly or call Emergency Helpline (<strong className="text-rose-950">0422-2666222</strong>).
             </p>
           </div>
 
@@ -471,7 +471,7 @@ export const PatientDashboard: React.FC = () => {
 
           <div className="p-3.5 rounded-2xl bg-white/90 border border-indigo-300 shadow-xs space-y-1">
             <p className="font-extrabold text-indigo-950 flex items-center gap-1.5 text-xs">
-              <span>🤖 AI XGBoost Attendance Analytics</span>
+              <span>🤖 CarePilot SNS AI XGBoost Analytics</span>
             </p>
             <p className="text-slate-700 leading-relaxed text-[11px]">
               Machine learning models analyze attendance history to optimize doctor schedules and prevent appointment slot downtime.
