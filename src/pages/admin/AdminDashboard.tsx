@@ -328,10 +328,23 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* 🏥 HOSPITAL OVERVIEW & PATIENT STATS HEADER BAR 🏥 */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <div>
-          <h2 className="text-base font-black text-slate-900">Daily Hospital Operations & Patient Attendance</h2>
-          <p className="text-xs text-slate-500">Real-time daily physician schedules, consultation outcomes & emergency waitlist tracking</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+        <div className="flex items-center space-x-3">
+          {/* Blinking Live Indicator Light */}
+          <div className="relative flex h-3 w-3 flex-shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
+          </div>
+
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-black text-slate-900">Daily Hospital Operations & Patient Attendance</h2>
+              <span className="bg-teal-100 text-teal-800 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-teal-300 animate-pulse flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-600 animate-ping" /> LIVE ADMIN FEED
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">Real-time daily physician schedules, consultation outcomes & emergency waitlist tracking</p>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
