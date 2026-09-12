@@ -645,8 +645,8 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 📥 EXPANDABLE PATIENT LIST PANEL (TOGGLED VIA DOWN ARROW ON METRIC CARDS) 📥 */}
-      {expandedMetricKey && (
+      {/* 📥 EXPANDABLE PATIENT LIST PANEL FOR TOP METRIC CARDS 📥 */}
+      {expandedMetricKey && ['appointments', 'attended', 'cancelled', 'rescheduled', 'waitlist', 'accepted_waitlist', 'missed'].includes(expandedMetricKey) && (
         <div className="rounded-3xl bg-white border-2 border-slate-200 shadow-xl p-5 md:p-6 transition-all duration-300 animate-fadeIn space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
             <div className="flex items-center space-x-3">
@@ -1044,8 +1044,111 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* 📥 EXPANDABLE PATIENT LIST PANEL FOR LOW, MEDIUM, HIGH RISK CARDS (RENDERS BELOW RISK CARDS) 📥 */}
+        {expandedMetricKey && ['LOW_RISK', 'MEDIUM_RISK', 'HIGH_RISK'].includes(expandedMetricKey) && (
+          <div className="rounded-3xl bg-white border-2 border-slate-200 shadow-xl p-5 md:p-6 transition-all duration-300 animate-fadeIn space-y-4 mt-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
+              <div className="flex items-center space-x-3">
+                <div className={`p-2.5 rounded-2xl text-white shadow-md ${
+                  expandedMetricKey === 'LOW_RISK' ? 'bg-emerald-600' :
+                  expandedMetricKey === 'MEDIUM_RISK' ? 'bg-amber-600' : 'bg-rose-600'
+                }`}>
+                  {expandedMetricKey === 'LOW_RISK' && <ShieldCheck className="w-5 h-5" />}
+                  {expandedMetricKey === 'MEDIUM_RISK' && <AlertTriangle className="w-5 h-5" />}
+                  {expandedMetricKey === 'HIGH_RISK' && <AlertCircle className="w-5 h-5" />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-black text-slate-900 tracking-tight">
+                      {dateRange === 'yesterday' ? "Yesterday's" : dateRange === 'custom' ? "Selected Date" : "Today's"} {
+                        expandedMetricKey === 'LOW_RISK' ? 'Low Risk' :
+                        expandedMetricKey === 'MEDIUM_RISK' ? 'Medium Risk' : 'High Risk'
+                      } Patient Breakdown
+                    </h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-slate-100 text-slate-800 border border-slate-200">
+                      {getPatientsForMetricKey(expandedMetricKey).length} Patient(s)
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
+                    Detailed AI predictions, risk scores, and clinical factors for {expandedMetricKey.replace('_RISK', '').toLowerCase()} risk patients
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setExpandedMetricKey(null)}
+                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+                title="Close patient list"
+              >
+                <X className="w-4 h-4" />
+                <span>Close</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200/80 shadow-xs bg-white">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-900 text-slate-200 font-black uppercase text-[10px] tracking-wider border-b border-slate-800">
+                    <th className="py-3.5 px-4 text-indigo-300">Appointment ID</th>
+                    <th className="py-3.5 px-4 text-white">Patient Name</th>
+                    <th className="py-3.5 px-4 text-purple-300">Physician & Department</th>
+                    <th className="py-3.5 px-4 text-amber-300">Time & Date</th>
+                    <th className="py-3.5 px-4 text-teal-300">AI Risk Assessment</th>
+                    <th className="py-3.5 px-4 text-emerald-300">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+                  {getPatientsForMetricKey(expandedMetricKey).map((apt) => (
+                    <tr key={apt.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-slate-700">{apt.id}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 via-teal-500 to-emerald-500 text-white flex items-center justify-center font-bold text-xs shadow-xs border border-white">
+                            {apt.patientName ? apt.patientName.charAt(0) : 'P'}
+                          </div>
+                          <span className="font-extrabold text-slate-900 text-xs">{apt.patientName}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div>
+                          <p className="font-bold text-slate-800 text-xs">{apt.doctorName || 'Assigned Specialist'}</p>
+                          <span className="text-[10px] font-semibold text-slate-500">{apt.doctorSpecialization || 'General Practice'}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="font-mono text-slate-700">
+                          <span className="font-bold text-slate-900">{apt.appointmentTime || '09:00 AM'}</span>
+                          <p className="text-[10px] text-slate-400">{apt.appointmentDate || (dateRange === 'yesterday' ? 'Yesterday' : dateRange === 'custom' ? customDate : 'Today')}</p>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <AIRiskBadge risk={apt.risk || { level: 'LOW', probability: 0.1, factors: [] }} showProbability size="sm" />
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase border tracking-wider shadow-xs ${
+                          apt.status === 'CONFIRMED' || apt.status === 'COMPLETED' || apt.status === 'CHECKED_IN'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : apt.status === 'CANCELLED'
+                            ? 'bg-rose-50 text-rose-700 border-rose-200'
+                            : apt.status === 'RESCHEDULED'
+                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                            : 'bg-purple-50 text-purple-700 border-purple-200'
+                        }`}>
+                          {apt.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
     </div>
   );
 };
+
+
