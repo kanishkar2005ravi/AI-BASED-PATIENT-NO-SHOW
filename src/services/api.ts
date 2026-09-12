@@ -597,36 +597,54 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         };
       }
 
-      // Handle JOIN_WAITLIST Action Specifically
-      if (payload.action === 'JOIN_WAITLIST') {
+      // Handle JOIN_WAITLIST & ADD_TO_WAITLIST Action Specifically
+      if (payload.action === 'JOIN_WAITLIST' || payload.action === 'ADD_TO_WAITLIST') {
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
         const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
 
         const pId = payload.data?.patientId || 'PAT-001';
         const dId = payload.data?.doctorId || 'DOC-001';
         const selDoc = localDocs.find(d => d.id === dId) || localDocs[0];
-        const selPat = localPats.find(p => p.id === pId) || { name: payload.data?.patientName || 'Kiran Raj' };
+        const selPat = localPats.find(p => p.id === pId) || { name: payload.data?.patientName || 'Patient' };
+
+        const reasonStr = payload.data?.reason || payload.data?.requestedTimeSlot || 'Urgent Priority Consultation';
+
+        const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
 
         const newItem: WaitlistItem = {
           id: `WTL-${Date.now()}`,
           patientId: pId,
-          patientName: selPat.name,
+          patientName: selPat.name || payload.data?.patientName || 'Patient',
           doctorId: dId,
-          doctorName: selDoc.name,
-          requestedDate: payload.data?.requestedDate || '2026-09-10',
-          requestedTimeSlot: payload.data?.requestedTimeSlot || 'Morning',
-          position: 1,
+          doctorName: selDoc.name || payload.data?.doctorName || 'Doctor',
+          requestedDate: payload.data?.requestedDate || new Date().toISOString().split('T')[0],
+          requestedTimeSlot: reasonStr,
+          position: localWaitlist.filter(w => w.doctorId === dId && w.status === 'WAITING').length + 1,
           status: 'WAITING',
           createdAt: new Date().toISOString().split('T')[0]
         };
 
-        const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
         localWaitlist.unshift(newItem);
         setLocalData(STORAGE_KEYS.WAITLIST, localWaitlist);
 
+        // Dispatches Real-time Notification for Hospital Admin
+        const localNotifs = getLocalData<NotificationItem[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS);
+        const adminNotif: NotificationItem = {
+          id: `NOTIF-${Date.now()}`,
+          userId: 'ADMIN',
+          type: 'Waitlist',
+          title: `Urgent Consultation Request: ${newItem.patientName}`,
+          message: `${newItem.patientName} requested an urgent consultation with ${newItem.doctorName} on ${newItem.requestedDate}. ${reasonStr}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          read: false,
+          actionUrl: '/admin/waitlist'
+        };
+        localNotifs.unshift(adminNotif);
+        setLocalData(STORAGE_KEYS.NOTIFICATIONS, localNotifs);
+
         return {
           success: true,
-          message: resData.message || 'Joined waitlist queue successfully!',
+          message: resData.message || 'Urgent consultation requested and added to waitlist queue!',
           data: newItem as any
         };
       }
@@ -634,11 +652,12 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_WAITLIST Action Specifically
       if (payload.action === 'GET_WAITLIST') {
         const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
-        const wtlData = (Array.isArray(resData.data) && resData.data.length > 0) ? resData.data : localWaitlist;
+        const remoteList = Array.isArray(resData.data) ? resData.data : [];
+        const combined = mergeListsById(localWaitlist, remoteList);
         return {
           success: true,
           message: 'Waitlist retrieved successfully.',
-          data: wtlData as any
+          data: combined as any
         };
       }
 
@@ -646,7 +665,32 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       if (payload.action === 'ACCEPT_WAITLIST_SLOT') {
         const wId = payload.data?.waitlistId || payload.data?.id;
         const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
-        const updated = localWaitlist.map(w => w.id === wId ? { ...w, status: 'CLAIMED' as const } : w);
+        const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
+
+        const targetItem = localWaitlist.find(w => w.id === wId);
+        if (targetItem) {
+          targetItem.status = 'ACCEPTED';
+          const newApt: Appointment = {
+            id: `APT-WTL-${Date.now()}`,
+            patientId: targetItem.patientId,
+            patientName: targetItem.patientName,
+            patientEmail: 'patient@example.com',
+            doctorId: targetItem.doctorId,
+            doctorName: targetItem.doctorName,
+            doctorSpecialization: 'Specialist',
+            appointmentDate: targetItem.requestedDate,
+            appointmentTime: targetItem.requestedTimeSlot || '10:00',
+            appointmentType: 'Consultation',
+            status: 'CONFIRMED',
+            risk: { level: 'LOW', probability: 0.1, factors: [] },
+            confirmedByPatient: true,
+            createdAt: new Date().toISOString().split('T')[0]
+          };
+          localApts.unshift(newApt);
+          setLocalData(STORAGE_KEYS.APPOINTMENTS, localApts);
+        }
+
+        const updated = localWaitlist.map(w => w.id === wId ? { ...w, status: 'ACCEPTED' as const } : w);
         setLocalData(STORAGE_KEYS.WAITLIST, updated);
 
         return {
@@ -1185,6 +1229,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
     }
 
     // 16. WAITLIST ACTIONS (JOIN, GET, LEAVE)
+    case 'ADD_TO_WAITLIST':
     case 'JOIN_WAITLIST': {
       const { patientId, patientName, doctorId, doctorName, requestedDate, requestedTimeSlot } = data;
       const newEntry: WaitlistItem = {
