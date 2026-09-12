@@ -142,7 +142,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
   const navSections = role === 'admin' ? adminNavSections : patientNavSections;
 
   return (
-    <aside className="w-68 bg-slate-950 text-slate-300 min-h-screen flex flex-col justify-between p-4 hidden md:flex border-r border-slate-800/80 flex-shrink-0 relative overflow-hidden select-none">
+    <aside className="w-56 bg-gradient-to-b from-teal-950 via-slate-950 to-slate-900 text-slate-200 min-h-screen flex flex-col justify-between p-3 hidden md:flex border-r border-teal-500/20 flex-shrink-0 relative overflow-hidden select-none">
       {/* Top 7-Color Rainbow Neon Stripe */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 via-amber-400 via-emerald-400 via-teal-400 via-cyan-400 via-indigo-500 to-purple-600 animate-pulse" />
 
@@ -150,35 +150,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       <div className="absolute top-20 -left-12 w-36 h-36 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
       <div className="absolute bottom-32 -right-12 w-36 h-36 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
 
-      <div className="relative z-10 space-y-5">
+      <div className="relative z-10 space-y-4">
         {/* Brand Header */}
-        <div className="px-2 py-2 flex items-center justify-between">
+        <div className="px-1 py-1 flex items-center justify-between">
           <CarePilotLogo size="sm" textLight={true} />
         </div>
 
         {/* Role & User Badge Banner */}
-        <div className="px-1">
-          <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3 shadow-inner flex items-center space-x-3 backdrop-blur-md">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-600 text-slate-950 font-black text-sm flex items-center justify-center shadow-md shadow-teal-500/20">
+        <div className="px-0.5">
+          <div className="bg-teal-900/30 border border-teal-500/30 rounded-xl p-2.5 shadow-inner flex items-center space-x-2.5 backdrop-blur-md">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-teal-500/20 flex-shrink-0">
               {user?.name ? user.name.charAt(0).toUpperCase() : 'P'}
             </div>
             <div className="overflow-hidden flex-1">
               <div className="flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-teal-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-[9px] font-black uppercase tracking-wider text-teal-300">
                   {role === 'patient' ? 'Patient Portal' : 'Hospital Admin'}
                 </span>
               </div>
-              <p className="text-xs font-bold text-white truncate leading-tight mt-0.5">{user?.name || user?.email}</p>
+              <p className="text-xs font-extrabold text-white truncate leading-tight mt-0.5">{user?.name || user?.email}</p>
             </div>
           </div>
         </div>
 
         {/* Navigation Sections */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {navSections.map((section, idx) => (
-            <div key={idx} className="space-y-1.5">
-              <p className="px-3 text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1">
+            <div key={idx} className="space-y-1">
+              <p className="px-2 text-[10px] font-black uppercase tracking-widest text-teal-400/70 flex items-center gap-1">
                 <span>{section.title}</span>
               </p>
               <nav className="space-y-1">
@@ -188,9 +188,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                       <button
                         key="logout-item"
                         onClick={handleLogout}
-                        className="w-full group flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs text-rose-400 hover:text-white hover:bg-rose-950/60 hover:translate-x-1 border border-transparent hover:border-rose-900/40 transition-all duration-200 text-left"
+                        className="w-full group flex items-center justify-between px-3 py-2 rounded-lg font-bold text-xs text-rose-400 hover:text-white hover:bg-rose-950/60 hover:translate-x-1 border border-transparent hover:border-rose-900/40 transition-all duration-200 text-left"
                       >
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2.5">
                           <span className="flex-shrink-0 transition-transform group-hover:scale-110 text-rose-400">
                             {item.icon}
                           </span>
@@ -205,14 +205,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                       key={item.path}
                       to={item.path}
                       className={({ isActive }) =>
-                        `group flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all duration-200 ${
+                        `group flex items-center justify-between px-3 py-2 rounded-lg font-bold text-xs transition-all duration-200 ${
                           isActive
-                            ? `${item.activeGradient} scale-[1.02]`
-                            : 'text-slate-400 hover:text-white hover:bg-slate-900/90 hover:translate-x-1 border border-transparent'
+                            ? `${item.activeGradient} scale-[1.01]`
+                            : 'text-slate-300 hover:text-white hover:bg-teal-900/40 hover:translate-x-1 border border-transparent'
                         }`
                       }
                     >
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-2.5">
                         <span className="flex-shrink-0 transition-transform group-hover:scale-110">
                           {item.icon}
                         </span>
@@ -234,8 +234,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       </div>
 
       {/* Footer Section */}
-      <div className="relative z-10 pt-3 border-t border-slate-800/80 space-y-2">
-        <div className="px-2 py-1 flex items-center justify-between text-[10px] text-slate-500 font-semibold">
+      <div className="relative z-10 pt-2 border-t border-teal-500/20 space-y-2">
+        <div className="px-2 py-1 flex items-center justify-between text-[10px] text-slate-400 font-semibold">
           <span className="flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> CarePilot v2.5
           </span>
@@ -245,7 +245,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
         {role === 'admin' && (
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-900/40 transition-all"
+            className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-900/40 transition-all"
           >
             <LogOut className="w-4 h-4 flex-shrink-0 text-rose-400" />
             <span>{t('nav.logout')}</span>
