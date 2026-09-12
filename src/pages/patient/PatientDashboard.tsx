@@ -399,24 +399,85 @@ export const PatientDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* 🔔 ACTIVE WAITLIST POSITION (IF ANY) 🔔 */}
-      {waitlist.length > 0 && (
-        <Card title="Active Waitlist Position">
-          <div className="space-y-2">
-            {waitlist.map(w => (
-              <div key={w.id} className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-xs flex justify-between items-center">
-                <div>
-                  <p className="font-extrabold text-purple-950">{w.doctorName}</p>
-                  <p className="text-purple-700 font-medium">{w.requestedDate}</p>
-                </div>
-                <Badge variant="purple" size="md">
-                  Pos #{w.position}
-                </Badge>
+      {/* 🏥 SNS 24/7 HEALTHCARE SUPPORT & APP FEATURES 🏥 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Card 1: SNS 24/7 Medical Services */}
+        <Card title="SNS Medical College 24/7 Healthcare Support">
+          <div className="space-y-3.5 text-xs text-slate-700">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/80 flex items-start space-x-3">
+              <div className="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center font-black flex-shrink-0 shadow-xs mt-0.5">
+                <Hospital className="w-5 h-5" />
               </div>
-            ))}
+              <div>
+                <h4 className="font-extrabold text-slate-900 text-sm">24/7 Outpatient & Emergency Support</h4>
+                <p className="text-slate-600 text-[11px] mt-0.5 font-medium leading-relaxed">
+                  SNS Medical College & Hospital provides round-the-clock emergency casualty care, intensive consultation, and outpatient services across all major medical specialties.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5 font-bold">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center space-x-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <span className="text-[11px] text-slate-800">NABH Accredited</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center space-x-2">
+                <Stethoscope className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                <span className="text-[11px] text-slate-800">100+ Specialist Docs</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center space-x-2">
+                <Activity className="w-4 h-4 text-rose-500 flex-shrink-0" />
+                <span className="text-[11px] text-slate-800">Emergency ICU</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center space-x-2">
+                <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                <span className="text-[11px] text-slate-800">AI Priority Care</span>
+              </div>
+            </div>
           </div>
         </Card>
-      )}
+
+        {/* Card 2: Platform App Features */}
+        <Card title="CarePilot Platform App Features">
+          <div className="space-y-3 text-xs">
+            <div className="p-3 rounded-2xl bg-amber-50/60 border border-amber-200/70 flex items-start space-x-3">
+              <div className="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
+                🤖
+              </div>
+              <div>
+                <p className="font-extrabold text-slate-900 text-xs">AI No-Show Risk Analytics</p>
+                <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
+                  Machine learning model analyzes attendance probability to optimize schedule slotting & dispatch smart pre-visit reminders.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-teal-50/60 border border-teal-200/70 flex items-start space-x-3">
+              <div className="w-8 h-8 rounded-xl bg-teal-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
+                ⚡
+              </div>
+              <div>
+                <p className="font-extrabold text-slate-900 text-xs">Same-Day Priority Booking</p>
+                <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
+                  Request urgent faculty specialist consultations when regular slots are full with instant admin verification.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-purple-50/60 border border-purple-200/70 flex items-start space-x-3">
+              <div className="w-8 h-8 rounded-xl bg-purple-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
+                🔄
+              </div>
+              <div>
+                <p className="font-extrabold text-slate-900 text-xs">Smart Auto-Fill Waitlist Queue</p>
+                <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
+                  Automatically reallocates cancelled appointment slots to highest-priority waitlisted patients in real time.
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
 
       {/* 🩺 ALL FACULTY PHYSICIANS MODAL 🩺 */}
       {showAllDoctorsModal && (
