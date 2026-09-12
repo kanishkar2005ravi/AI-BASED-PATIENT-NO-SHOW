@@ -159,18 +159,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
 
         {/* Role & User Badge Banner */}
         <div className="px-0.5">
-          <div className="bg-teal-900/30 border border-teal-500/30 rounded-xl p-2.5 shadow-inner flex items-center space-x-2.5 backdrop-blur-md">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-teal-500/20 flex-shrink-0">
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'P'}
-            </div>
-            <div className="overflow-hidden flex-1">
-              <div className="flex items-center space-x-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-[9px] font-black uppercase tracking-wider text-teal-300">
+          <div className="bg-gradient-to-r from-teal-900/50 via-slate-900/80 to-emerald-950/50 border-2 border-teal-400/80 rounded-xl p-2.5 shadow-lg shadow-teal-500/25 backdrop-blur-md animate-pulse">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-teal-500/20 flex-shrink-0">
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'P'}
+              </div>
+              <div className="overflow-hidden flex-1">
+                <span className="text-[9px] font-black uppercase tracking-wider text-teal-300 block">
                   {role === 'patient' ? 'Patient Portal' : 'Hospital Admin'}
                 </span>
+                <p className="text-xs font-extrabold text-white truncate leading-tight mt-0.5">{user?.name || user?.email}</p>
               </div>
-              <p className="text-xs font-extrabold text-white truncate leading-tight mt-0.5">{user?.name || user?.email}</p>
             </div>
           </div>
         </div>
