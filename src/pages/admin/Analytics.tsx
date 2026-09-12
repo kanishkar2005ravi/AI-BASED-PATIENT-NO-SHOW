@@ -563,68 +563,6 @@ export const Analytics: React.FC = () => {
           </div>
         </Card>
       </div>
-
-      {/* Model Performance Overview Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <Card className="text-center bg-gradient-to-br from-white to-teal-50/30 border-teal-200">
-          <span className="text-xs font-bold uppercase text-slate-500">Accuracy</span>
-          <h3 className="text-3xl font-black text-teal-700 mt-1">{(modelPerf.accuracy * 100).toFixed(1)}%</h3>
-          <p className="text-[11px] text-slate-400 mt-1">Overall correctness</p>
-        </Card>
-
-        <Card className="text-center bg-gradient-to-br from-white to-emerald-50/30 border-emerald-200">
-          <span className="text-xs font-bold uppercase text-slate-500">Precision</span>
-          <h3 className="text-3xl font-black text-emerald-700 mt-1">{(modelPerf.precision * 100).toFixed(1)}%</h3>
-          <p className="text-[11px] text-slate-400 mt-1">True no-show accuracy</p>
-        </Card>
-
-        <Card className="text-center bg-gradient-to-br from-white to-sky-50/30 border-sky-200">
-          <span className="text-xs font-bold uppercase text-slate-500">Recall</span>
-          <h3 className="text-3xl font-black text-sky-700 mt-1">{(modelPerf.recall * 100).toFixed(1)}%</h3>
-          <p className="text-[11px] text-slate-400 mt-1">Sensitivity / detection</p>
-        </Card>
-
-        <Card className="text-center bg-gradient-to-br from-white to-purple-50/30 border-purple-200">
-          <span className="text-xs font-bold uppercase text-slate-500">F1 Score</span>
-          <h3 className="text-3xl font-black text-purple-700 mt-1">{modelPerf.f1Score.toFixed(3)}</h3>
-          <p className="text-[11px] text-slate-400 mt-1">Harmonic mean score</p>
-        </Card>
-
-        <Card className="text-center bg-gradient-to-br from-white to-rose-50/30 border-rose-200 col-span-2 sm:col-span-1">
-          <span className="text-xs font-bold uppercase text-slate-500">ROC-AUC</span>
-          <h3 className="text-3xl font-black text-rose-700 mt-1">{modelPerf.rocAuc.toFixed(3)}</h3>
-          <p className="text-[11px] text-slate-400 mt-1">Area under curve</p>
-        </Card>
-      </div>
-
-      {/* Confusion Matrix Card */}
-      <Card title="Model Confusion Matrix" subtitle="Validation against empirical hospital attendance logs">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
-            <span className="text-xs font-bold text-emerald-800 uppercase">True Positive (TP)</span>
-            <h4 className="text-3xl font-black text-emerald-900 mt-1">{modelPerf.confusionMatrix.truePositive}</h4>
-            <p className="text-[11px] text-emerald-700 mt-1">Predicted No-Show & Actually No-Show</p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center">
-            <span className="text-xs font-bold text-amber-800 uppercase">False Positive (FP)</span>
-            <h4 className="text-3xl font-black text-amber-900 mt-1">{modelPerf.confusionMatrix.falsePositive}</h4>
-            <p className="text-[11px] text-amber-700 mt-1">Predicted No-Show & Actually Attended</p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-center">
-            <span className="text-xs font-bold text-rose-800 uppercase">False Negative (FN)</span>
-            <h4 className="text-3xl font-black text-rose-900 mt-1">{modelPerf.confusionMatrix.falseNegative}</h4>
-            <p className="text-[11px] text-rose-700 mt-1">Predicted Attended & Missed Visit</p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-center">
-            <span className="text-xs font-bold text-sky-800 uppercase">True Negative (TN)</span>
-            <h4 className="text-3xl font-black text-sky-900 mt-1">{modelPerf.confusionMatrix.trueNegative}</h4>
-            <p className="text-[11px] text-sky-700 mt-1">Predicted Attended & Actually Attended</p>
-          </div>
-        </div>
-      </Card>
     </div>
   );
 };
