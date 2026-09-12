@@ -87,7 +87,7 @@ export const CreatePatient: React.FC = () => {
             <Input
               label="Full Name *"
               name="name"
-              placeholder="e.g. Kiran Raj"
+              placeholder="Enter patient full name..."
               value={formData.name}
               onChange={handleChange}
               required
@@ -97,7 +97,7 @@ export const CreatePatient: React.FC = () => {
               label="Email Address *"
               type="email"
               name="email"
-              placeholder="patient@example.com"
+              placeholder="Enter email address..."
               value={formData.email}
               onChange={handleChange}
               required
@@ -106,7 +106,7 @@ export const CreatePatient: React.FC = () => {
             <Input
               label="Phone Number"
               name="phone"
-              placeholder="9876543210"
+              placeholder="Enter 10-digit mobile number..."
               value={formData.phone}
               onChange={handleChange}
             />
@@ -135,7 +135,7 @@ export const CreatePatient: React.FC = () => {
           <Input
             label="Full Home Address"
             name="address"
-            placeholder="Coimbatore, Tamil Nadu"
+            placeholder="Enter complete residential home address..."
             value={formData.address}
             onChange={handleChange}
           />

@@ -75,7 +75,7 @@ export const CreateDoctor: React.FC = () => {
             <Input
               label="Doctor Name *"
               name="name"
-              placeholder="e.g. Dr. Arun Kumar"
+              placeholder="Enter doctor full name (e.g. Dr. Arun Kumar)..."
               value={formData.name}
               onChange={handleChange}
               required
@@ -99,7 +99,7 @@ export const CreateDoctor: React.FC = () => {
             <Input
               label="Department Name"
               name="department"
-              placeholder="Cardiology Department"
+              placeholder="Enter department name..."
               value={formData.department}
               onChange={handleChange}
             />
@@ -108,7 +108,7 @@ export const CreateDoctor: React.FC = () => {
               label="Email Address"
               type="email"
               name="email"
-              placeholder="arun.kumar@aicareschedule.com"
+              placeholder="Enter doctor email address..."
               value={formData.email}
               onChange={handleChange}
             />
@@ -116,7 +116,7 @@ export const CreateDoctor: React.FC = () => {
             <Input
               label="Phone Contact"
               name="phone"
-              placeholder="+91 98401 22334"
+              placeholder="Enter contact phone number..."
               value={formData.phone}
               onChange={handleChange}
             />

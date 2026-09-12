@@ -54,45 +54,49 @@ export const BookAppointment: React.FC = () => {
     };
   }, []);
 
-  // Fetch Available Slots when Doctor or Date Changes & Deduplicate
+  // Generate 25 slots per doctor per day (20 mins each with Morning & Evening Tea Breaks)
+  // Morning: 09:00-10:40 (5 slots) + ☕ Tea Break 10:40-11:00 + 11:00-12:00 (3 slots) = 8 slots
+  // Evening: 14:00-16:00 (6 slots) + ☕ Tea Break 16:00-16:20 + 16:20-20:00 (11 slots) = 17 slots
+  // Total = 8 + 17 = 25 SLOTS PER DAY
+  const ALL_25_SLOTS = [
+    // Morning Part 1 (5 slots)
+    '09:00', '09:20', '09:40', '10:00', '10:20',
+    // Morning Part 2 (3 slots after 10:40 AM Tea Break)
+    '11:00', '11:20', '11:40',
+    // Evening Part 1 (6 slots after 12:00-14:00 Lunch Break)
+    '14:00', '14:20', '14:40', '15:00', '15:20', '15:40',
+    // Evening Part 2 (11 slots after 16:00 Tea Break)
+    '16:20', '16:40', '17:00', '17:20', '17:40', '18:00', '18:20', '18:40', '19:00', '19:20', '19:40'
+  ];
+
+  const [bookedTimeSlots, setBookedTimeSlots] = useState<string[]>([]);
+
+  // Fetch Appointments to find Booked 20-minute slots for selected doctor & date
   useEffect(() => {
     if (!selectedDoctorId) return;
     setLoadingSlots(true);
-    callBackend({ action: 'GET_DOCTOR_AVAILABILITY', data: { doctorId: selectedDoctorId } }).then(res => {
-      if (res.success && res.data) {
-        const schedule: TimeSlot[] = res.data.weeklySchedule || [];
-        const freeSlots = schedule.filter(s => s.status === 'Available');
+    callBackend({ action: 'GET_APPOINTMENTS', data: { doctorId: selectedDoctorId } }).then(res => {
+      if (res.success && Array.isArray(res.data)) {
+        const booked = res.data
+          .filter((a: Appointment) => 
+            a.doctorId === selectedDoctorId && 
+            a.appointmentDate === selectedDate && 
+            a.status !== 'CANCELLED'
+          )
+          .map((a: Appointment) => a.appointmentTime);
+        
+        setBookedTimeSlots(booked);
 
-        const rawTimes: string[] = [];
-        freeSlots.forEach(s => {
-          const startH = parseInt(s.startTime.split(':')[0], 10);
-          const endH = parseInt(s.endTime.split(':')[0], 10);
-          if (!isNaN(startH) && !isNaN(endH) && endH > startH) {
-            for (let h = startH; h < endH; h++) {
-              rawTimes.push(`${String(h).padStart(2, '0')}:00`);
-            }
-          } else {
-            rawTimes.push(s.startTime);
-          }
-        });
-
-        let uniqueTimes = Array.from(new Set(rawTimes));
-        // Fallback default slots if schedule has no entries
-        if (uniqueTimes.length === 0) {
-          uniqueTimes = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00'];
-        }
-
-        setAvailableSlots(uniqueTimes);
-
-        if (uniqueTimes.length > 0) {
-          setSelectedTimeSlot(uniqueTimes[0]);
+        // Find first available unbooked slot
+        const firstAvailable = ALL_25_SLOTS.find(slot => !booked.includes(slot));
+        if (firstAvailable) {
+          setSelectedTimeSlot(firstAvailable);
         } else {
           setSelectedTimeSlot('');
         }
       } else {
-        const defaultSlots = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00'];
-        setAvailableSlots(defaultSlots);
-        setSelectedTimeSlot(defaultSlots[0]);
+        setBookedTimeSlots([]);
+        setSelectedTimeSlot(ALL_25_SLOTS[0]);
       }
       setLoadingSlots(false);
     });
@@ -110,18 +114,28 @@ export const BookAppointment: React.FC = () => {
     const res = await callBackend({
       action: 'BOOK_APPOINTMENT',
       data: {
-        patient_id: user?.id || 'PAT-001',
+        patient_id: user?.id || 'PAT-1001',
+        patientId: user?.id || 'PAT-1001',
         doctor_id: selectedDoctorId,
-        appointment_date: selectedDate,
-        appointment_time: selectedTimeSlot,
-        reason: appointmentType,
-        patientId: user?.id || 'PAT-001',
         doctorId: selectedDoctorId,
+        appointment_date: selectedDate,
         appointmentDate: selectedDate,
+        appointment_time: selectedTimeSlot,
         appointmentTime: selectedTimeSlot,
-        appointmentType
+        reason: appointmentType,
+        appointmentType,
+        email: user?.email || '',
+        patientEmail: user?.email || '',
+        patient_email: user?.email || '',
+        phone: user?.phone || '',
+        patientPhone: user?.phone || '',
+        patient_phone: user?.phone || '',
+        patientName: user?.name || '',
+        patient_name: user?.name || '',
+        name: user?.name || ''
       }
     });
+
 
     setBookingLoading(false);
     if (res.success) {
@@ -247,33 +261,169 @@ export const BookAppointment: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                4. Select Available Time Slot
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  4. Select 20-Minute Time Slot (25 Slots Daily)
+                </label>
+                <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
+                  {25 - bookedTimeSlots.length} / 25 Available
+                </span>
+              </div>
 
               {loadingSlots ? (
-                <p className="text-xs text-slate-500 italic py-3">Fetching open slots for {selectedDoctor?.name}...</p>
-              ) : availableSlots.length === 0 ? (
-                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
-                  No open slots found for this doctor on the selected date. Please select another doctor or date, or join the waitlist.
-                </div>
+                <p className="text-xs text-slate-500 italic py-3">Checking slot availability for {selectedDoctor?.name}...</p>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {availableSlots.map((tStr, index) => (
-                    <button
-                      type="button"
-                      key={`${tStr}-${index}`}
-                      onClick={() => setSelectedTimeSlot(tStr)}
-                      className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
-                        selectedTimeSlot === tStr
-                          ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>{formatTime(tStr)}</span>
-                    </button>
-                  ))}
+                <div className="space-y-4">
+                  {/* Morning Session Part 1 (5 Slots: 09:00 - 10:40 AM) */}
+                  <div>
+                    <h5 className="text-xs font-bold text-slate-700 mb-2 flex items-center">
+                      <Clock className="w-3.5 h-3.5 mr-1 text-amber-500" /> Morning Session (9:00 AM – 10:40 AM &bull; 5 Slots)
+                    </h5>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {ALL_25_SLOTS.slice(0, 5).map((tStr) => {
+                        const isBooked = bookedTimeSlots.includes(tStr);
+                        const isSelected = selectedTimeSlot === tStr;
+
+                        return (
+                          <button
+                            type="button"
+                            key={tStr}
+                            disabled={isBooked}
+                            onClick={() => setSelectedTimeSlot(tStr)}
+                            className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-0.5 ${
+                              isBooked
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through opacity-70'
+                                : isSelected
+                                ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-600/20'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-teal-400 hover:bg-teal-50/50'
+                            }`}
+                          >
+                            <span>{formatTime(tStr)}</span>
+                            <span className="text-[10px] font-medium">
+                              {isBooked ? 'BOOKED' : '20 min'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* ☕ Morning Tea Break Banner: 10:40 AM - 11:00 AM */}
+                  <div className="py-2 px-3 bg-amber-50 rounded-xl border border-amber-200 text-center text-xs font-semibold text-amber-900 flex items-center justify-center space-x-2">
+                    <span>☕ 10:40 AM – 11:00 AM Morning Tea Break (20 Mins Break)</span>
+                  </div>
+
+                  {/* Morning Session Part 2 (3 Slots: 11:00 AM - 12:00 PM) */}
+                  <div>
+                    <h5 className="text-xs font-bold text-slate-700 mb-2 flex items-center">
+                      <Clock className="w-3.5 h-3.5 mr-1 text-amber-600" /> Late Morning Session (11:00 AM – 12:00 PM &bull; 3 Slots)
+                    </h5>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {ALL_25_SLOTS.slice(5, 8).map((tStr) => {
+                        const isBooked = bookedTimeSlots.includes(tStr);
+                        const isSelected = selectedTimeSlot === tStr;
+
+                        return (
+                          <button
+                            type="button"
+                            key={tStr}
+                            disabled={isBooked}
+                            onClick={() => setSelectedTimeSlot(tStr)}
+                            className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-0.5 ${
+                              isBooked
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through opacity-70'
+                                : isSelected
+                                ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-600/20'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-teal-400 hover:bg-teal-50/50'
+                            }`}
+                          >
+                            <span>{formatTime(tStr)}</span>
+                            <span className="text-[10px] font-medium">
+                              {isBooked ? 'BOOKED' : '20 min'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 🍱 Lunch Break Banner: 12:00 PM - 2:00 PM */}
+                  <div className="py-2 px-3 bg-slate-100 rounded-xl border border-slate-200 text-center text-xs font-semibold text-slate-600 flex items-center justify-center space-x-2">
+                    <span>🍱 12:00 PM – 02:00 PM Lunch Break (Doctor Unavailable &bull; 2 Hours)</span>
+                  </div>
+
+                  {/* Afternoon Session (6 Slots: 02:00 PM - 04:00 PM) */}
+                  <div>
+                    <h5 className="text-xs font-bold text-slate-700 mb-2 flex items-center">
+                      <Clock className="w-3.5 h-3.5 mr-1 text-indigo-500" /> Afternoon Session (2:00 PM – 4:00 PM &bull; 6 Slots)
+                    </h5>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {ALL_25_SLOTS.slice(8, 14).map((tStr) => {
+                        const isBooked = bookedTimeSlots.includes(tStr);
+                        const isSelected = selectedTimeSlot === tStr;
+
+                        return (
+                          <button
+                            type="button"
+                            key={tStr}
+                            disabled={isBooked}
+                            onClick={() => setSelectedTimeSlot(tStr)}
+                            className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-0.5 ${
+                              isBooked
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through opacity-70'
+                                : isSelected
+                                ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-600/20'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-teal-400 hover:bg-teal-50/50'
+                            }`}
+                          >
+                            <span>{formatTime(tStr)}</span>
+                            <span className="text-[10px] font-medium">
+                              {isBooked ? 'BOOKED' : '20 min'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* ☕ Evening Tea Break Banner: 04:00 PM - 04:20 PM */}
+                  <div className="py-2 px-3 bg-amber-50 rounded-xl border border-amber-200 text-center text-xs font-semibold text-amber-900 flex items-center justify-center space-x-2">
+                    <span>☕ 04:00 PM – 04:20 PM Evening Tea Break (20 Mins Break)</span>
+                  </div>
+
+                  {/* Evening Session (11 Slots: 04:20 PM - 08:00 PM) */}
+                  <div>
+                    <h5 className="text-xs font-bold text-slate-700 mb-2 flex items-center">
+                      <Clock className="w-3.5 h-3.5 mr-1 text-purple-600" /> Evening Session (4:20 PM – 8:00 PM &bull; 11 Slots)
+                    </h5>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {ALL_25_SLOTS.slice(14).map((tStr) => {
+                        const isBooked = bookedTimeSlots.includes(tStr);
+                        const isSelected = selectedTimeSlot === tStr;
+
+                        return (
+                          <button
+                            type="button"
+                            key={tStr}
+                            disabled={isBooked}
+                            onClick={() => setSelectedTimeSlot(tStr)}
+                            className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-0.5 ${
+                              isBooked
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through opacity-70'
+                                : isSelected
+                                ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-600/20'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-teal-400 hover:bg-teal-50/50'
+                            }`}
+                          >
+                            <span>{formatTime(tStr)}</span>
+                            <span className="text-[10px] font-medium">
+                              {isBooked ? 'BOOKED' : '20 min'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

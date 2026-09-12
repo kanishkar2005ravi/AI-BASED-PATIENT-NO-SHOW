@@ -113,22 +113,50 @@ export const Doctors: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
+              <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={<Clock className="w-3.5 h-3.5" />}
+                    onClick={() => navigate(`/admin/doctors/${doc.id}/availability`)}
+                  >
+                    Availability
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon={<Edit className="w-3.5 h-3.5" />}
+                    onClick={() => navigate(`/admin/doctors/${doc.id}`)}
+                  >
+                    Manage Profile
+                  </Button>
+                </div>
                 <Button
-                  variant="outline"
+                  variant="primary"
                   size="sm"
-                  icon={<Clock className="w-3.5 h-3.5" />}
-                  onClick={() => navigate(`/admin/doctors/${doc.id}/availability`)}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                  icon={<Mail className="w-3.5 h-3.5" />}
+                  onClick={async () => {
+                    showToast(`Sending today's patient roster to ${doc.name}...`, 'info');
+                    const res = await callBackend({
+                      action: 'SEND_DOCTOR_SCHEDULE',
+                      data: {
+                        doctorId: doc.id,
+                        doctorName: doc.name,
+                        email: doc.email,
+                        phone: doc.phone || '+919876543210',
+                        date: new Date().toISOString().split('T')[0]
+                      }
+                    });
+                    if (res.success) {
+                      showToast(`Today's patient schedule sent to ${doc.name} via Email & WhatsApp!`, 'success');
+                    } else {
+                      showToast(`Failed to send daily schedule to ${doc.name}.`, 'error');
+                    }
+                  }}
                 >
-                  Availability
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<Edit className="w-3.5 h-3.5" />}
-                  onClick={() => navigate(`/admin/doctors/${doc.id}`)}
-                >
-                  Manage Profile
+                  Send Today's Schedule (Email/WhatsApp)
                 </Button>
               </div>
             </Card>

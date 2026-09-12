@@ -11,12 +11,14 @@ import { AIRiskBadge } from '../../components/ai/AIRiskBadge';
 import { AIRiskExplanationModal } from '../../components/ai/AIRiskExplanationModal';
 import { callBackend } from '../../services/api';
 import { Appointment, AIRiskAssessment, AppointmentStatus } from '../../types';
-import { Search, Eye, XCircle, Calendar, Filter, RefreshCw, ShieldCheck, UserCheck, UserX, LogOut, CheckCircle } from 'lucide-react';
+import { Search, Eye, XCircle, Calendar, Filter, RefreshCw, ShieldCheck, UserCheck, UserX, LogOut, CheckCircle, Stethoscope, Clock } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 export const Appointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [filteredAppointments, setFilteredAppointments] = useState<Appointment[]>([]);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>('ALL');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -29,10 +31,16 @@ export const Appointments: React.FC = () => {
 
   const fetchAppointments = () => {
     setLoading(true);
-    callBackend({ action: 'GET_APPOINTMENTS' }).then(res => {
-      if (res.success && Array.isArray(res.data)) {
-        setAppointments(res.data);
-        setFilteredAppointments(res.data);
+    Promise.all([
+      callBackend({ action: 'GET_APPOINTMENTS' }),
+      callBackend({ action: 'GET_DOCTORS' })
+    ]).then(([aptsRes, docsRes]) => {
+      if (aptsRes.success && Array.isArray(aptsRes.data)) {
+        setAppointments(aptsRes.data);
+        setFilteredAppointments(aptsRes.data);
+      }
+      if (docsRes.success && Array.isArray(docsRes.data)) {
+        setDoctors(docsRes.data);
       }
       setLoading(false);
     });
@@ -44,6 +52,9 @@ export const Appointments: React.FC = () => {
 
   useEffect(() => {
     let result = appointments;
+    if (selectedDoctorId !== 'ALL') {
+      result = result.filter(a => a.doctorId === selectedDoctorId || a.doctorName.toLowerCase().includes(doctors.find(d => d.id === selectedDoctorId)?.name?.toLowerCase() || ''));
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -60,7 +71,16 @@ export const Appointments: React.FC = () => {
       result = result.filter(a => a.risk?.level === riskFilter);
     }
     setFilteredAppointments(result);
-  }, [searchQuery, statusFilter, riskFilter, appointments]);
+  }, [searchQuery, statusFilter, riskFilter, selectedDoctorId, appointments, doctors]);
+
+  // Doctor Specific / Filtered Appointments Risk Breakdown
+  const doctorAppointments = selectedDoctorId === 'ALL'
+    ? appointments
+    : appointments.filter(a => a.doctorId === selectedDoctorId || a.doctorName.toLowerCase().includes(doctors.find(d => d.id === selectedDoctorId)?.name?.toLowerCase() || ''));
+
+  const lowRiskAppointments = doctorAppointments.filter(a => !a.risk || a.risk.level === 'LOW');
+  const medRiskAppointments = doctorAppointments.filter(a => a.risk?.level === 'MEDIUM');
+  const highRiskAppointments = doctorAppointments.filter(a => a.risk?.level === 'HIGH');
 
   const handleUpdateStatus = async (aptId: string, newStatus: AppointmentStatus) => {
     const res = await callBackend({
@@ -99,6 +119,153 @@ export const Appointments: React.FC = () => {
         <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={fetchAppointments}>
           Sync Data
         </Button>
+      </div>
+
+      {/* Doctor Selector Tabs */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <Stethoscope className="w-4 h-4 text-teal-600" />
+            <span>Select Physician to View Risk-Separated Schedule:</span>
+          </h3>
+          <span className="text-xs font-semibold text-slate-500">
+            {doctors.length} Doctors Registered
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setSelectedDoctorId('ALL')}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+              selectedDoctorId === 'ALL'
+                ? 'bg-slate-900 text-white shadow-md'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            All Doctors ({appointments.length})
+          </button>
+
+          {doctors.map(doc => {
+            const docAptCount = appointments.filter(a => a.doctorId === doc.id || a.doctorName === doc.name).length;
+            return (
+              <button
+                key={doc.id}
+                onClick={() => setSelectedDoctorId(doc.id)}
+                className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  selectedDoctorId === doc.id
+                    ? 'bg-teal-600 text-white shadow-md ring-2 ring-teal-400'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                <span>{doc.name}</span>
+                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold ${
+                  selectedDoctorId === doc.id ? 'bg-teal-800 text-teal-100' : 'bg-slate-200 text-slate-800'
+                }`}>
+                  {docAptCount}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 🟢 🟡 🔴 3-Column Risk Breakdown Cards (Low, Medium, High Risk) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* LOW RISK CARD */}
+        <div className="bg-emerald-50/50 border-2 border-emerald-200 rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between border-b border-emerald-200 pb-3">
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+              <h4 className="font-extrabold text-sm text-emerald-900 uppercase tracking-wide">Low Risk Patients</h4>
+            </div>
+            <span className="bg-emerald-600 text-white px-2.5 py-1 rounded-xl text-xs font-black">
+              {lowRiskAppointments.length}
+            </span>
+          </div>
+
+          <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+            {lowRiskAppointments.length === 0 ? (
+              <p className="text-xs text-emerald-700 italic py-4 text-center">No low risk patients scheduled.</p>
+            ) : (
+              lowRiskAppointments.map(apt => (
+                <div key={apt.id} className="bg-white p-3 rounded-xl border border-emerald-100 shadow-2xs hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-[11px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">{apt.id}</span>
+                    <span className="text-xs font-extrabold text-emerald-700 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {apt.appointmentTime}
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-slate-900">{apt.patientName}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5 truncate">Dr: {apt.doctorName}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* MEDIUM RISK CARD */}
+        <div className="bg-amber-50/50 border-2 border-amber-200 rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between border-b border-amber-200 pb-3">
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></span>
+              <h4 className="font-extrabold text-sm text-amber-900 uppercase tracking-wide">Medium Risk Patients</h4>
+            </div>
+            <span className="bg-amber-600 text-white px-2.5 py-1 rounded-xl text-xs font-black">
+              {medRiskAppointments.length}
+            </span>
+          </div>
+
+          <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+            {medRiskAppointments.length === 0 ? (
+              <p className="text-xs text-amber-700 italic py-4 text-center">No medium risk patients scheduled.</p>
+            ) : (
+              medRiskAppointments.map(apt => (
+                <div key={apt.id} className="bg-white p-3 rounded-xl border border-amber-100 shadow-2xs hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-[11px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">{apt.id}</span>
+                    <span className="text-xs font-extrabold text-amber-700 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {apt.appointmentTime}
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-slate-900">{apt.patientName}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5 truncate">Dr: {apt.doctorName}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* HIGH RISK CARD */}
+        <div className="bg-rose-50/50 border-2 border-rose-200 rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between border-b border-rose-200 pb-3">
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></span>
+              <h4 className="font-extrabold text-sm text-rose-900 uppercase tracking-wide">High Risk Patients</h4>
+            </div>
+            <span className="bg-rose-600 text-white px-2.5 py-1 rounded-xl text-xs font-black">
+              {highRiskAppointments.length}
+            </span>
+          </div>
+
+          <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+            {highRiskAppointments.length === 0 ? (
+              <p className="text-xs text-rose-700 italic py-4 text-center">No high risk patients scheduled.</p>
+            ) : (
+              highRiskAppointments.map(apt => (
+                <div key={apt.id} className="bg-white p-3 rounded-xl border border-rose-100 shadow-2xs hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-[11px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded">{apt.id}</span>
+                    <span className="text-xs font-extrabold text-rose-700 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {apt.appointmentTime}
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-slate-900">{apt.patientName}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5 truncate">Dr: {apt.doctorName}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Filter Bar */}

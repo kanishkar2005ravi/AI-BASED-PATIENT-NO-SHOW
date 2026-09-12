@@ -8,8 +8,9 @@ import { Loading } from '../../components/common/Loading';
 import { useAuth } from '../../context/AuthContext';
 import { callBackend } from '../../services/api';
 import { Appointment, WaitlistItem, NotificationItem } from '../../types';
-import { Calendar, Clock, ChevronRight, Bell, Sparkles, HeartPulse } from 'lucide-react';
+import { Calendar, Clock, ChevronRight, Bell, Sparkles, HeartPulse, Play } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { WelcomeSplashScreen } from '../../components/common/WelcomeSplashScreen';
 
 export const PatientDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -20,6 +21,8 @@ export const PatientDashboard: React.FC = () => {
   const [waitlist, setWaitlist] = useState<WaitlistItem[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(true);
+
 
   const fetchData = () => {
     setLoading(true);
@@ -75,20 +78,39 @@ export const PatientDashboard: React.FC = () => {
     <div className="space-y-6 pb-12">
       <Header title="Patient Dashboard" />
 
+      {/* 5-Second 7-Color Animated Welcome Entrance Screen */}
+      {showWelcomeSplash && (
+        <WelcomeSplashScreen
+          userName={user?.name || 'Patient'}
+          role="patient"
+          onComplete={() => setShowWelcomeSplash(false)}
+        />
+      )}
+
       {/* Greeting Header Banner */}
       <div className="bg-gradient-to-r from-teal-800 via-teal-900 to-slate-900 text-white p-6 md:p-8 rounded-3xl shadow-lg relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-teal-300 flex items-center gap-1.5 mb-1">
-              <Sparkles className="w-4 h-4 text-teal-300" /> Patient Care Portal
-            </span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-teal-300 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-teal-300" /> Patient Care Portal
+              </span>
+              <button
+                onClick={() => setShowWelcomeSplash(true)}
+                className="px-2.5 py-0.5 rounded-full bg-teal-500/20 hover:bg-teal-500/40 border border-teal-400/30 text-[10px] font-black text-teal-200 transition-all flex items-center gap-1"
+                title="Replay 5s Welcome Animation"
+              >
+                <Play className="w-3 h-3 fill-current" /> Replay Welcome Intro
+              </button>
+            </div>
+
             <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
-              Good morning, {user?.name || 'Patient'}
+              Welcome to CarePilot SNS
             </h1>
-            <p className="text-xs md:text-sm text-teal-100 mt-1">
-              View your medical appointments, request new consultations, and track waitlist updates.
+            <p className="text-xs md:text-sm text-teal-200 font-semibold mt-1">
+              Run by <span className="text-amber-300 font-black">SNS Medical College and Hospital</span> • Hello, {user?.name || 'Patient'}!
             </p>
           </div>
 
@@ -101,8 +123,10 @@ export const PatientDashboard: React.FC = () => {
           >
             Book Appointment
           </Button>
+
         </div>
       </div>
+
 
       {/* Next Appointment Hero Card (NO AI Risk Details, NO Check-in button) */}
       {nextAppointment ? (

@@ -37,13 +37,16 @@ import {
 } from 'recharts';
 import { AIRiskBadge } from '../../components/ai/AIRiskBadge';
 import { useNavigate } from 'react-router-dom';
+import { WelcomeSplashScreen } from '../../components/common/WelcomeSplashScreen';
 
 export const AdminDashboard: React.FC = () => {
   const [dateRange, setDateRange] = useState<'today' | '7days' | '30days' | 'custom'>('7days');
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(true);
   const navigate = useNavigate();
+
 
   useEffect(() => {
     let isMounted = true;
@@ -77,12 +80,19 @@ export const AdminDashboard: React.FC = () => {
           lowRiskCount: 0
         };
 
+        const lowCount = aptsList.filter(a => !a.risk || a.risk.level === 'LOW').length;
+        const medCount = aptsList.filter(a => a.risk && a.risk.level === 'MEDIUM').length;
+        const highCount = aptsList.filter(a => a.risk && a.risk.level === 'HIGH').length;
+
         const liveAnalytics: AnalyticsData = {
           ...baseAnalytics,
           totalPatients: patsList.length > 0 ? patsList.length : baseAnalytics.totalPatients,
           totalDoctors: docsList.length > 0 ? docsList.length : baseAnalytics.totalDoctors,
           totalAppointments: aptsList.length > 0 ? aptsList.length : baseAnalytics.totalAppointments,
-          todayAppointments: todayCount > 0 ? todayCount : (aptsList.length > 0 ? todayCount : baseAnalytics.todayAppointments)
+          todayAppointments: todayCount > 0 ? todayCount : (aptsList.length > 0 ? todayCount : baseAnalytics.todayAppointments),
+          lowRiskCount: aptsList.length > 0 ? lowCount : (baseAnalytics.lowRiskCount || 18),
+          mediumRiskCount: aptsList.length > 0 ? medCount : (baseAnalytics.mediumRiskCount || 6),
+          highRiskCount: aptsList.length > 0 ? highCount : (baseAnalytics.highRiskCount || 3)
         };
 
         setAnalytics(liveAnalytics);
@@ -116,6 +126,16 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header title="Admin Dashboard" />
+
+      {/* 5-Second 7-Color Animated Welcome Entrance Screen */}
+      {showWelcomeSplash && (
+        <WelcomeSplashScreen
+          userName="Administrator"
+          role="admin"
+          onComplete={() => setShowWelcomeSplash(false)}
+        />
+      )}
+
 
       {/* Date Range Selector Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
@@ -208,7 +228,49 @@ export const AdminDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Row 2: Recent Appointments Table */}
+      {/* Row 2: AI No-Show Risk Split Breakdown Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-50/50 to-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Low Risk Patients</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.lowRiskCount}</h3>
+              <span className="text-xs font-semibold text-emerald-600">Standard 10h Reminders</span>
+            </div>
+            <div className="p-3 bg-emerald-100 rounded-2xl text-emerald-600 font-bold text-xs">
+              LOW
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-50/50 to-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Medium Risk Patients</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.mediumRiskCount}</h3>
+              <span className="text-xs font-semibold text-amber-600">Priority 10h Reminders</span>
+            </div>
+            <div className="p-3 bg-amber-100 rounded-2xl text-amber-600 font-bold text-xs">
+              MED
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-l-4 border-l-rose-500 bg-gradient-to-r from-rose-50/50 to-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-rose-800 uppercase tracking-wider">High Risk Patients</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.highRiskCount}</h3>
+              <span className="text-xs font-semibold text-rose-600">Urgent 24h, 12h, 6h Reminders</span>
+            </div>
+            <div className="p-3 bg-rose-100 rounded-2xl text-rose-600 font-bold text-xs">
+              HIGH
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Row 3: Recent Appointments Table */}
       <Card
         title="Recent Hospital Appointments & AI Risk"
         action={

@@ -85,7 +85,7 @@ function normalizePatient(p: any): Patient {
   const status = p.status === 'Inactive' || p.is_active === false ? 'Inactive' : 'Active';
   const totalAppointments = Number(p.totalAppointments ?? p.total_appointments ?? p.appointments_count ?? 0);
   const attendedAppointments = Number(p.attendedAppointments ?? p.attended_appointments ?? 0);
-  const noShowAppointments = Number(p.noShowAppointments ?? p.no_show_appointments ?? 0);
+  const noShowAppointments = Number(p.noShowAppointments ?? p.no_show_appointments ?? p.no_show_count ?? 0);
   const cancelledAppointments = Number(p.cancelledAppointments ?? p.cancelled_appointments ?? 0);
   const rescheduledAppointments = Number(p.rescheduledAppointments ?? p.rescheduled_appointments ?? 0);
   const noShowRate = Number(p.noShowRate ?? p.noshow_rate ?? (totalAppointments > 0 ? Math.round((noShowAppointments / totalAppointments) * 100) : 0));
@@ -136,14 +136,20 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       let requestBody: any;
       if (payload.action === 'BOOK_APPOINTMENT') {
         requestBody = {
-          patient_id: payload.data?.patientId || payload.data?.patient_id || 'PAT-001',
-          doctor_id: payload.data?.doctorId || payload.data?.doctor_id || 'DOC-001',
+          patient_id: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
+          patientId: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
+          doctor_id: payload.data?.doctorId || payload.data?.doctor_id || 'DOC-101',
+          doctorId: payload.data?.doctorId || payload.data?.doctor_id || 'DOC-101',
           appointment_date: payload.data?.appointmentDate || payload.data?.appointment_date,
           appointment_time: payload.data?.appointmentTime || payload.data?.appointment_time,
           reason: payload.data?.appointmentType || payload.data?.reason || 'Routine Checkup',
+          email: payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email,
+          phone: payload.data?.phone || payload.data?.patientPhone || payload.data?.patient_phone,
+          patient_name: payload.data?.patientName || payload.data?.patient_name || payload.data?.name,
           action: 'BOOK_APPOINTMENT',
           data: payload.data
         };
+
       } else if (payload.action === 'CREATE_PATIENT') {
         requestBody = {
           action: 'CREATE_PATIENT',
@@ -414,6 +420,20 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           message: resData.message || 'Contact details updated successfully.',
           patient: updatedPatient,
           data: updatedPatient as any
+        };
+      }
+
+      // Handle DELETE_PATIENT Action Specifically
+      if (payload.action === 'DELETE_PATIENT' || payload.action === 'REMOVE_PATIENT') {
+        const pId = payload.data?.patientId || payload.data?.id;
+        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+        const updatedPats = localPats.filter(p => p.id !== pId && p.email !== pId);
+        setLocalData(STORAGE_KEYS.PATIENTS, updatedPats);
+
+        return {
+          success: true,
+          message: resData.message || 'Patient account removed successfully.',
+          data: updatedPats as any
         };
       }
 
@@ -735,30 +755,26 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           };
         }
       } else if (role === 'patient') {
-        const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.role === 'patient');
-        const foundPatient = patients.find(p => p.email.toLowerCase() === email.toLowerCase());
+        const inputLower = email.toLowerCase().trim();
+        const foundUser = users.find(u => u.email.toLowerCase() === inputLower || u.id.toLowerCase() === inputLower);
+        const foundPatient = patients.find(p => p.email.toLowerCase() === inputLower || p.id.toLowerCase() === inputLower);
 
-        if (foundUser || foundPatient) {
-          const patId = foundPatient?.id || foundUser?.id || 'PAT-001';
-          const patName = foundPatient?.name || foundUser?.name || 'Kiran Raj';
-          const patEmail = foundPatient?.email || foundUser?.email || email;
-          return {
-            success: true,
-            message: 'Patient login successful',
-            user: {
-              id: patId,
-              name: patName,
-              email: patEmail,
-              role: 'patient'
-            }
-          };
-        }
+        const patId = foundPatient?.id || foundUser?.id || (inputLower.startsWith('pat') ? email.toUpperCase() : 'PAT-001');
+        const patName = foundPatient?.name || foundUser?.name || 'Valued Patient';
+        const patEmail = foundPatient?.email || foundUser?.email || (inputLower.includes('@') ? email : 'patient@example.com');
+
+        return {
+          success: true,
+          message: 'Patient login successful',
+          user: {
+            id: patId,
+            name: patName,
+            email: patEmail,
+            role: 'patient'
+          }
+        };
       }
-
-      return {
-        success: false,
-        message: 'Invalid email or password.'
-      };
+      return { success: false, message: 'Invalid credentials.' };
     }
 
     // 2. CREATE_PATIENT
@@ -850,6 +866,14 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       patients[idx].status = action === 'ACTIVATE_PATIENT' ? 'Active' : 'Inactive';
       setLocalData(STORAGE_KEYS.PATIENTS, patients);
       return { success: true, message: `Patient ${action === 'ACTIVATE_PATIENT' ? 'activated' : 'deactivated'} successfully.`, patient: patients[idx], data: patients[idx] as any };
+    }
+
+    case 'DELETE_PATIENT':
+    case 'REMOVE_PATIENT': {
+      const targetId = data.patientId || data.id;
+      const updatedPats = patients.filter(p => p.id !== targetId && p.email !== targetId);
+      setLocalData(STORAGE_KEYS.PATIENTS, updatedPats);
+      return { success: true, message: 'Patient removed successfully.', data: updatedPats as any };
     }
 
     // 7. CREATE_DOCTOR
