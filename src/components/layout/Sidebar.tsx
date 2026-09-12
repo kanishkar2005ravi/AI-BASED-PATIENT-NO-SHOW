@@ -235,12 +235,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       </div>
 
       {/* Footer Section */}
-      <div className="relative z-10 pt-2 border-t border-teal-500/20 space-y-2">
-        <div className="px-2 py-1 flex items-center justify-between text-[10px] text-slate-400 font-semibold">
-          <span className="text-teal-400 font-bold">SNS Medical College</span>
-        </div>
-
-        {role === 'admin' && (
+      {role === 'admin' && (
+        <div className="relative z-10 pt-2 border-t border-teal-500/20 space-y-2">
           <button
             onClick={handleLogout}
             className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-900/40 transition-all"
@@ -248,8 +244,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
             <LogOut className="w-4 h-4 flex-shrink-0 text-rose-400" />
             <span>{t('nav.logout')}</span>
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </aside>
   );
 };
