@@ -67,10 +67,31 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 md:px-8 py-3.5 sticky top-0 z-20 flex items-center justify-between shadow-sm">
-      {/* Search Input (Left) */}
-      <div className="flex items-center space-x-4 w-1/4">
+      {/* Left Controls (To the Left of SNS Medical College Badge) */}
+      <div className="flex items-center space-x-2.5 w-1/4">
+        {/* Language Switcher Button (English / Tamil) */}
+        <button
+          onClick={() => setLanguage(language === 'en' ? 'ta' : 'en')}
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 border border-teal-300/80 text-teal-900 text-xs font-black transition-all shadow-xs flex-shrink-0 cursor-pointer"
+          title="Switch Language / மொழியை மாற்றுக"
+        >
+          <Globe className="w-4 h-4 text-teal-700 animate-spin-slow" />
+          <span>{language === 'en' ? '🇬🇧 EN' : '🇮🇳 தமிழ்'}</span>
+        </button>
+
+        {/* Refresh Symbol Button to Refresh App */}
+        <button
+          onClick={handleRefreshApp}
+          className={`p-2 rounded-xl text-slate-600 hover:text-teal-600 hover:bg-teal-50 border border-slate-200/80 transition-all shadow-xs flex items-center justify-center cursor-pointer flex-shrink-0 group ${
+            isRefreshing ? 'bg-teal-100 text-teal-700 border-teal-300' : ''
+          }`}
+          title="Refresh App / பக்கத்தைப் புதுப்பிக்கவும்"
+        >
+          <RotateCw className={`w-4 h-4 text-slate-600 group-hover:text-teal-600 ${isRefreshing ? 'animate-spin text-teal-600' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+        </button>
+
         {showSearch && (
-          <div className="relative flex-1 hidden sm:block">
+          <div className="relative flex-1 hidden xl:block">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -110,30 +131,8 @@ export const Header: React.FC<HeaderProps> = ({
         </p>
       </div>
 
-
       {/* Right Controls */}
       <div className="flex items-center justify-end space-x-3 w-1/4">
-        {/* Language Switcher Button (English / Tamil) */}
-        <button
-          onClick={() => setLanguage(language === 'en' ? 'ta' : 'en')}
-          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 border border-teal-300/80 text-teal-900 text-xs font-black transition-all shadow-xs"
-          title="Switch Language / மொழியை மாற்றுக"
-        >
-          <Globe className="w-4 h-4 text-teal-700 animate-spin-slow" />
-          <span>{language === 'en' ? '🇬🇧 EN' : '🇮🇳 தமிழ்'}</span>
-        </button>
-
-        {/* Refresh Symbol Button to Refresh App */}
-        <button
-          onClick={handleRefreshApp}
-          className={`p-2 rounded-xl text-slate-600 hover:text-teal-600 hover:bg-teal-50 border border-slate-200/80 transition-all shadow-xs flex items-center justify-center cursor-pointer group ${
-            isRefreshing ? 'bg-teal-100 text-teal-700 border-teal-300' : ''
-          }`}
-          title="Refresh App / பக்கத்தைப் புதுப்பிக்கவும்"
-        >
-          <RotateCw className={`w-4 h-4 text-slate-600 group-hover:text-teal-600 ${isRefreshing ? 'animate-spin text-teal-600' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
-        </button>
-
         {/* Notifications Icon */}
         <button
           onClick={handleNotificationClick}
