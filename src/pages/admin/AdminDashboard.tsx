@@ -39,7 +39,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminDashboard: React.FC = () => {
-  const [dateRange, setDateRange] = useState<'today' | '7days' | '30days' | 'custom'>('7days');
+  const [dateRange, setDateRange] = useState<'today' | 'yesterday' | '7days' | '30days' | 'custom'>('today');
+  const [customDate, setCustomDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +62,14 @@ export const AdminDashboard: React.FC = () => {
     acceptedWaitlistCount: 0
   });
 
+  const getFilteredMetricLabel = (type: 'appointments' | 'cancelled' | 'rescheduled') => {
+    if (dateRange === 'yesterday') return t(`metric.yesterdays_${type}`);
+    if (dateRange === 'custom') return t(`metric.custom_${type}`);
+    if (dateRange === '7days') return t(`metric.7days_${type}`);
+    if (dateRange === '30days') return t(`metric.30days_${type}`);
+    return t(`metric.todays_${type}`);
+  };
+
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -79,7 +88,30 @@ export const AdminDashboard: React.FC = () => {
         const waitList: WaitlistItem[] = (waitRes.success && Array.isArray(waitRes.data)) ? waitRes.data : [];
 
         const todayStr = new Date().toISOString().split('T')[0];
-        const todayApts = aptsList.filter(a => a.appointmentDate === todayStr);
+        let targetDateStr = todayStr;
+
+        if (dateRange === 'yesterday') {
+          const y = new Date();
+          y.setDate(y.getDate() - 1);
+          targetDateStr = y.toISOString().split('T')[0];
+        } else if (dateRange === 'custom') {
+          targetDateStr = customDate;
+        }
+
+        let dateFilteredApts: Appointment[] = [];
+        if (dateRange === '7days') {
+          const d7 = new Date();
+          d7.setDate(d7.getDate() - 7);
+          const d7Str = d7.toISOString().split('T')[0];
+          dateFilteredApts = aptsList.filter(a => a.appointmentDate >= d7Str && a.appointmentDate <= todayStr);
+        } else if (dateRange === '30days') {
+          const d30 = new Date();
+          d30.setDate(d30.getDate() - 30);
+          const d30Str = d30.toISOString().split('T')[0];
+          dateFilteredApts = aptsList.filter(a => a.appointmentDate >= d30Str && a.appointmentDate <= todayStr);
+        } else {
+          dateFilteredApts = aptsList.filter(a => a.appointmentDate === targetDateStr);
+        }
 
         const calculatedMetrics = {
           totalPatients: patsList.length > 0 ? patsList.length : 200,
@@ -88,9 +120,9 @@ export const AdminDashboard: React.FC = () => {
           totalRescheduled: aptsList.filter(a => a.status === 'RESCHEDULED').length,
           totalMissed: aptsList.filter(a => a.status === 'NO_SHOW').length,
           activeDoctors: docsList.filter(d => d.status === 'Active').length || docsList.length || 4,
-          todayAppointments: todayApts.length,
-          todayCancelled: todayApts.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length,
-          todayRescheduled: todayApts.filter(a => a.status === 'RESCHEDULED').length,
+          todayAppointments: dateFilteredApts.length,
+          todayCancelled: dateFilteredApts.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length,
+          todayRescheduled: dateFilteredApts.filter(a => a.status === 'RESCHEDULED').length,
           waitlistCount: waitList.length,
           acceptedWaitlistCount: waitList.filter(w => w.status === 'ACCEPTED').length
         };
@@ -135,7 +167,7 @@ export const AdminDashboard: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [dateRange]);
+  }, [dateRange, customDate]);
 
   if (loading || !analytics) {
     return (
@@ -290,26 +322,43 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* 🏥 HOSPITAL OVERVIEW & PATIENT STATS HEADER BAR 🏥 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div>
           <h2 className="text-base font-black text-slate-900">Hospital Overview & Patient Stats</h2>
-          <p className="text-xs text-slate-500">Real-time today's attendance metrics & waitlist stats</p>
+          <p className="text-xs text-slate-500">Real-time attendance metrics & waitlist stats</p>
         </div>
 
-        <div className="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
-          {(['today', '7days', '30days'] as const).map(range => (
-            <button
-              key={range}
-              onClick={() => setDateRange(range)}
-              className={`px-3 py-1.5 rounded-lg transition-all capitalize cursor-pointer ${
-                dateRange === range
-                  ? 'bg-gradient-to-r from-amber-500 via-teal-600 to-purple-600 text-white shadow-sm font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
+            {(['today', 'yesterday', '7days', '30days'] as const).map(range => (
+              <button
+                key={range}
+                onClick={() => setDateRange(range)}
+                className={`px-3 py-1.5 rounded-lg transition-all capitalize cursor-pointer ${
+                  dateRange === range
+                    ? 'bg-gradient-to-r from-amber-500 via-teal-600 to-purple-600 text-white shadow-sm font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {range === '7days' ? '7 Days' : range === '30days' ? '30 Days' : range === 'yesterday' ? 'Yesterday' : 'Today'}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
+            <Calendar className="w-3.5 h-3.5 text-slate-500 ml-1" />
+            <input
+              type="date"
+              value={customDate}
+              onChange={(e) => {
+                setCustomDate(e.target.value);
+                setDateRange('custom');
+              }}
+              className={`px-2 py-1 rounded-lg border text-xs bg-white text-slate-800 font-semibold focus:outline-none transition-all cursor-pointer ${
+                dateRange === 'custom' ? 'ring-2 ring-teal-500 border-teal-500' : 'border-slate-300'
               }`}
-            >
-              {range === '7days' ? '7 Days' : range === '30days' ? '30 Days' : 'Today'}
-            </button>
-          ))}
+            />
+          </div>
         </div>
       </div>
 
@@ -333,7 +382,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Box 2: Today's Appointments */}
+        {/* Box 2: Appointments */}
         <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
@@ -346,11 +395,11 @@ export const AdminDashboard: React.FC = () => {
           </div>
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-teal-600 leading-none">{metrics.todayAppointments}</p>
-            <p className="text-[10px] font-extrabold text-teal-900 uppercase tracking-wider">{t('metric.todays_appointments')}</p>
+            <p className="text-[10px] font-extrabold text-teal-900 uppercase tracking-wider">{getFilteredMetricLabel('appointments')}</p>
           </div>
         </div>
 
-        {/* Box 3: Today's Appointments Cancelled */}
+        {/* Box 3: Appointments Cancelled */}
         <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
@@ -363,11 +412,11 @@ export const AdminDashboard: React.FC = () => {
           </div>
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-rose-600 leading-none">{metrics.todayCancelled}</p>
-            <p className="text-[10px] font-extrabold text-rose-900 uppercase tracking-wider">{t('metric.todays_cancelled')}</p>
+            <p className="text-[10px] font-extrabold text-rose-900 uppercase tracking-wider">{getFilteredMetricLabel('cancelled')}</p>
           </div>
         </div>
 
-        {/* Box 4: Today's Appointments Rescheduled */}
+        {/* Box 4: Appointments Rescheduled */}
         <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
@@ -380,7 +429,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-blue-600 leading-none">{metrics.todayRescheduled}</p>
-            <p className="text-[10px] font-extrabold text-blue-900 uppercase tracking-wider">{t('metric.todays_rescheduled')}</p>
+            <p className="text-[10px] font-extrabold text-blue-900 uppercase tracking-wider">{getFilteredMetricLabel('rescheduled')}</p>
           </div>
         </div>
 
