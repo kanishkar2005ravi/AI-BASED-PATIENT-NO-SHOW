@@ -13,6 +13,7 @@ import { callBackend } from '../../services/api';
 import { Appointment, AIRiskAssessment, AppointmentStatus } from '../../types';
 import { Search, Eye, XCircle, Calendar, Filter, RefreshCw, ShieldCheck, UserCheck, UserX, LogOut, CheckCircle, Stethoscope, Clock } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { BackButton } from '../../components/common/BackButton';
 
 export const Appointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -103,6 +104,7 @@ export const Appointments: React.FC = () => {
         searchPlaceholder="Search by Patient, Doctor, or Appointment ID..."
         onSearch={setSearchQuery}
       />
+      <BackButton variant="admin" />
 
       {/* Admin Topic Banner */}
       <div className="bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 flex items-center justify-between">

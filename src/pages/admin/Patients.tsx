@@ -10,6 +10,7 @@ import { callBackend } from '../../services/api';
 import { Patient } from '../../types';
 import { UserPlus, Search, Eye, Edit, UserX, UserCheck, ShieldAlert, Trash2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { BackButton } from '../../components/common/BackButton';
 
 export const Patients: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -84,6 +85,7 @@ export const Patients: React.FC = () => {
         searchPlaceholder="Search patients by name, ID, or phone..."
         onSearch={setSearchQuery}
       />
+      <BackButton variant="admin" />
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-2">

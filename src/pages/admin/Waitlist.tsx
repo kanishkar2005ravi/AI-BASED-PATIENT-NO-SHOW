@@ -8,6 +8,7 @@ import { callBackend } from '../../services/api';
 import { WaitlistItem } from '../../types';
 import { Clock, CheckCircle2, AlertCircle, Sparkles, RefreshCw, UserCheck } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { BackButton } from '../../components/common/BackButton';
 
 export const Waitlist: React.FC = () => {
   const [waitlist, setWaitlist] = useState<WaitlistItem[]>([]);
@@ -41,6 +42,7 @@ export const Waitlist: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header title="Automated Waitlist Recovery System" />
+      <BackButton variant="admin" />
 
       {/* Recovery Information Banner */}
       <div className="bg-gradient-to-r from-teal-900 via-slate-900 to-teal-950 text-white p-6 rounded-3xl shadow-md">

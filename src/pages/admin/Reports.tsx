@@ -6,6 +6,7 @@ import { callBackend } from '../../services/api';
 import { downloadCSV } from '../../utils/helpers';
 import { FileText, Download, Printer, CheckCircle, BarChart2, Calendar, Users, Stethoscope, Clock, Brain } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { BackButton } from '../../components/common/BackButton';
 
 export const Reports: React.FC = () => {
   const { showToast } = useToast();
@@ -86,6 +87,7 @@ export const Reports: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header title="Hospital Analytics & Data Reports Export" />
+      <BackButton variant="admin" />
 
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

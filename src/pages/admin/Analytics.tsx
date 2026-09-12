@@ -9,6 +9,8 @@ import { INITIAL_MODEL_PERFORMANCE } from '../../utils/mockData';
 import { Brain, Sparkles, Target, Activity, Award, BarChart3, CheckCircle2, AlertCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
+import { BackButton } from '../../components/common/BackButton';
+
 export const Analytics: React.FC = () => {
   const [modelPerf, setModelPerf] = useState<ModelPerformance | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,6 +53,7 @@ export const Analytics: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header title="AI No-Show Model Performance Analytics" />
+      <BackButton variant="admin" />
 
       {/* Demo Data Notice Banner */}
       {demoActive && (

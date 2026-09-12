@@ -128,17 +128,6 @@ export const AdminDashboard: React.FC = () => {
     <div className="space-y-6 pb-12">
       <Header title="Admin Dashboard" />
 
-      {/* 🔙 BACK TO LOGIN PORTAL BUTTON 🔙 */}
-      <div>
-        <button
-          onClick={() => navigate('/login')}
-          className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold text-xs shadow-xs group cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4 text-amber-600 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Login Portal</span>
-        </button>
-      </div>
-
       {/* 5-Second 7-Color Animated Welcome Entrance Screen */}
       {showWelcomeSplash && (
         <WelcomeSplashScreen

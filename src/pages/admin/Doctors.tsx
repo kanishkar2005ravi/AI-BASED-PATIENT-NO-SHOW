@@ -10,6 +10,7 @@ import { callBackend } from '../../services/api';
 import { Doctor } from '../../types';
 import { Stethoscope, Plus, Calendar, Clock, Edit, UserX, UserCheck, Mail, Phone } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { BackButton } from '../../components/common/BackButton';
 
 export const Doctors: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -48,6 +49,7 @@ export const Doctors: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header title="Hospital Doctor Management" />
+      <BackButton variant="admin" />
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
