@@ -32,7 +32,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   FileText,
-  X
+  X,
+  RefreshCw,
+  XCircle
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { WelcomeSplashScreen } from '../../components/common/WelcomeSplashScreen';
@@ -135,8 +137,9 @@ export const PatientDashboard: React.FC = () => {
     a => a.status === 'CONFIRMED' || a.status === 'CHECKED_IN' || a.status === 'RESCHEDULED'
   );
 
-  const attendedCount = appointments.filter(a => a.status === 'COMPLETED').length;
-  const noShowCount = appointments.filter(a => a.status === 'NO_SHOW').length;
+  const attendedCount = appointments.filter(a => a.status === 'COMPLETED' || a.status === 'CHECKED_OUT' || a.status === 'ATTENDED').length;
+  const rescheduledCount = appointments.filter(a => a.status === 'RESCHEDULED').length;
+  const cancelledCount = appointments.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length;
 
   const handleCancel = async (aptId: string) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
@@ -183,73 +186,90 @@ export const PatientDashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* 📊 PATIENT PORTAL SQUARE METRIC BOXES WITH CIRCULAR ANIMATIONS 📊 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* Box 1: Total Visits */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
-          <div className="relative w-12 h-12 flex items-center justify-center">
-            <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+      {/* 📊 PATIENT PORTAL 5 METRIC STATS BOXES IN ONE ROW 📊 */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        {/* Box 1: Total Booking */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-teal-100" fill="transparent" />
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={0} strokeLinecap="round" className="text-teal-500 transition-all duration-700" fill="transparent" />
             </svg>
-            <div className="p-2.5 rounded-full bg-teal-50 text-teal-600 group-hover:scale-110 transition-transform">
-              <Calendar className="w-5 h-5" />
+            <div className="p-2 rounded-full bg-teal-50 text-teal-600 group-hover:scale-110 transition-transform">
+              <Calendar className="w-4 h-4" />
             </div>
           </div>
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-slate-900 leading-none">{appointments.length}</p>
-            <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">{t('metric.total_visits')}</p>
+            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{t('metric.total_booking')}</p>
           </div>
         </div>
 
-        {/* Box 2: Attended Visits */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
-          <div className="relative w-12 h-12 flex items-center justify-center">
-            <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+        {/* Box 2: Total Attended */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-emerald-100" fill="transparent" />
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={appointments.length > 0 ? 125.6 - (125.6 * (attendedCount / appointments.length)) : 0} strokeLinecap="round" className="text-emerald-500 transition-all duration-700" fill="transparent" />
             </svg>
-            <div className="p-2.5 rounded-full bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform">
-              <UserCheck className="w-5 h-5" />
+            <div className="p-2 rounded-full bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform">
+              <UserCheck className="w-4 h-4" />
             </div>
           </div>
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-emerald-600 leading-none">{attendedCount}</p>
-            <p className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider">{t('metric.attended')}</p>
+            <p className="text-[10px] font-bold text-emerald-900 uppercase tracking-wider">{t('metric.total_attended')}</p>
           </div>
         </div>
 
-        {/* Box 3: Missed Visits */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
-          <div className="relative w-12 h-12 flex items-center justify-center">
-            <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
-              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-rose-100" fill="transparent" />
-              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={appointments.length > 0 ? 125.6 - (125.6 * (noShowCount / appointments.length)) : 125.6} strokeLinecap="round" className="text-rose-500 transition-all duration-700" fill="transparent" />
+        {/* Box 3: Total Rescheduled */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-blue-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={appointments.length > 0 ? 125.6 - (125.6 * (rescheduledCount / appointments.length)) : 125.6} strokeLinecap="round" className="text-blue-500 transition-all duration-700" fill="transparent" />
             </svg>
-            <div className="p-2.5 rounded-full bg-rose-50 text-rose-600 group-hover:scale-110 transition-transform">
-              <AlertCircle className="w-5 h-5" />
+            <div className="p-2 rounded-full bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform">
+              <RefreshCw className="w-4 h-4" />
             </div>
           </div>
           <div className="space-y-0.5">
-            <p className="text-2xl font-black text-rose-600 leading-none">{noShowCount}</p>
-            <p className="text-[11px] font-bold text-rose-900 uppercase tracking-wider">{t('metric.missed')}</p>
+            <p className="text-2xl font-black text-blue-600 leading-none">{rescheduledCount}</p>
+            <p className="text-[10px] font-bold text-blue-900 uppercase tracking-wider">{t('metric.total_rescheduled')}</p>
           </div>
         </div>
 
-        {/* Box 4: Waitlist Requests */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
-          <div className="relative w-12 h-12 flex items-center justify-center">
-            <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+        {/* Box 4: Total Cancelled */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-rose-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={appointments.length > 0 ? 125.6 - (125.6 * (cancelledCount / appointments.length)) : 125.6} strokeLinecap="round" className="text-rose-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2 rounded-full bg-rose-50 text-rose-600 group-hover:scale-110 transition-transform">
+              <XCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-rose-600 leading-none">{cancelledCount}</p>
+            <p className="text-[10px] font-bold text-rose-900 uppercase tracking-wider">{t('metric.total_cancelled')}</p>
+          </div>
+        </div>
+
+        {/* Box 5: Total Waitlist */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group col-span-2 lg:col-span-1">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-purple-100" fill="transparent" />
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={waitlist.length > 0 ? 0 : 90} strokeLinecap="round" className="text-purple-500 transition-all duration-700" fill="transparent" />
             </svg>
-            <div className="p-2.5 rounded-full bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform">
-              <Clock className="w-5 h-5" />
+            <div className="p-2 rounded-full bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform">
+              <Clock className="w-4 h-4" />
             </div>
           </div>
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-purple-600 leading-none">{waitlist.length}</p>
-            <p className="text-[11px] font-bold text-purple-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
+            <p className="text-[10px] font-bold text-purple-900 uppercase tracking-wider">{t('metric.total_waitlist')}</p>
           </div>
         </div>
       </div>
