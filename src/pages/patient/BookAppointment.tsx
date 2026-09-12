@@ -278,7 +278,7 @@ export const BookAppointment: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  4. Select 20-Minute Time Slot (25 Slots Daily)
+                  4. Select Time Slot (25 Slots Daily)
                 </label>
                 <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
                   {25 - bookedTimeSlots.length} / 25 Available
@@ -314,9 +314,9 @@ export const BookAppointment: React.FC = () => {
                             }`}
                           >
                             <span>{formatTime(tStr)}</span>
-                            <span className="text-[10px] font-medium">
-                              {isBooked ? 'BOOKED' : '20 min'}
-                            </span>
+                            {isBooked && (
+                              <span className="text-[10px] font-medium">BOOKED</span>
+                            )}
                           </button>
                         );
                       })}
@@ -325,7 +325,7 @@ export const BookAppointment: React.FC = () => {
 
                   {/* ☕ Morning Tea Break Banner: 10:40 AM - 11:00 AM */}
                   <div className="py-2 px-3 bg-amber-50 rounded-xl border border-amber-200 text-center text-xs font-semibold text-amber-900 flex items-center justify-center space-x-2">
-                    <span>☕ 10:40 AM – 11:00 AM Morning Tea Break (20 Mins Break)</span>
+                    <span>☕ 10:40 AM – 11:00 AM Morning Tea Break</span>
                   </div>
 
                   {/* Morning Session Part 2 (3 Slots: 11:00 AM - 12:00 PM) */}
@@ -353,9 +353,9 @@ export const BookAppointment: React.FC = () => {
                             }`}
                           >
                             <span>{formatTime(tStr)}</span>
-                            <span className="text-[10px] font-medium">
-                              {isBooked ? 'BOOKED' : '20 min'}
-                            </span>
+                            {isBooked && (
+                              <span className="text-[10px] font-medium">BOOKED</span>
+                            )}
                           </button>
                         );
                       })}
@@ -392,9 +392,9 @@ export const BookAppointment: React.FC = () => {
                             }`}
                           >
                             <span>{formatTime(tStr)}</span>
-                            <span className="text-[10px] font-medium">
-                              {isBooked ? 'BOOKED' : '20 min'}
-                            </span>
+                            {isBooked && (
+                              <span className="text-[10px] font-medium">BOOKED</span>
+                            )}
                           </button>
                         );
                       })}
@@ -403,7 +403,7 @@ export const BookAppointment: React.FC = () => {
 
                   {/* ☕ Evening Tea Break Banner: 04:00 PM - 04:20 PM */}
                   <div className="py-2 px-3 bg-amber-50 rounded-xl border border-amber-200 text-center text-xs font-semibold text-amber-900 flex items-center justify-center space-x-2">
-                    <span>☕ 04:00 PM – 04:20 PM Evening Tea Break (20 Mins Break)</span>
+                    <span>☕ 04:00 PM – 04:20 PM Evening Tea Break</span>
                   </div>
 
                   {/* Evening Session (11 Slots: 04:20 PM - 08:00 PM) */}
@@ -431,9 +431,9 @@ export const BookAppointment: React.FC = () => {
                             }`}
                           >
                             <span>{formatTime(tStr)}</span>
-                            <span className="text-[10px] font-medium">
-                              {isBooked ? 'BOOKED' : '20 min'}
-                            </span>
+                            {isBooked && (
+                              <span className="text-[10px] font-medium">BOOKED</span>
+                            )}
                           </button>
                         );
                       })}
