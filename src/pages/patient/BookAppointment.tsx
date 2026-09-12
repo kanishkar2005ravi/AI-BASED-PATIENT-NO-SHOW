@@ -191,6 +191,19 @@ export const BookAppointment: React.FC = () => {
         </button>
       </div>
 
+      {/* 📋 CANCELLATION & RESCHEDULE POLICY NOTE 📋 */}
+      <div className="p-4 md:p-5 rounded-2xl bg-white border-2 border-slate-200 shadow-sm flex items-start space-x-3.5 max-w-3xl mx-auto">
+        <div className="px-2.5 py-1 rounded-lg bg-teal-600 text-white font-extrabold text-xs uppercase tracking-wider flex-shrink-0 shadow-xs mt-0.5">
+          NOTE
+        </div>
+        <div className="text-xs text-slate-700 font-medium leading-relaxed">
+          <p className="font-extrabold text-slate-900 text-sm mb-0.5">Cancellation & Rescheduling Policy:</p>
+          <p className="text-slate-600 text-xs">
+            You can <strong className="text-slate-900 font-bold">cancel</strong> or <strong className="text-slate-900 font-bold">reschedule</strong> your appointment up to <strong className="text-teal-700 font-extrabold">6 hours</strong> prior to your scheduled time slot.
+          </p>
+        </div>
+      </div>
+
       {/* Progress Wizard Header */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between max-w-3xl mx-auto">
         <div className={`flex items-center space-x-2 text-xs font-bold ${step >= 1 ? 'text-teal-700' : 'text-slate-400'}`}>

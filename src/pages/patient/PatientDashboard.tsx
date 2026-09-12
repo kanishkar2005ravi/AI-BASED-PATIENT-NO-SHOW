@@ -541,7 +541,7 @@ export const PatientDashboard: React.FC = () => {
                 <span>🔄 Automatic Slot Cancellation & Real-Time Waitlist Reallocation</span>
               </p>
               <p className="text-slate-600 leading-relaxed text-[11px]">
-                If you cancel or reschedule 2 hours in advance, slots are automatically reallocated in real-time to the highest-priority waitlisted patient.
+                You can cancel or reschedule up to <strong className="text-slate-900 font-bold">6 hours prior to your slot</strong>. Cancelled slots are automatically reallocated in real-time to the highest-priority waitlisted patient.
               </p>
             </div>
 
