@@ -58,7 +58,7 @@ export const Analytics: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const demoActive = isDemoMode();
 
-  const handleDownloadMetricReport = async (type: 'PATIENTS' | 'APPOINTMENTS' | 'CANCELLED' | 'RESCHEDULED' | 'MISSED' | 'WAITLIST') => {
+  const handleDownloadMetricReport = async (type: 'PATIENTS' | 'APPOINTMENTS' | 'ATTENDED' | 'CANCELLED' | 'RESCHEDULED' | 'MISSED' | 'WAITLIST') => {
     const todayStr = new Date().toISOString().split('T')[0];
     
     if (type === 'PATIENTS') {
@@ -96,6 +96,23 @@ export const Analytics: React.FC = () => {
       }));
       downloadCSV(`Total_Appointments_Report_${todayStr}.csv`, exportData);
       showToast('Total Appointments CSV report downloaded successfully!', 'success');
+
+    } else if (type === 'ATTENDED') {
+      const res = await callBackend({ action: 'GET_APPOINTMENTS' });
+      const aptsList: Appointment[] = (res.success && Array.isArray(res.data)) ? res.data : [];
+      const attendedList = aptsList.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT');
+      const exportData = attendedList.map(a => ({
+        AppointmentID: a.id,
+        PatientID: a.patientId,
+        PatientName: a.patientName,
+        DoctorName: a.doctorName,
+        Specialization: a.doctorSpecialization,
+        Date: a.appointmentDate,
+        Time: a.appointmentTime,
+        Status: a.status
+      }));
+      downloadCSV(`Attended_Appointments_Report_${todayStr}.csv`, exportData);
+      showToast('Attended Appointments CSV report downloaded successfully!', 'success');
 
     } else if (type === 'CANCELLED') {
       const res = await callBackend({ action: 'GET_APPOINTMENTS' });
@@ -258,8 +275,8 @@ export const Analytics: React.FC = () => {
         </div>
       )}
 
-      {/* 📊 OVERALL HOSPITAL SUMMARY METRICS (TOTAL PATIENTS, APPOINTMENTS, CANCELLED, RESCHEDULED, MISSED, WAITLIST) 📊 */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+      {/* 📊 OVERALL HOSPITAL SUMMARY METRICS (TOTAL PATIENTS, APPOINTMENTS, ATTENDED, CANCELLED, RESCHEDULED, MISSED, WAITLIST) 📊 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {/* 1. Total Patients */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between group">
           <div className="flex items-center justify-between">
@@ -314,7 +331,34 @@ export const Analytics: React.FC = () => {
           </div>
         </div>
 
-        {/* 3. Total Cancelled */}
+        {/* 3. Total Attended */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider">{t('metric.total_attended')}</p>
+              <h3 className="text-2xl font-black text-emerald-600 mt-1">{aptMetrics.totalAttended}</h3>
+            </div>
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-emerald-400/50 flex-shrink-0">
+              <UserCheck className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+            <span className="inline-flex items-center text-[10px] font-bold text-emerald-700">
+              <CheckCircle2 className="w-3 h-3 mr-0.5" /> Attended Visits
+            </span>
+            <button
+              onClick={() => handleDownloadMetricReport('ATTENDED')}
+              className="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 hover:text-emerald-950 font-extrabold text-[10px] flex items-center gap-1 border border-emerald-200/80 transition-all cursor-pointer shadow-xs"
+              title="Download Attended Appointments CSV Report"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Download</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 4. Total Cancelled */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col justify-between group">
           <div className="flex items-center justify-between">
             <div>
@@ -341,7 +385,7 @@ export const Analytics: React.FC = () => {
           </div>
         </div>
 
-        {/* 4. Total Rescheduled */}
+        {/* 5. Total Rescheduled */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex flex-col justify-between group">
           <div className="flex items-center justify-between">
             <div>
@@ -368,7 +412,7 @@ export const Analytics: React.FC = () => {
           </div>
         </div>
 
-        {/* 5. Total Missed */}
+        {/* 6. Total Missed */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col justify-between group">
           <div className="flex items-center justify-between">
             <div>
@@ -395,8 +439,8 @@ export const Analytics: React.FC = () => {
           </div>
         </div>
 
-        {/* 6. Total Waitlist */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between group col-span-2 sm:col-span-1">
+        {/* 7. Total Waitlist */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between group">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_waitlist')}</p>
