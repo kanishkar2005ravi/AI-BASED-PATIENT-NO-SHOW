@@ -466,36 +466,22 @@ export const PatientDashboard: React.FC = () => {
 
         {/* Card 2: Platform App Features */}
         <Card title="CarePilot Platform App Features">
-          <div className="space-y-4 text-xs">
-            <p className="text-slate-600 font-medium leading-relaxed">
-              Explore CarePilot's smart AI scheduling system, automated Multi-Channel Gmail & WhatsApp notifications, phone helpline booking, and real-time waitlist auto-reallocation.
-            </p>
-
-            <div className="grid grid-cols-2 gap-2 font-bold text-[11px]">
-              <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center space-x-2">
-                <span>📩</span>
-                <span>Gmail & WhatsApp</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 flex items-center space-x-2">
-                <span>📞</span>
-                <span>Phone Booking</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center space-x-2">
-                <span>🤖</span>
-                <span>AI No-Show Analytics</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center space-x-2">
-                <span>⚡</span>
-                <span>Priority Care</span>
-              </div>
+          <div className="py-4 px-2 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 text-white flex items-center justify-center font-black shadow-lg shadow-purple-500/20">
+              <Sparkles className="w-7 h-7 text-white animate-pulse" />
             </div>
-
+            <div className="space-y-1">
+              <h4 className="text-sm font-extrabold text-slate-900">Explore Platform App Features</h4>
+              <p className="text-xs text-slate-500 font-medium max-w-xs mx-auto leading-relaxed">
+                Click below to view full details on Gmail/WhatsApp alerts, phone booking helpline, AI risk model & waitlist auto-fills.
+              </p>
+            </div>
             <button
               onClick={() => setShowFeaturesModal(true)}
-              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-700 hover:from-teal-700 hover:to-emerald-800 text-white font-black text-xs transition-all shadow-md hover:shadow-lg hover:scale-[1.01] flex items-center justify-center space-x-2 cursor-pointer border border-teal-400/30 group mt-2"
+              className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-700 hover:from-teal-700 hover:to-emerald-800 text-white font-black text-xs transition-all shadow-md hover:shadow-lg hover:scale-[1.01] flex items-center justify-center space-x-2 cursor-pointer border border-teal-400/30 group"
             >
               <Sparkles className="w-4 h-4 text-amber-300 animate-pulse group-hover:rotate-12 transition-transform" />
-              <span>View More App Features & System Details</span>
+              <span>Click to View App Features</span>
               <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
