@@ -49,14 +49,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
           badge: null
         },
         {
-          label: 'Priority Care',
-          path: '/patient/dashboard?openPriority=true',
-          icon: <HeartPulse className="w-5 h-5 text-rose-400 animate-bounce" />,
-          activeGradient: 'bg-gradient-to-r from-rose-600 via-red-600 to-pink-600 text-white shadow-lg shadow-rose-500/30 border-l-4 border-white',
-          isPriority: true,
-          badge: { text: 'URGENT', color: 'bg-rose-500/40 text-rose-200 border-rose-400/60 animate-pulse' }
-        },
-        {
           label: t('nav.profile'),
           path: '/patient/profile',
           icon: <User className="w-5 h-5 text-emerald-400 group-hover:text-emerald-300" />,
@@ -214,12 +206,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                       key={item.path}
                       to={item.path}
                       className={({ isActive }) =>
-                        `group flex items-center justify-between px-3 py-2 rounded-xl font-bold text-xs transition-all duration-200 ${
+                        `group flex items-center justify-between px-3 py-2 rounded-lg font-bold text-xs transition-all duration-200 ${
                           isActive
                             ? `${item.activeGradient} scale-[1.01]`
-                            : (item as any).isPriority
-                              ? 'border-2 border-rose-500/80 bg-gradient-to-r from-rose-950/70 via-red-950/50 to-rose-900/60 text-rose-100 shadow-lg shadow-rose-500/30 animate-pulse hover:border-rose-400 hover:text-white'
-                              : 'text-slate-300 hover:text-white hover:bg-teal-900/40 hover:translate-x-1 border border-transparent'
+                            : 'text-slate-300 hover:text-white hover:bg-teal-900/40 hover:translate-x-1 border border-transparent'
                         }`
                       }
                     >
