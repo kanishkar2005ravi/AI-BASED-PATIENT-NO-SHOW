@@ -52,7 +52,8 @@ export const Analytics: React.FC = () => {
     totalAttended: 18,
     totalCancelled: 4,
     totalRescheduled: 2,
-    totalMissed: 0
+    totalMissed: 0,
+    totalWaitlistCount: 0
   });
   const [loading, setLoading] = useState(true);
   const demoActive = isDemoMode();
@@ -217,8 +218,9 @@ export const Analytics: React.FC = () => {
     Promise.all([
       callBackend({ action: 'GET_MODEL_PERFORMANCE' }),
       callBackend({ action: 'GET_APPOINTMENTS', data: {} }),
-      callBackend({ action: 'GET_PATIENTS', data: {} })
-    ]).then(([perfRes, aptsRes, patsRes]) => {
+      callBackend({ action: 'GET_PATIENTS', data: {} }),
+      callBackend({ action: 'GET_WAITLIST', data: {} })
+    ]).then(([perfRes, aptsRes, patsRes, waitRes]) => {
       if (isMounted) {
         const perfData = (perfRes.success && perfRes.data && typeof perfRes.data.accuracy === 'number') 
           ? perfRes.data 
@@ -227,6 +229,7 @@ export const Analytics: React.FC = () => {
 
         const aptsList: Appointment[] = (aptsRes.success && Array.isArray(aptsRes.data)) ? aptsRes.data : [];
         const patsList: Patient[] = (patsRes.success && Array.isArray(patsRes.data)) ? patsRes.data : [];
+        const waitList: WaitlistItem[] = (waitRes.success && Array.isArray(waitRes.data)) ? waitRes.data : [];
 
         const totalPatients = patsList.length > 0 ? patsList.length : 1000;
         const totalAppointments = aptsList.length > 0 ? aptsList.length : 24;
@@ -234,6 +237,7 @@ export const Analytics: React.FC = () => {
         const totalRescheduled = aptsList.filter(a => a.status === 'RESCHEDULED').length;
         const totalMissed = aptsList.filter(a => a.status === 'NO_SHOW').length;
         const totalAttended = aptsList.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT').length;
+        const totalWaitlistCount = waitList.length;
 
         setAptMetrics({
           totalPatients,
@@ -241,7 +245,8 @@ export const Analytics: React.FC = () => {
           totalAttended,
           totalCancelled,
           totalRescheduled,
-          totalMissed
+          totalMissed,
+          totalWaitlistCount
         });
         setLoading(false);
       }
@@ -298,8 +303,8 @@ export const Analytics: React.FC = () => {
         </div>
       )}
 
-      {/* 📊 OVERALL HOSPITAL SUMMARY METRICS (TOTAL PATIENTS, APPOINTMENTS, ATTENDED, CANCELLED, RESCHEDULED, MISSED) 📊 */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+      {/* 📊 OVERALL HOSPITAL SUMMARY METRICS (TOTAL PATIENTS, APPOINTMENTS, ATTENDED, CANCELLED, RESCHEDULED, MISSED, WAITLIST) 📊 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {/* 1. Total Patients */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between group">
           <div className="flex items-center justify-between">
@@ -457,6 +462,33 @@ export const Analytics: React.FC = () => {
               title="Download Missed / No-Show CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-purple-700" />
+              <span>Download</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 7. Total Waitlist */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_waitlist')}</p>
+              <h3 className="text-2xl font-black text-amber-600 mt-1">{aptMetrics.totalWaitlistCount}</h3>
+            </div>
+            <div className="p-3 bg-amber-50 text-amber-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-amber-400/50 flex-shrink-0">
+              <Clock className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+            <span className="inline-flex items-center text-[10px] font-bold text-amber-700">
+              Entire Queue
+            </span>
+            <button
+              onClick={() => handleDownloadMetricReport('WAITLIST')}
+              className="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 hover:text-amber-950 font-extrabold text-[10px] flex items-center gap-1 border border-amber-200/80 transition-all cursor-pointer shadow-xs"
+              title="Download Waitlist Queue CSV Report"
+            >
+              <Download className="w-3.5 h-3.5 text-amber-700" />
               <span>Download</span>
             </button>
           </div>
