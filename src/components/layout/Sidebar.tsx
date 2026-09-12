@@ -49,32 +49,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       ]
     },
     {
-      title: 'PATIENT CARE HUB',
-      items: [
-        {
-          label: t('nav.book_appointment'),
-          path: '/patient/book',
-          icon: <CalendarPlus className="w-5 h-5 text-amber-400 group-hover:text-amber-300" />,
-          activeGradient: 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-lg shadow-amber-500/30 border-l-4 border-white',
-          badge: { text: '+ BOOK NOW', color: 'bg-amber-400/20 text-amber-300 border-amber-400/40' }
-        },
-        {
-          label: t('nav.my_appointments'),
-          path: '/patient/appointments',
-          icon: <CalendarCheck className="w-5 h-5 text-indigo-400 group-hover:text-indigo-300" />,
-          activeGradient: 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white shadow-lg shadow-indigo-500/30 border-l-4 border-teal-300',
-          badge: { text: 'Active', color: 'bg-indigo-400/20 text-indigo-300 border-indigo-400/40' }
-        },
-        {
-          label: t('nav.waitlist'),
-          path: '/patient/waitlist',
-          icon: <Clock className="w-5 h-5 text-pink-400 group-hover:text-pink-300" />,
-          activeGradient: 'bg-gradient-to-r from-pink-600 via-rose-600 to-rose-700 text-white shadow-lg shadow-pink-500/30 border-l-4 border-amber-300',
-          badge: { text: 'Priority', color: 'bg-pink-400/20 text-pink-300 border-pink-400/40' }
-        }
-      ]
-    },
-    {
       title: 'SETTINGS & NOTICES',
       items: [
         {
@@ -232,8 +206,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                     </div>
 
                     {item.badge && (
-                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${item.badge.color}`}>
-                        {item.badge.text}
+                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${(item.badge as any).color}`}>
+                        {(item.badge as any).text}
                       </span>
                     )}
                   </NavLink>

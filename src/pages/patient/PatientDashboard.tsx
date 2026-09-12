@@ -12,6 +12,8 @@ import { callBackend } from '../../services/api';
 import { Appointment, WaitlistItem, NotificationItem, Doctor } from '../../types';
 import {
   Calendar,
+  CalendarPlus,
+  CalendarCheck,
   Clock,
   ChevronRight,
   Bell,
@@ -180,6 +182,42 @@ export const PatientDashboard: React.FC = () => {
             <p className="text-xl font-black text-purple-600 leading-none">{waitlist.length}</p>
             <p className="text-[11px] font-bold text-purple-900 uppercase tracking-wider">Waitlist</p>
           </div>
+        </div>
+      </div>
+
+      {/* ⚡ QUICK NAVIGATION ACTION BOXES ⚡ */}
+      <div className="grid grid-cols-3 gap-3">
+        {/* Book Appointment Box */}
+        <div
+          onClick={() => navigate('/patient/book')}
+          className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[96px] cursor-pointer group"
+        >
+          <div className="p-2 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 group-hover:scale-110 transition-transform">
+            <CalendarPlus className="w-4 h-4" />
+          </div>
+          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">Book Appointment</p>
+        </div>
+
+        {/* My Appointments Box */}
+        <div
+          onClick={() => navigate('/patient/appointments')}
+          className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[96px] cursor-pointer group"
+        >
+          <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 group-hover:scale-110 transition-transform">
+            <CalendarCheck className="w-4 h-4" />
+          </div>
+          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">My Appointments</p>
+        </div>
+
+        {/* Waitlist Box */}
+        <div
+          onClick={() => navigate('/patient/waitlist')}
+          className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-pink-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[96px] cursor-pointer group"
+        >
+          <div className="p-2 rounded-lg bg-pink-50 text-pink-600 border border-pink-100 group-hover:scale-110 transition-transform">
+            <Clock className="w-4 h-4" />
+          </div>
+          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">Waitlist</p>
         </div>
       </div>
 
