@@ -7,13 +7,15 @@ import { Loading } from '../../components/common/Loading';
 import { EmptyState } from '../../components/common/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { callBackend } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 import { NotificationItem } from '../../types';
-import { Bell, Check, AlertTriangle, Calendar, RefreshCw, Clock, Sparkles } from 'lucide-react';
+import { Bell, Check, AlertTriangle, Calendar, RefreshCw, Clock, Sparkles, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 export const Notifications: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,6 +44,17 @@ export const Notifications: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header title="My Reminders & Notifications" />
+
+      {/* 🔙 BACK TO DASHBOARD BUTTON 🔙 */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => navigate('/patient/dashboard')}
+          className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-teal-700 text-white text-xs font-black transition-all shadow-sm group cursor-pointer border border-slate-800"
+        >
+          <ArrowLeft className="w-4 h-4 text-teal-400 group-hover:-translate-x-1 transition-transform" />
+          <span>&larr; Back to Dashboard</span>
+        </button>
+      </div>
 
       <Card
         title="Notifications & Advisory Alerts"

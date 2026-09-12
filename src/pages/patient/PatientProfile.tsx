@@ -6,13 +6,15 @@ import { Button } from '../../components/common/Button';
 import { Loading } from '../../components/common/Loading';
 import { useAuth } from '../../context/AuthContext';
 import { callBackend } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 import { Patient } from '../../types';
-import { User, Mail, Phone, Calendar, MapPin, Save, ShieldAlert } from 'lucide-react';
+import { User, Mail, Phone, Calendar, MapPin, Save, ShieldAlert, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 export const PatientProfile: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
 
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,6 +79,17 @@ export const PatientProfile: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header title="Patient Medical Account Profile" />
+
+      {/* 🔙 BACK TO DASHBOARD BUTTON 🔙 */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => navigate('/patient/dashboard')}
+          className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-teal-700 text-white text-xs font-black transition-all shadow-sm group cursor-pointer border border-slate-800"
+        >
+          <ArrowLeft className="w-4 h-4 text-teal-400 group-hover:-translate-x-1 transition-transform" />
+          <span>&larr; Back to Dashboard</span>
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-1 text-center p-6">

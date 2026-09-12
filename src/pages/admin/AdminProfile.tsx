@@ -3,13 +3,15 @@ import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { User, ShieldCheck, Mail, Phone, Lock, Save } from 'lucide-react';
+import { User, ShieldCheck, Mail, Phone, Lock, Save, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 export const AdminProfile: React.FC = () => {
   const { user, setUser } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [name, setName] = useState(user?.name || 'Administrator');
   const [email, setEmail] = useState(user?.email || 'admin@example.com');
   const [phone, setPhone] = useState(user?.phone || '+1 (555) 019-2831');
@@ -30,6 +32,17 @@ export const AdminProfile: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header title="Administrator Profile Settings" />
+
+      {/* 🔙 BACK TO DASHBOARD BUTTON 🔙 */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => navigate('/admin/dashboard')}
+          className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-amber-600 text-white text-xs font-black transition-all shadow-sm group cursor-pointer border border-slate-800"
+        >
+          <ArrowLeft className="w-4 h-4 text-amber-400 group-hover:-translate-x-1 transition-transform" />
+          <span>&larr; Back to Dashboard</span>
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-1 text-center p-6">
