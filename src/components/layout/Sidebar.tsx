@@ -117,6 +117,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       title: 'SYSTEM & ANALYTICS',
       items: [
         {
+          label: t('nav.analytics'),
+          path: '/admin/analytics',
+          icon: <Activity className="w-5 h-5" />,
+          activeGradient: 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30 border-l-4 border-amber-300',
+          badge: null
+        },
+        {
           label: t('nav.notifications'),
           path: '/admin/notifications',
           icon: <Bell className="w-5 h-5" />,
