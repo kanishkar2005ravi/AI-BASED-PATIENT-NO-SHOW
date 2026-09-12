@@ -38,17 +38,15 @@ export const CarePilotLogo: React.FC<CarePilotLogoProps> = ({
       </div>
 
       {showText && (
-        <div className="leading-tight">
-          <div className="flex items-center gap-1.5">
-            <span className={`${textSize} font-black tracking-tight ${textLight ? 'text-white' : 'text-slate-900'}`}>
-              Care<span className={textLight ? 'text-amber-400 font-black' : 'text-teal-600'}>Pilot</span>
-            </span>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-gradient-to-r from-amber-500 via-rose-500 to-teal-500 text-white tracking-widest shadow-sm">
-              SNS
-            </span>
-          </div>
-          <span className={`text-[10px] font-extrabold tracking-wider uppercase ${textLight ? 'text-amber-400' : 'text-teal-700'} block font-sans mt-0.5`}>
-            SNS Medical College & Hospital
+        <div className="flex items-center space-x-2 whitespace-nowrap select-none">
+          <span className={`${textSize} font-black tracking-tight ${textLight ? 'text-white' : 'text-slate-900'}`}>
+            Care<span className={textLight ? 'text-amber-400 font-black' : 'text-teal-600'}>Pilot</span>
+          </span>
+          <span className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-gradient-to-r from-amber-500 via-rose-500 to-teal-500 text-white tracking-widest shadow-md">
+            SNS
+          </span>
+          <span className={`text-[11px] font-black tracking-wider uppercase ${textLight ? 'text-teal-300' : 'text-teal-700'} hidden sm:inline-block`}>
+            • SNS Medical College & Hospital
           </span>
         </div>
       )}
