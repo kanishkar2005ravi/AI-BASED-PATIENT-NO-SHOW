@@ -11,6 +11,7 @@ import { Patient } from '../../types';
 import { UserPlus, Search, Eye, Edit, UserX, UserCheck, ShieldAlert, Trash2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { BackButton } from '../../components/common/BackButton';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const Patients: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -19,6 +20,7 @@ export const Patients: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { t } = useLanguage();
 
   const fetchPatients = () => {
     setLoading(true);
@@ -76,9 +78,9 @@ export const Patients: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header
-        title="Patient Directory"
+        title={t('patients.title')}
         showSearch
-        searchPlaceholder="Search patients by name, ID, or phone..."
+        searchPlaceholder={t('patients.search_placeholder')}
         onSearch={setSearchQuery}
       />
       <BackButton variant="admin" />
@@ -86,7 +88,7 @@ export const Patients: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-2">
           <span className="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 via-rose-500 to-teal-500 text-white shadow-sm">
-            Total Patients ({patients.length})
+            {t('patients.total')} ({patients.length})
           </span>
         </div>
 
@@ -95,7 +97,7 @@ export const Patients: React.FC = () => {
           icon={<UserPlus className="w-4 h-4" />}
           onClick={() => navigate('/admin/patients/create')}
         >
-          Create Patient Account
+          {t('patients.create')}
         </Button>
       </div>
 
@@ -104,9 +106,9 @@ export const Patients: React.FC = () => {
           <Loading message="Loading patient database..." />
         ) : filteredPatients.length === 0 ? (
           <EmptyState
-            title="No Patients Found"
+            title={t('patients.no_found')}
             description="No patient accounts match your current search query."
-            actionLabel="Create Patient"
+            actionLabel={t('patients.create')}
             onAction={() => navigate('/admin/patients/create')}
           />
         ) : (
@@ -114,13 +116,13 @@ export const Patients: React.FC = () => {
             <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50/50">
-                  <th className="py-3 px-4">Patient ID</th>
-                  <th className="py-3 px-4">Name & Email</th>
-                  <th className="py-3 px-4">Phone</th>
-                  <th className="py-3 px-4 text-center">Attended Visits</th>
-                  <th className="py-3 px-4 text-center">Not Attended (No-Show)</th>
-                  <th className="py-3 px-4 text-center">AI Risk Level</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4">{t('patients.col_id')}</th>
+                  <th className="py-3 px-4">{t('patients.col_name')}</th>
+                  <th className="py-3 px-4">{t('patients.col_phone')}</th>
+                  <th className="py-3 px-4 text-center">{t('patients.col_attended')}</th>
+                  <th className="py-3 px-4 text-center">{t('patients.col_missed')}</th>
+                  <th className="py-3 px-4 text-center">{t('patients.col_risk')}</th>
+                  <th className="py-3 px-4 text-right">{t('patients.col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

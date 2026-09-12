@@ -303,7 +303,7 @@ export const Analytics: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <Header title="Hospital Analytics & Reports" />
+      <Header title={t('analytics.title')} />
       <BackButton variant="admin" />
 
       {/* Demo Data Notice Banner */}
@@ -348,7 +348,7 @@ export const Analytics: React.FC = () => {
               title="Download Total Patients CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-amber-700" />
-              <span>Download</span>
+              <span>{t('analytics.download_csv')}</span>
             </button>
           </div>
         </div>
@@ -375,7 +375,7 @@ export const Analytics: React.FC = () => {
               title="Download Total Appointments CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-teal-700" />
-              <span>Download</span>
+              <span>{t('analytics.download_csv')}</span>
             </button>
           </div>
         </div>
@@ -402,7 +402,7 @@ export const Analytics: React.FC = () => {
               title="Download Attended Appointments CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-emerald-700" />
-              <span>Download</span>
+              <span>{t('analytics.download_csv')}</span>
             </button>
           </div>
         </div>
@@ -429,7 +429,7 @@ export const Analytics: React.FC = () => {
               title="Download Cancelled Appointments CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-rose-700" />
-              <span>Download</span>
+              <span>{t('analytics.download_csv')}</span>
             </button>
           </div>
         </div>
@@ -456,7 +456,7 @@ export const Analytics: React.FC = () => {
               title="Download Rescheduled Appointments CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-blue-700" />
-              <span>Download</span>
+              <span>{t('analytics.download_csv')}</span>
             </button>
           </div>
         </div>
@@ -483,7 +483,7 @@ export const Analytics: React.FC = () => {
               title="Download Missed / No-Show CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-purple-700" />
-              <span>Download</span>
+              <span>{t('analytics.download_csv')}</span>
             </button>
           </div>
         </div>
@@ -510,7 +510,7 @@ export const Analytics: React.FC = () => {
               title="Download Waitlist Queue CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-amber-700" />
-              <span>Download</span>
+              <span>{t('analytics.download_csv')}</span>
             </button>
           </div>
         </div>
@@ -561,7 +561,7 @@ export const Analytics: React.FC = () => {
               title="Download Low Risk Patients CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Low Risk CSV</span>
+              <span>{t('analytics.low_risk_csv')}</span>
             </button>
 
             <button
@@ -570,7 +570,7 @@ export const Analytics: React.FC = () => {
               title="Download Medium Risk Patients CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-amber-600" />
-              <span>Medium Risk CSV</span>
+              <span>{t('analytics.medium_risk_csv')}</span>
             </button>
 
             <button
@@ -579,7 +579,7 @@ export const Analytics: React.FC = () => {
               title="Download High Risk Patients CSV Report"
             >
               <Download className="w-3.5 h-3.5 text-rose-600" />
-              <span>High Risk CSV</span>
+              <span>{t('analytics.high_risk_csv')}</span>
             </button>
           </div>
         </Card>
@@ -587,7 +587,7 @@ export const Analytics: React.FC = () => {
 
       {/* 🩺 HOSPITAL DOCTORS DIRECTORY & CSV DOWNLOAD SECTION 🩺 */}
       <Card
-        title="Hospital Doctors Directory"
+        title={t('analytics.doctors_directory')}
         action={
           <button
             onClick={() => handleDownloadMetricReport('DOCTORS')}
@@ -595,7 +595,7 @@ export const Analytics: React.FC = () => {
             title="Download Hospital Doctors Roster CSV"
           >
             <Download className="w-4 h-4 text-emerald-200 animate-pulse" />
-            <span>Download Doctors CSV</span>
+            <span>{t('doctors.download_csv')}</span>
           </button>
         }
       >
@@ -603,13 +603,13 @@ export const Analytics: React.FC = () => {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-slate-200 font-black uppercase text-[10px] tracking-wider border-b border-slate-800">
-                <th className="py-3.5 px-4 text-indigo-300">Doctor ID</th>
-                <th className="py-3.5 px-4 text-white">Physician Name</th>
-                <th className="py-3.5 px-4 text-purple-300">Specialization</th>
-                <th className="py-3.5 px-4 text-cyan-300">Department</th>
-                <th className="py-3.5 px-4 text-amber-300">Experience</th>
-                <th className="py-3.5 px-4 text-teal-300">Contact Email</th>
-                <th className="py-3.5 px-4 text-emerald-300">Status</th>
+                <th className="py-3.5 px-4 text-indigo-300">{t('doctors.col_id')}</th>
+                <th className="py-3.5 px-4 text-white">{t('label.doctor')}</th>
+                <th className="py-3.5 px-4 text-purple-300">{t('label.specialization')}</th>
+                <th className="py-3.5 px-4 text-cyan-300">{t('label.department')}</th>
+                <th className="py-3.5 px-4 text-amber-300">{t('label.experience')}</th>
+                <th className="py-3.5 px-4 text-teal-300">{t('label.email')}</th>
+                <th className="py-3.5 px-4 text-emerald-300">{t('waitlist.status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">

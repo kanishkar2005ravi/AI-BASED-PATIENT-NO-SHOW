@@ -9,11 +9,13 @@ import { WaitlistItem } from '../../types';
 import { Clock, CheckCircle2, AlertCircle, Sparkles, RefreshCw, UserCheck } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { BackButton } from '../../components/common/BackButton';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const Waitlist: React.FC = () => {
   const [waitlist, setWaitlist] = useState<WaitlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
+  const { t } = useLanguage();
 
   const fetchWaitlist = () => {
     setLoading(true);
@@ -41,14 +43,14 @@ export const Waitlist: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <Header title="Automated Waitlist Recovery System" />
+      <Header title={t('waitlist.admin_title')} />
       <BackButton variant="admin" />
 
       <Card
-        title="Active Waitlist Queue"
+        title={t('waitlist.active_queue')}
         action={
           <button onClick={fetchWaitlist} className="text-xs font-bold text-teal-600 flex items-center gap-1">
-            <RefreshCw className="w-3.5 h-3.5" /> Refresh Queue
+            <RefreshCw className="w-3.5 h-3.5" /> {t('waitlist.refresh')}
           </button>
         }
       >
@@ -64,12 +66,12 @@ export const Waitlist: React.FC = () => {
             <table className="w-full text-left text-sm border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50/50">
-                  <th className="py-3 px-4">Queue Pos</th>
-                  <th className="py-3 px-4">Patient Name</th>
-                  <th className="py-3 px-4">Doctor Requested</th>
-                  <th className="py-3 px-4">Target Date</th>
-                  <th className="py-3 px-4">Preferred Slot</th>
-                  <th className="py-3 px-4">Auto-Recovery Status</th>
+                  <th className="py-3 px-4">{t('waitlist.pos')}</th>
+                  <th className="py-3 px-4">{t('label.patient')}</th>
+                  <th className="py-3 px-4">{t('label.doctor')}</th>
+                  <th className="py-3 px-4">{t('waitlist.target_date')}</th>
+                  <th className="py-3 px-4">{t('waitlist.preferred_slot')}</th>
+                  <th className="py-3 px-4">{t('waitlist.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

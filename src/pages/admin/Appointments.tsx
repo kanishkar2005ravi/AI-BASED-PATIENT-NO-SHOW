@@ -14,6 +14,7 @@ import { Appointment, AIRiskAssessment, AppointmentStatus } from '../../types';
 import { Search, Eye, XCircle, Calendar, Filter, RefreshCw, ShieldCheck, UserCheck, UserX, LogOut, CheckCircle, Stethoscope, Clock } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { BackButton } from '../../components/common/BackButton';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const Appointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -23,6 +24,7 @@ export const Appointments: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { t } = useLanguage();
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -99,7 +101,7 @@ export const Appointments: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       <Header
-        title="Admin - Hospital Appointments & Attendance Management"
+        title={t('appointments.admin_title')}
         showSearch
         searchPlaceholder="Search by Patient, Doctor, or Appointment ID..."
         onSearch={setSearchQuery}
@@ -111,7 +113,7 @@ export const Appointments: React.FC = () => {
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
             <Stethoscope className="w-4 h-4 text-teal-600" />
-            <span>Select Physician to View Risk-Separated Schedule:</span>
+            <span>{t('appointments.select_physician')}</span>
           </h3>
           <span className="text-xs font-semibold text-slate-500">
             {doctors.length} Doctors Registered
@@ -127,7 +129,7 @@ export const Appointments: React.FC = () => {
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            All Doctors ({appointments.length})
+            {t('appointments.all_doctors')} ({appointments.length})
           </button>
 
           {doctors.map(doc => {
@@ -161,7 +163,7 @@ export const Appointments: React.FC = () => {
           <div className="flex items-center justify-between border-b border-emerald-200 pb-3">
             <div className="flex items-center space-x-2">
               <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-              <h4 className="font-extrabold text-sm text-emerald-900 uppercase tracking-wide">Low Risk Patients</h4>
+              <h4 className="font-extrabold text-sm text-emerald-900 uppercase tracking-wide">{t('appointments.low_risk_patients')}</h4>
             </div>
             <span className="bg-emerald-600 text-white px-2.5 py-1 rounded-xl text-xs font-black">
               {lowRiskAppointments.length}
@@ -193,7 +195,7 @@ export const Appointments: React.FC = () => {
           <div className="flex items-center justify-between border-b border-amber-200 pb-3">
             <div className="flex items-center space-x-2">
               <span className="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></span>
-              <h4 className="font-extrabold text-sm text-amber-900 uppercase tracking-wide">Medium Risk Patients</h4>
+              <h4 className="font-extrabold text-sm text-amber-900 uppercase tracking-wide">{t('appointments.med_risk_patients')}</h4>
             </div>
             <span className="bg-amber-600 text-white px-2.5 py-1 rounded-xl text-xs font-black">
               {medRiskAppointments.length}
@@ -225,7 +227,7 @@ export const Appointments: React.FC = () => {
           <div className="flex items-center justify-between border-b border-rose-200 pb-3">
             <div className="flex items-center space-x-2">
               <span className="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></span>
-              <h4 className="font-extrabold text-sm text-rose-900 uppercase tracking-wide">High Risk Patients</h4>
+              <h4 className="font-extrabold text-sm text-rose-900 uppercase tracking-wide">{t('appointments.high_risk_patients')}</h4>
             </div>
             <span className="bg-rose-600 text-white px-2.5 py-1 rounded-xl text-xs font-black">
               {highRiskAppointments.length}
@@ -258,20 +260,20 @@ export const Appointments: React.FC = () => {
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center space-x-2 text-xs font-bold text-slate-500 uppercase">
             <Filter className="w-4 h-4 text-teal-600" />
-            <span>Filter Status:</span>
+            <span>{t('appointments.filter_status')}</span>
           </div>
 
           <Select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
             options={[
-              { value: 'ALL', label: 'All Statuses' },
-              { value: 'CONFIRMED', label: 'Confirmed' },
+              { value: 'ALL', label: t('appointments.all_statuses') },
+              { value: 'CONFIRMED', label: t('status.confirmed') },
               { value: 'CHECKED_IN', label: 'Checked In' },
               { value: 'CHECKED_OUT', label: 'Checked Out' },
-              { value: 'COMPLETED', label: 'Completed' },
-              { value: 'NO_SHOW', label: 'Not Attended (No-Show)' },
-              { value: 'CANCELLED', label: 'Cancelled' },
+              { value: 'COMPLETED', label: t('status.completed') },
+              { value: 'NO_SHOW', label: t('status.not_attended') },
+              { value: 'CANCELLED', label: t('status.cancelled') },
               { value: 'RESCHEDULED', label: 'Rescheduled' }
             ]}
             className="text-xs py-1.5"
@@ -281,10 +283,10 @@ export const Appointments: React.FC = () => {
             value={riskFilter}
             onChange={e => setRiskFilter(e.target.value)}
             options={[
-              { value: 'ALL', label: 'All AI Risk Levels' },
-              { value: 'HIGH', label: 'High Risk Only' },
-              { value: 'MEDIUM', label: 'Medium Risk' },
-              { value: 'LOW', label: 'Low Risk' }
+              { value: 'ALL', label: t('appointments.all_risk_levels') },
+              { value: 'HIGH', label: t('risk.high') },
+              { value: 'MEDIUM', label: t('risk.medium') },
+              { value: 'LOW', label: t('risk.low') }
             ]}
             className="text-xs py-1.5"
           />

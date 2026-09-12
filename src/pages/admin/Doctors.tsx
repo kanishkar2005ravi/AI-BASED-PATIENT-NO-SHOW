@@ -11,12 +11,14 @@ import { Doctor } from '../../types';
 import { Stethoscope, Plus, Calendar, Clock, Edit, UserX, UserCheck, Mail, Phone } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { BackButton } from '../../components/common/BackButton';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const Doctors: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { t } = useLanguage();
 
   const fetchDoctors = () => {
     setLoading(true);
@@ -48,12 +50,12 @@ export const Doctors: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <Header title="Hospital Doctor Management" />
+      <Header title={t('doctors.title')} />
       <BackButton variant="admin" />
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Doctor Directory & Schedules</h2>
+          <h2 className="text-lg font-bold text-slate-900">{t('doctors.directory')}</h2>
           <p className="text-xs text-slate-500">Doctors are hospital entities managed by the Administrator</p>
         </div>
 
@@ -62,7 +64,7 @@ export const Doctors: React.FC = () => {
           icon={<Plus className="w-4 h-4" />}
           onClick={() => navigate('/admin/doctors/create')}
         >
-          Add New Doctor
+          {t('doctors.add')}
         </Button>
       </div>
 
@@ -72,7 +74,7 @@ export const Doctors: React.FC = () => {
         <EmptyState
           title="No Doctors Registered"
           description="Add doctor records to manage hospital schedules and appointment availability."
-          actionLabel="Add Doctor"
+          actionLabel={t('doctors.add')}
           onAction={() => navigate('/admin/doctors/create')}
         />
       ) : (
@@ -97,19 +99,19 @@ export const Doctors: React.FC = () => {
 
                 <div className="space-y-2 text-xs text-slate-600 my-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Doctor ID:</span>
+                    <span className="text-slate-400">{t('doctors.col_id')}:</span>
                     <span className="font-mono font-bold text-slate-800">{doc.id}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Department:</span>
+                    <span className="text-slate-400">{t('doctors.col_dept')}:</span>
                     <span className="font-semibold text-slate-800">{doc.department}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Experience:</span>
-                    <span className="font-semibold text-slate-800">{doc.experience} Years</span>
+                    <span className="text-slate-400">{t('doctors.col_exp')}:</span>
+                    <span className="font-semibold text-slate-800">{doc.experience} {t('dashboard.exp_years')}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Email:</span>
+                    <span className="text-slate-400">{t('doctors.col_email')}:</span>
                     <span className="font-medium text-slate-700 truncate max-w-[180px]">{doc.email}</span>
                   </div>
                 </div>
@@ -123,7 +125,7 @@ export const Doctors: React.FC = () => {
                     icon={<Clock className="w-3.5 h-3.5" />}
                     onClick={() => navigate(`/admin/doctors/${doc.id}/availability`)}
                   >
-                    Availability
+                    {t('doctors.availability')}
                   </Button>
                   <Button
                     variant="secondary"
@@ -131,7 +133,7 @@ export const Doctors: React.FC = () => {
                     icon={<Edit className="w-3.5 h-3.5" />}
                     onClick={() => navigate(`/admin/doctors/${doc.id}`)}
                   >
-                    Manage Profile
+                    {t('doctors.manage_profile')}
                   </Button>
                 </div>
                 <Button
