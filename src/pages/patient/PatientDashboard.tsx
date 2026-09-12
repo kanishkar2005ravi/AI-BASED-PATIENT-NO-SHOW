@@ -419,7 +419,7 @@ export const PatientDashboard: React.FC = () => {
             </div>
           </div>
           <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-500 text-slate-950 shadow-sm border border-amber-600/30 tracking-wider">
-            CarePilot SNS Official Note
+            Note
           </span>
         </div>
 
