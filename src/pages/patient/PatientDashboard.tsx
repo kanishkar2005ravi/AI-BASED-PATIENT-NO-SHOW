@@ -502,55 +502,55 @@ export const PatientDashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs text-slate-800 font-medium relative z-10">
             <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200 shadow-xs space-y-1 hover:border-teal-300 transition-colors">
               <p className="font-extrabold text-teal-800 flex items-center gap-1.5 text-xs">
-                <span>⏰ Reporting Time & Identity Verification</span>
+                <span>{t('guidelines.card1_title')}</span>
               </p>
               <p className="text-slate-600 leading-relaxed text-[11px]">
-                Please report to reception 15 mins prior to your scheduled slot. Present your Patient ID (<strong className="text-slate-900">{user?.id || 'PAT-686'}</strong>) or registered phone number.
+                {t('guidelines.card1_desc')}
               </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200 shadow-xs space-y-1 hover:border-blue-300 transition-colors">
               <p className="font-extrabold text-blue-900 flex items-center gap-1.5 text-xs">
-                <span>📞 Telephone Call-In Booking Helpline (1st Come, 1st Serve)</span>
+                <span>{t('guidelines.card2_title')}</span>
               </p>
               <p className="text-slate-600 leading-relaxed text-[11px]">
-                For non-smartphone patients without app access, call helpline (<strong className="text-blue-950">+91 422 2661100</strong>). Reserved limited daily slots are assigned on a strict First-Come, First-Served priority.
+                {t('guidelines.card2_desc')}
               </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200 shadow-xs space-y-1 hover:border-emerald-300 transition-colors">
               <p className="font-extrabold text-emerald-800 flex items-center gap-1.5 text-xs">
-                <span>📩 Instant Multi-Channel Alerts (Gmail & WhatsApp)</span>
+                <span>{t('guidelines.card3_title')}</span>
               </p>
               <p className="text-slate-600 leading-relaxed text-[11px]">
-                Automated notifications sent via Gmail (<strong className="text-emerald-950">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong className="text-emerald-950">+91 8300096676</strong>) for Account Signup, Slot Booking, Cancellation, Rescheduling & Waitlist Confirmations.
+                {t('guidelines.card3_desc')}
               </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200 shadow-xs space-y-1 hover:border-rose-300 transition-colors">
               <p className="font-extrabold text-rose-800 flex items-center gap-1.5 text-xs">
-                <span>⚡ Urgent Priority Care & 24/7 Casualty</span>
+                <span>{t('guidelines.card4_title')}</span>
               </p>
               <p className="text-slate-600 leading-relaxed text-[11px]">
-                If regular slots are full, request Urgent Priority Consultation. For acute emergencies, visit our Casualty Unit directly or call Emergency Helpline (<strong className="text-rose-950">0422-2666222</strong>).
+                {t('guidelines.card4_desc')}
               </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200 shadow-xs space-y-1 hover:border-purple-300 transition-colors">
               <p className="font-extrabold text-purple-800 flex items-center gap-1.5 text-xs">
-                <span>🔄 Automatic Slot Cancellation & Real-Time Waitlist Reallocation</span>
+                <span>{t('guidelines.card5_title')}</span>
               </p>
               <p className="text-slate-600 leading-relaxed text-[11px]">
-                You can cancel or reschedule up to <strong className="text-slate-900 font-bold">6 hours prior to your slot</strong>. Cancelled slots are automatically reallocated in real-time to the highest-priority waitlisted patient.
+                {t('guidelines.card5_desc')}
               </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200 shadow-xs space-y-1 hover:border-indigo-300 transition-colors">
               <p className="font-extrabold text-indigo-800 flex items-center gap-1.5 text-xs">
-                <span>🤖 CarePilot SNS AI XGBoost Analytics</span>
+                <span>{t('guidelines.card6_title')}</span>
               </p>
               <p className="text-slate-600 leading-relaxed text-[11px]">
-                Machine learning models analyze attendance history to optimize doctor schedules and prevent appointment slot downtime.
+                {t('guidelines.card6_desc')}
               </p>
             </div>
           </div>

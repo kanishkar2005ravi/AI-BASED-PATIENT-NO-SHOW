@@ -214,7 +214,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 <div className="space-y-1.5">
-                  <p className="text-xs font-black uppercase text-teal-300 tracking-widest">Hospital Campus Address</p>
+                  <p className="text-xs font-black uppercase text-teal-300 tracking-widest">{t('address.title')}</p>
                   <p className="text-sm md:text-base font-black text-white leading-relaxed max-w-sm mx-auto">
                     SNS Kalvi Nagar, Sathy Main Road, NH-209, Vazhiyampalayam, Saravanampatti, Coimbatore - 641048
                   </p>
@@ -222,16 +222,16 @@ export const Header: React.FC<HeaderProps> = ({
 
                 <div className="pt-3 border-t border-slate-800 flex flex-col items-center justify-center gap-2 text-xs text-slate-300">
                   <span className="flex items-center gap-1.5 font-bold">
-                    <Phone className="w-4 h-4 text-emerald-400" /> Emergency Helpline: 0422-2666222
+                    <Phone className="w-4 h-4 text-emerald-400" /> {t('address.helpline')}
                   </span>
                   <a
                     href="mailto:kanis.r.ad.2024@snsce.ac.in"
                     className="flex items-center gap-1.5 font-extrabold text-amber-300 hover:text-amber-200 transition-colors"
                   >
-                    <Mail className="w-4 h-4 text-amber-400" /> Email: kanis.r.ad.2024@snsce.ac.in
+                    <Mail className="w-4 h-4 text-amber-400" /> {t('address.email')}
                   </a>
                   <span className="bg-emerald-500/20 text-emerald-300 px-3 py-0.5 rounded-full text-[10px] font-black border border-emerald-500/30">
-                    24 Hours Emergency & Ambulance Service
+                    {t('address.service')}
                   </span>
                 </div>
               </div>
@@ -243,7 +243,7 @@ export const Header: React.FC<HeaderProps> = ({
                   className="flex-1 py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold text-xs flex items-center justify-center space-x-2 transition-all"
                 >
                   <Copy className="w-4 h-4 text-amber-400" />
-                  <span>{copied ? 'Copied!' : 'Copy Address'}</span>
+                  <span>{copied ? t('address.copied') : t('address.copy')}</span>
                 </button>
 
                 <a
@@ -252,7 +252,7 @@ export const Header: React.FC<HeaderProps> = ({
                   rel="noopener noreferrer"
                   className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600 hover:from-teal-600 hover:to-emerald-700 text-white font-black text-xs flex items-center justify-center space-x-2 shadow-lg shadow-teal-500/25 transition-all hover:scale-105"
                 >
-                  <span>Google Maps</span>
+                  <span>{t('address.maps')}</span>
                   <ExternalLink className="w-4 h-4" />
                 </a>
               </div>
