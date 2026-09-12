@@ -4,8 +4,8 @@ import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { Loading } from '../../components/common/Loading';
 import { callBackend, isDemoMode } from '../../services/api';
-import { Appointment, ModelPerformance, Patient, WaitlistItem } from '../../types';
-import { INITIAL_MODEL_PERFORMANCE } from '../../utils/mockData';
+import { Appointment, Doctor, ModelPerformance, Patient, WaitlistItem } from '../../types';
+import { INITIAL_DOCTORS, INITIAL_MODEL_PERFORMANCE } from '../../utils/mockData';
 import {
   Brain,
   Sparkles,
@@ -46,6 +46,7 @@ export const Analytics: React.FC = () => {
   const { t } = useLanguage();
   const { showToast } = useToast();
   const [modelPerf, setModelPerf] = useState<ModelPerformance | null>(null);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [aptMetrics, setAptMetrics] = useState({
     totalPatients: 1000,
     totalAppointments: 24,
@@ -58,7 +59,7 @@ export const Analytics: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const demoActive = isDemoMode();
 
-  const handleDownloadMetricReport = async (type: 'PATIENTS' | 'APPOINTMENTS' | 'ATTENDED' | 'CANCELLED' | 'RESCHEDULED' | 'MISSED' | 'WAITLIST') => {
+  const handleDownloadMetricReport = async (type: 'PATIENTS' | 'APPOINTMENTS' | 'ATTENDED' | 'CANCELLED' | 'RESCHEDULED' | 'MISSED' | 'WAITLIST' | 'DOCTORS') => {
     const todayStr = new Date().toISOString().split('T')[0];
     
     if (type === 'PATIENTS') {
@@ -180,6 +181,22 @@ export const Analytics: React.FC = () => {
       }));
       downloadCSV(`Waitlist_Queue_Report_${todayStr}.csv`, exportData);
       showToast('Waitlist Queue CSV report downloaded successfully!', 'success');
+
+    } else if (type === 'DOCTORS') {
+      const res = await callBackend({ action: 'GET_DOCTORS' });
+      const docsList: Doctor[] = (res.success && Array.isArray(res.data)) ? res.data : (doctors.length > 0 ? doctors : INITIAL_DOCTORS);
+      const exportData = docsList.map(d => ({
+        DoctorID: d.id,
+        Name: d.name,
+        Specialization: d.specialization,
+        Department: d.department,
+        Email: d.email,
+        Phone: d.phone,
+        ExperienceYears: `${d.experience} Yrs`,
+        Status: d.status
+      }));
+      downloadCSV(`Hospital_Doctors_Report_${todayStr}.csv`, exportData);
+      showToast('Hospital Doctors CSV report downloaded successfully!', 'success');
     }
   };
 
@@ -219,8 +236,9 @@ export const Analytics: React.FC = () => {
       callBackend({ action: 'GET_MODEL_PERFORMANCE' }),
       callBackend({ action: 'GET_APPOINTMENTS', data: {} }),
       callBackend({ action: 'GET_PATIENTS', data: {} }),
-      callBackend({ action: 'GET_WAITLIST', data: {} })
-    ]).then(([perfRes, aptsRes, patsRes, waitRes]) => {
+      callBackend({ action: 'GET_WAITLIST', data: {} }),
+      callBackend({ action: 'GET_DOCTORS', data: {} })
+    ]).then(([perfRes, aptsRes, patsRes, waitRes, docsRes]) => {
       if (isMounted) {
         const perfData = (perfRes.success && perfRes.data && typeof perfRes.data.accuracy === 'number') 
           ? perfRes.data 
@@ -230,6 +248,9 @@ export const Analytics: React.FC = () => {
         const aptsList: Appointment[] = (aptsRes.success && Array.isArray(aptsRes.data)) ? aptsRes.data : [];
         const patsList: Patient[] = (patsRes.success && Array.isArray(patsRes.data)) ? patsRes.data : [];
         const waitList: WaitlistItem[] = (waitRes.success && Array.isArray(waitRes.data)) ? waitRes.data : [];
+        const docsList: Doctor[] = (docsRes.success && Array.isArray(docsRes.data) && docsRes.data.length > 0) ? docsRes.data : INITIAL_DOCTORS;
+
+        setDoctors(docsList);
 
         const totalPatients = patsList.length > 0 ? patsList.length : 1000;
         const totalAppointments = aptsList.length > 0 ? aptsList.length : 24;
@@ -563,6 +584,59 @@ export const Analytics: React.FC = () => {
           </div>
         </Card>
       </div>
+
+      {/* 🩺 HOSPITAL DOCTORS DIRECTORY & CSV DOWNLOAD SECTION 🩺 */}
+      <Card
+        title="Hospital Doctors & Medical Specialists Directory"
+        subtitle="Complete roster of medical staff, departments, contact info, and status"
+        action={
+          <button
+            onClick={() => handleDownloadMetricReport('DOCTORS')}
+            className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            title="Download Hospital Doctors Roster CSV"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download Doctors CSV</span>
+          </button>
+        }
+      >
+        <div className="overflow-x-auto mt-2">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-slate-50 text-slate-500 font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                <th className="py-3 px-3">Doctor ID</th>
+                <th className="py-3 px-3">Physician Name</th>
+                <th className="py-3 px-3">Specialization</th>
+                <th className="py-3 px-3">Department</th>
+                <th className="py-3 px-3">Experience</th>
+                <th className="py-3 px-3">Contact Email</th>
+                <th className="py-3 px-3">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+              {doctors.map(d => (
+                <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-2.5 px-3 font-mono font-bold text-teal-700">{d.id}</td>
+                  <td className="py-2.5 px-3 font-bold text-slate-900">{d.name}</td>
+                  <td className="py-2.5 px-3">{d.specialization}</td>
+                  <td className="py-2.5 px-3 font-semibold text-slate-600">{d.department}</td>
+                  <td className="py-2.5 px-3 font-mono">{d.experience} Yrs</td>
+                  <td className="py-2.5 px-3 text-slate-500">{d.email}</td>
+                  <td className="py-2.5 px-3">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase border ${
+                      d.status === 'Active' 
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                        : 'bg-slate-100 text-slate-600 border-slate-200'
+                    }`}>
+                      {d.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   );
 };
