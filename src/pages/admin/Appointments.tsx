@@ -106,23 +106,6 @@ export const Appointments: React.FC = () => {
       />
       <BackButton variant="admin" />
 
-      {/* Admin Topic Banner */}
-      <div className="bg-slate-900 text-white p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-teal-500/20 rounded-xl border border-teal-400/30 text-teal-300">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-teal-300">ADMIN CONTROL CENTER</h3>
-            <p className="text-xs text-slate-300">Manage patient attendance: Check In, Check Out, Not Attended (No-Show), or Completed</p>
-          </div>
-        </div>
-
-        <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={fetchAppointments}>
-          Sync Data
-        </Button>
-      </div>
-
       {/* Doctor Selector Tabs */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
