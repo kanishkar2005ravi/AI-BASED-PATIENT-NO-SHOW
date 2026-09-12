@@ -54,6 +54,7 @@ export const AdminDashboard: React.FC = () => {
     totalCancelled: 0,
     totalRescheduled: 0,
     totalMissed: 0,
+    totalWaitlistCount: 0,
     activeDoctors: 0,
     todayAppointments: 0,
     todayCancelled: 0,
@@ -108,6 +109,7 @@ export const AdminDashboard: React.FC = () => {
           totalCancelled: aptsList.filter(a => a.status === 'CANCELLED').length,
           totalRescheduled: aptsList.filter(a => a.status === 'RESCHEDULED').length,
           totalMissed: aptsList.filter(a => a.status === 'NO_SHOW').length,
+          totalWaitlistCount: waitList.length,
           activeDoctors: workingDocsCount > 0 ? workingDocsCount : activeDocsCount,
           todayAppointments: dateFilteredApts.length,
           todayCancelled: dateFilteredApts.filter(a => a.status === 'CANCELLED').length,
@@ -239,7 +241,7 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* 🌟 TOP SECTION: OVERALL TOTAL METRICS (ABOVE HOSPITAL OVERVIEW) 🌟 */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {/* 1. Total Patients */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group">
           <div>
@@ -297,7 +299,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* 5. Total Missed */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex items-center justify-between group col-span-2 sm:col-span-1">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex items-center justify-between group">
           <div>
             <p className="text-[11px] font-extrabold text-purple-800 uppercase tracking-wider">{t('metric.total_missed')}</p>
             <h3 className="text-2xl font-black text-purple-600 mt-1">{metrics.totalMissed}</h3>
@@ -307,6 +309,20 @@ export const AdminDashboard: React.FC = () => {
           </div>
           <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl group-hover:scale-110 transition-transform">
             <AlertCircle className="w-6 h-6" />
+          </div>
+        </div>
+
+        {/* 6. Total Waitlist */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group col-span-2 sm:col-span-1">
+          <div>
+            <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_waitlist')}</p>
+            <h3 className="text-2xl font-black text-amber-600 mt-1">{metrics.totalWaitlistCount}</h3>
+            <span className="inline-flex items-center text-[10px] font-bold text-amber-700 mt-1">
+              Entire Queue
+            </span>
+          </div>
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
+            <Clock className="w-6 h-6" />
           </div>
         </div>
       </div>
