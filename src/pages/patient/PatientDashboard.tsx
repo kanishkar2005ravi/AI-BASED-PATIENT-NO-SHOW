@@ -382,37 +382,8 @@ export const PatientDashboard: React.FC = () => {
           )}
         </Card>
 
-        {/* Right Column: Unique Patient Profile Card & Hospital Notices */}
+        {/* Right Column: Hospital Notices & Waitlist */}
         <div className="space-y-6">
-          {/* 🌟 SLEEK SINGLE-LINE PATIENT PROFILE BAR 🌟 */}
-          <div
-            onClick={() => navigate('/patient/profile')}
-            className="p-[2px] rounded-2xl bg-gradient-to-r from-teal-400 via-amber-400 to-indigo-500 shadow-md cursor-pointer hover:scale-[1.01] transition-all group"
-            title="View My Patient Profile"
-          >
-            <div className="p-3 rounded-[14px] bg-slate-950 text-white flex items-center justify-between space-x-3">
-              <div className="flex items-center space-x-3 overflow-hidden">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 via-teal-400 to-emerald-400 text-slate-950 font-black text-sm flex items-center justify-center shadow-md flex-shrink-0">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : 'P'}
-                </div>
-                <div className="overflow-hidden flex-1 leading-none">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs font-black text-white truncate group-hover:text-amber-300 transition-colors">
-                      {user?.name || 'Patient'}
-                    </span>
-                    <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex-shrink-0">
-                      Verified
-                    </span>
-                  </div>
-                  <p className="text-[11px] font-bold text-amber-400 mt-1">
-                    {t('dashboard.patient_id')}: {user?.id || 'PAT-686'}
-                  </p>
-                </div>
-              </div>
-
-              <ChevronRight className="w-4 h-4 text-teal-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-            </div>
-          </div>
 
           <Card title="Hospital Alerts & Notices">
             {notifications.length === 0 ? (
