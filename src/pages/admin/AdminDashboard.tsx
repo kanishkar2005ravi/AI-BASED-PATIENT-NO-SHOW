@@ -243,12 +243,12 @@ export const AdminDashboard: React.FC = () => {
       {/* 🌟 TOP SECTION: OVERALL TOTAL METRICS (ABOVE HOSPITAL OVERVIEW) 🌟 */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {/* 1. Total Patients */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group relative overflow-hidden">
           <div>
             <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_patients')}</p>
             <h3 className="text-2xl font-black text-slate-900 mt-1">{metrics.totalPatients}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-amber-700 mt-1">
-              <ArrowUpRight className="w-3 h-3 mr-0.5" /> Live Records
+            <span className="inline-flex items-center text-[10px] font-bold text-amber-700 mt-1 gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" /> Live Records
             </span>
           </div>
           <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
@@ -257,12 +257,12 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* 2. Total Appointments */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex items-center justify-between group">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex items-center justify-between group relative overflow-hidden">
           <div>
             <p className="text-[11px] font-extrabold text-teal-800 uppercase tracking-wider">{t('metric.total_appointments')}</p>
             <h3 className="text-2xl font-black text-slate-900 mt-1">{metrics.totalAppointments}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-teal-700 mt-1">
-              <ArrowUpRight className="w-3 h-3 mr-0.5" /> Total Bookings
+            <span className="inline-flex items-center text-[10px] font-bold text-teal-700 mt-1 gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-ping" /> Total Bookings
             </span>
           </div>
           <div className="p-3 bg-teal-50 text-teal-600 rounded-2xl group-hover:scale-110 transition-transform">
@@ -271,12 +271,12 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* 3. Total Cancelled */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex items-center justify-between group">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex items-center justify-between group relative overflow-hidden">
           <div>
             <p className="text-[11px] font-extrabold text-rose-800 uppercase tracking-wider">{t('metric.total_cancelled')}</p>
             <h3 className="text-2xl font-black text-rose-600 mt-1">{metrics.totalCancelled}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-rose-700 mt-1">
-              Cancelled Slots
+            <span className="inline-flex items-center text-[10px] font-bold text-rose-700 mt-1 gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" /> Cancelled Slots
             </span>
           </div>
           <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl group-hover:scale-110 transition-transform">
@@ -285,12 +285,12 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* 4. Total Rescheduled */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex items-center justify-between group">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex items-center justify-between group relative overflow-hidden">
           <div>
             <p className="text-[11px] font-extrabold text-blue-800 uppercase tracking-wider">{t('metric.total_rescheduled')}</p>
             <h3 className="text-2xl font-black text-blue-600 mt-1">{metrics.totalRescheduled}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-blue-700 mt-1">
-              Rescheduled Slots
+            <span className="inline-flex items-center text-[10px] font-bold text-blue-700 mt-1 gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" /> Rescheduled Slots
             </span>
           </div>
           <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
@@ -299,12 +299,12 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* 5. Total Missed */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex items-center justify-between group">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex items-center justify-between group relative overflow-hidden">
           <div>
             <p className="text-[11px] font-extrabold text-purple-800 uppercase tracking-wider">{t('metric.total_missed')}</p>
             <h3 className="text-2xl font-black text-purple-600 mt-1">{metrics.totalMissed}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-purple-700 mt-1">
-              No-Show Absences
+            <span className="inline-flex items-center text-[10px] font-bold text-purple-700 mt-1 gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" /> No-Show Absences
             </span>
           </div>
           <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl group-hover:scale-110 transition-transform">
@@ -313,12 +313,12 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* 6. Total Waitlist */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group col-span-2 sm:col-span-1">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group col-span-2 sm:col-span-1 relative overflow-hidden">
           <div>
             <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_waitlist')}</p>
             <h3 className="text-2xl font-black text-amber-600 mt-1">{metrics.totalWaitlistCount}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-amber-700 mt-1">
-              Entire Queue
+            <span className="inline-flex items-center text-[10px] font-bold text-amber-700 mt-1 gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" /> Entire Queue
             </span>
           </div>
           <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
@@ -328,23 +328,10 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* 🏥 HOSPITAL OVERVIEW & PATIENT STATS HEADER BAR 🏥 */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-        <div className="flex items-center space-x-3">
-          {/* Blinking Live Indicator Light */}
-          <div className="relative flex h-3 w-3 flex-shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
-          </div>
-
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-base font-black text-slate-900">Daily Hospital Operations & Patient Attendance</h2>
-              <span className="bg-teal-100 text-teal-800 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-teal-300 animate-pulse flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-600 animate-ping" /> LIVE ADMIN FEED
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">Real-time daily physician schedules, consultation outcomes & emergency waitlist tracking</p>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 className="text-base font-black text-slate-900">Daily Hospital Operations & Patient Attendance</h2>
+          <p className="text-xs text-slate-500">Real-time daily physician schedules, consultation outcomes & emergency waitlist tracking</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -385,7 +372,11 @@ export const AdminDashboard: React.FC = () => {
       {/* 7-Box Horizontal Row with Patient Dashboard Style SVG Progress Circles */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         {/* Box 1: Active Doctors */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group relative overflow-hidden">
+          <span className="absolute top-2.5 right-2.5 flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-emerald-100" fill="transparent" />
@@ -402,7 +393,11 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Box 2: Appointments */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group relative overflow-hidden">
+          <span className="absolute top-2.5 right-2.5 flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+          </span>
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-teal-100" fill="transparent" />
@@ -419,7 +414,11 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Box 3: Appointments Cancelled */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group relative overflow-hidden">
+          <span className="absolute top-2.5 right-2.5 flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+          </span>
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-rose-100" fill="transparent" />
@@ -436,7 +435,11 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Box 4: Appointments Rescheduled */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group relative overflow-hidden">
+          <span className="absolute top-2.5 right-2.5 flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          </span>
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-blue-100" fill="transparent" />
@@ -453,7 +456,11 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Box 5: Waitlist */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group relative overflow-hidden">
+          <span className="absolute top-2.5 right-2.5 flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+          </span>
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-amber-100" fill="transparent" />
@@ -470,7 +477,11 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Box 6: Accepted Waitlist */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group relative overflow-hidden">
+          <span className="absolute top-2.5 right-2.5 flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+          </span>
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-indigo-100" fill="transparent" />
@@ -487,7 +498,11 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Box 7: Missed / No-Show Absences */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group col-span-2 sm:col-span-1">
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group col-span-2 sm:col-span-1 relative overflow-hidden">
+          <span className="absolute top-2.5 right-2.5 flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+          </span>
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-purple-100" fill="transparent" />
