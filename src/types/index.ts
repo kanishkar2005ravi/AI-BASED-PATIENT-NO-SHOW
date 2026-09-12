@@ -6,6 +6,11 @@ export interface User {
   email: string;
   role: UserRole;
   phone?: string;
+  basicPhone?: string; // Contact No. for Non-Smartphone / Feature Phone Users
+  whatsappPhone?: string; // WhatsApp Number
+  emergencyPhone?: string; // Emergency Contact Phone Number
+  emergencyContactName?: string; // Emergency Contact Guardian / Relative Name
+  address?: string;
   avatar?: string;
 }
 
@@ -14,11 +19,7 @@ export interface Patient {
   name: string;
   email: string;
   password?: string;
-  phone: string; // Smartphone / Mobile Contact
-  basicPhone?: string; // Contact No. for Non-Smartphone / Feature Phone Users
-  whatsappPhone?: string; // WhatsApp Number
-  emergencyPhone?: string; // Emergency Contact Phone Number
-  emergencyContactName?: string; // Emergency Contact Guardian / Relative Name
+  phone: string;
   dateOfBirth: string;
   gender: 'Male' | 'Female' | 'Other';
   address: string;

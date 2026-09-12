@@ -9,7 +9,7 @@ import { AIRiskBadge } from '../../components/ai/AIRiskBadge';
 import { AIRiskExplanationModal } from '../../components/ai/AIRiskExplanationModal';
 import { callBackend } from '../../services/api';
 import { Patient, Appointment, AIRiskAssessment } from '../../types';
-import { ArrowLeft, User, Mail, Phone, Calendar, MapPin, Brain, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, MessageSquare, PhoneCall, Smartphone, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, Calendar, MapPin, Brain, CheckCircle2, XCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 export const PatientDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -89,94 +89,22 @@ export const PatientDetails: React.FC = () => {
             </p>
           </div>
 
-          <div className="space-y-3.5 text-xs text-slate-700">
-            {/* Email */}
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start space-x-3">
-              <Mail className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" />
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</p>
-                <a href={`mailto:${patient.email}`} className="font-semibold text-slate-900 hover:text-teal-600 truncate block">
-                  {patient.email}
-                </a>
-              </div>
+          <div className="space-y-3 text-xs text-slate-700">
+            <div className="flex items-center space-x-3">
+              <Mail className="w-4 h-4 text-slate-400" />
+              <span className="font-semibold text-slate-900">{patient.email}</span>
             </div>
-
-            {/* Smartphone Phone */}
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start space-x-3">
-              <Smartphone className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" />
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Primary Phone (Smartphone)</p>
-                <a href={`tel:${patient.phone}`} className="font-mono font-bold text-slate-900 hover:text-teal-600">
-                  {patient.phone || 'Not provided'}
-                </a>
-              </div>
+            <div className="flex items-center space-x-3">
+              <Phone className="w-4 h-4 text-slate-400" />
+              <span>{patient.phone || 'Not provided'}</span>
             </div>
-
-            {/* Feature Phone (Non-Smartphone) */}
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start space-x-3">
-              <PhoneCall className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Contact No. (Non-Smartphone Users)</p>
-                {patient.basicPhone ? (
-                  <a href={`tel:${patient.basicPhone}`} className="font-mono font-bold text-slate-900 hover:text-amber-600">
-                    {patient.basicPhone}
-                  </a>
-                ) : (
-                  <span className="text-slate-400 italic">Not specified (Basic voice call / SMS fallback)</span>
-                )}
-              </div>
+            <div className="flex items-center space-x-3">
+              <Calendar className="w-4 h-4 text-slate-400" />
+              <span>DOB: {patient.dateOfBirth} ({patient.gender})</span>
             </div>
-
-            {/* WhatsApp */}
-            <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-200/80 flex items-start space-x-3">
-              <MessageSquare className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">WhatsApp Number</p>
-                {patient.whatsappPhone ? (
-                  <a
-                    href={`https://wa.me/${patient.whatsappPhone.replace(/[^0-9]/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono font-bold text-emerald-900 hover:underline block"
-                  >
-                    {patient.whatsappPhone}
-                  </a>
-                ) : (
-                  <span className="text-emerald-700/70 italic">Not specified</span>
-                )}
-              </div>
-            </div>
-
-            {/* Emergency Contact */}
-            <div className="p-2.5 rounded-xl bg-rose-50/60 border border-rose-200/80 flex items-start space-x-3">
-              <ShieldAlert className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold text-rose-800 uppercase tracking-wider">Emergency Contact & Phone</p>
-                {patient.emergencyPhone || patient.emergencyContactName ? (
-                  <div>
-                    <p className="font-bold text-rose-950">{patient.emergencyContactName || 'Emergency Relative / Guardian'}</p>
-                    {patient.emergencyPhone && (
-                      <a href={`tel:${patient.emergencyPhone}`} className="font-mono font-bold text-rose-700 hover:underline">
-                        {patient.emergencyPhone}
-                      </a>
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-rose-700/70 italic">Not specified</span>
-                )}
-              </div>
-            </div>
-
-            {/* DOB & Address */}
-            <div className="pt-2 border-t border-slate-100 space-y-2">
-              <div className="flex items-center space-x-3 text-slate-700">
-                <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                <span>DOB: {patient.dateOfBirth} ({patient.gender})</span>
-              </div>
-              <div className="flex items-start space-x-3 text-slate-700">
-                <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
-                <span>{patient.address || 'Address not listed'}</span>
-              </div>
+            <div className="flex items-center space-x-3">
+              <MapPin className="w-4 h-4 text-slate-400" />
+              <span>{patient.address || 'Address not listed'}</span>
             </div>
           </div>
         </Card>
