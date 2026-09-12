@@ -69,7 +69,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     'note.label': 'NOTE',
     'note.policy_title': 'Cancellation & Rescheduling Policy:',
-    'note.policy_desc': 'You can cancel or reschedule your appointment up to 6 hours prior to your scheduled time slot. Early cancellation helps waitlisted patients receive recovered slots in real time.',
+    'note.policy_desc': 'Please cancel or reschedule your appointment at least 6 hours in advance so that the recovered slot can be automatically reallocated to next waitlisted patients in real time.',
     'note.waitlist_title': 'How Waitlist Auto-Recovery Works:',
     'note.waitlist_desc': 'If your preferred physician is fully booked, join the waitlist. When another patient cancels an appointment, the system automatically alerts you via Gmail (kanis.r.ad.2024@snsce.ac.in) & WhatsApp (+91 8300096676) in real time to claim the recovered slot!',
 
@@ -230,7 +230,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     'note.label': 'குறிப்பு',
     'note.policy_title': 'ரத்து மற்றும் மறுஅட்டவணை கொள்கை:',
-    'note.policy_desc': 'உங்கள் சந்திப்பை 6 மணிநேரத்திற்கு முன்பே ரத்து செய்யவோ அல்லது நேரத்தை மாற்றவோ முடியும். முன் கூட்டியே ரத்து செய்வதன் மூலம் காத்திருப்போர் பட்டியலில் உள்ள நோயாளிகளுக்கு முன்னுரிமை வழங்கப்படும்.',
+    'note.policy_desc': 'உங்கள் சந்திப்பை 6 மணிநேரத்திற்கு முன்பே ரத்து செய்யவோ அல்லது நேரத்தை மாற்றவோ கேட்டுக்கொள்ளப்படுகிறீர்கள். இதனால் காலியாகும் நேரம் காத்திருப்புப் பட்டியலில் உள்ள அடுத்த நோயாளிகளுக்கு உடனடியாக ஒதுக்கப்படும்.',
     'note.waitlist_title': 'காத்திருப்புப் பட்டியல் எவ்வாறு செயல்படுகிறது:',
     'note.waitlist_desc': 'உங்களுக்கு விருப்பமான மருத்துவரின் நேரம் முடிவடைந்தால், காத்திருப்புப் பட்டியலில் இணையலாம். மற்றொரு நோயாளி ரத்து செய்யும்போது ஜிமெயில் (kanis.r.ad.2024@snsce.ac.in) & வாட்ஸ்அப் (+91 8300096676) மூலம் உங்களுக்கு உடனடி தகவல் அனுப்பப்படும்!',
 
