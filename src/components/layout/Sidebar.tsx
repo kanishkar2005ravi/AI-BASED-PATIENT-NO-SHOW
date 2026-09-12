@@ -129,6 +129,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
           icon: <FileText className="w-5 h-5" />,
           activeGradient: 'bg-gradient-to-r from-indigo-600 to-blue-700 text-white shadow-lg shadow-indigo-500/30 border-l-4 border-cyan-300',
           badge: null
+        },
+        {
+          label: t('nav.logout'),
+          path: '#logout',
+          isLogout: true,
+          icon: <LogOut className="w-5 h-5 text-rose-400 group-hover:text-rose-300" />,
+          activeGradient: 'bg-rose-600 text-white',
+          badge: null
         }
       ]
     }
@@ -224,18 +232,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
         </div>
       </div>
 
-      {/* Footer Section */}
-      {role === 'admin' && (
-        <div className="relative z-10 pt-2 border-t border-teal-500/20 space-y-2">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-900/40 transition-all"
-          >
-            <LogOut className="w-4 h-4 flex-shrink-0 text-rose-400" />
-            <span>{t('nav.logout')}</span>
-          </button>
-        </div>
-      )}
     </aside>
   );
 };
