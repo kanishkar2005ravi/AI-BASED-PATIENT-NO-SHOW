@@ -99,7 +99,10 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.cancel': 'Cancel Visit',
     'dashboard.patient_id': 'Patient ID',
     'dashboard.back_to_dashboard': 'Back to Dashboard',
-    'dashboard.exp_years': 'Years Exp.'
+    'dashboard.exp_years': 'Years Exp.',
+    'dashboard.emergency_title': 'Premium & Emergency Priority Booking',
+    'dashboard.emergency_desc': 'If regular slots are unavailable, book an instant emergency priority consultation with on-call faculty specialists.',
+    'dashboard.emergency_button': 'Book Emergency Slot'
   },
   ta: {
     // Header & Navigation
@@ -191,7 +194,10 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.cancel': 'சந்திப்பை ரத்து செய்',
     'dashboard.patient_id': 'நோயாளி ஐடி',
     'dashboard.back_to_dashboard': 'முகப்பு பக்கத்திற்கு திரும்புக',
-    'dashboard.exp_years': 'ஆண்டுகள் அனுபவம்'
+    'dashboard.exp_years': 'ஆண்டுகள் அனுபவம்',
+    'dashboard.emergency_title': 'பிரீமியம் & அவசர சிகிச்சை முன்னுரிமை பதிவு',
+    'dashboard.emergency_desc': 'வழக்கமான நேரங்கள் கிடைக்கவில்லை என்றால், அவசர சிகிச்சைக்கான சிறப்பு மருத்துவரை உடனடியாக முன்பதிவு செய்யவும்.',
+    'dashboard.emergency_button': 'அவசர பதிவை மேற்கொள்ளவும் ⚡'
   }
 
 };

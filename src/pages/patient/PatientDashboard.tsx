@@ -314,6 +314,35 @@ export const PatientDashboard: React.FC = () => {
           </div>
         </div>
 
+      {/* 🚨 PREMIUM & EMERGENCY PRIORITY BOOKING CARD 🚨 */}
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-rose-950 via-slate-900 to-amber-950 border-2 border-rose-500/40 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden group">
+        <div className="flex items-center space-x-4">
+          <div className="p-4 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 text-white shadow-lg flex-shrink-0 group-hover:scale-105 transition-transform">
+            <Sparkles className="w-7 h-7 animate-pulse" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <span className="bg-rose-500/20 text-rose-300 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-rose-500/40">
+                Priority Care
+              </span>
+              <span className="text-xs font-bold text-amber-300">If regular slots are full</span>
+            </div>
+            <h3 className="text-lg font-black text-white">{t('dashboard.emergency_title')}</h3>
+            <p className="text-xs text-slate-300 font-medium max-w-xl">
+              {t('dashboard.emergency_desc')}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => navigate('/patient/book')}
+          className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-black text-xs transition-all shadow-lg hover:shadow-rose-500/30 flex items-center gap-2 flex-shrink-0 cursor-pointer"
+        >
+          <span>{t('dashboard.emergency_button')}</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* 🔔 HOSPITAL ALERTS & WAITLIST NOTICES 🔔 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card title="Hospital Alerts & Notices">
