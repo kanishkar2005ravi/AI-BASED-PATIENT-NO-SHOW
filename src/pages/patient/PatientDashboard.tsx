@@ -131,10 +131,10 @@ export const PatientDashboard: React.FC = () => {
       {/* 🌟 SIMPLE CLEAN TEXT GREETING MESSAGE 🌟 */}
       <div className="space-y-1 py-1">
         <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight">
-          Hello, <span className="text-teal-600 font-extrabold">{user?.name || 'Patient'}</span>
+          {t('welcome.hello')}, <span className="text-teal-600 font-extrabold">{user?.name || 'Patient'}</span>
         </h1>
         <p className="text-xs md:text-sm font-bold text-slate-500">
-          Patient ID: <span className="font-mono font-bold text-slate-800">{user?.id || 'PAT-1001'}</span>
+          {t('dashboard.patient_id')}: <span className="font-mono font-bold text-slate-800">{user?.id || 'PAT-1001'}</span>
         </p>
       </div>
 
@@ -147,7 +147,7 @@ export const PatientDashboard: React.FC = () => {
           </div>
           <div className="space-y-0.5">
             <p className="text-xl font-black text-slate-900 leading-none">{appointments.length}</p>
-            <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Total Visits</p>
+            <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">{t('metric.total_visits')}</p>
           </div>
         </div>
 
@@ -158,7 +158,7 @@ export const PatientDashboard: React.FC = () => {
           </div>
           <div className="space-y-0.5">
             <p className="text-xl font-black text-emerald-600 leading-none">{attendedCount}</p>
-            <p className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider">Attended</p>
+            <p className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider">{t('metric.attended')}</p>
           </div>
         </div>
 
@@ -169,7 +169,7 @@ export const PatientDashboard: React.FC = () => {
           </div>
           <div className="space-y-0.5">
             <p className="text-xl font-black text-rose-600 leading-none">{noShowCount}</p>
-            <p className="text-[11px] font-bold text-rose-900 uppercase tracking-wider">Missed</p>
+            <p className="text-[11px] font-bold text-rose-900 uppercase tracking-wider">{t('metric.missed')}</p>
           </div>
         </div>
 
@@ -180,7 +180,7 @@ export const PatientDashboard: React.FC = () => {
           </div>
           <div className="space-y-0.5">
             <p className="text-xl font-black text-purple-600 leading-none">{waitlist.length}</p>
-            <p className="text-[11px] font-bold text-purple-900 uppercase tracking-wider">Waitlist</p>
+            <p className="text-[11px] font-bold text-purple-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
           </div>
         </div>
       </div>
@@ -195,7 +195,7 @@ export const PatientDashboard: React.FC = () => {
           <div className="p-2 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 group-hover:scale-110 transition-transform">
             <CalendarPlus className="w-4 h-4" />
           </div>
-          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">Book Appointment</p>
+          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">{t('nav.book_appointment')}</p>
         </div>
 
         {/* My Appointments Box */}
@@ -206,7 +206,7 @@ export const PatientDashboard: React.FC = () => {
           <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 group-hover:scale-110 transition-transform">
             <CalendarCheck className="w-4 h-4" />
           </div>
-          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">My Appointments</p>
+          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">{t('nav.my_appointments')}</p>
         </div>
 
         {/* Waitlist Box */}
@@ -217,7 +217,7 @@ export const PatientDashboard: React.FC = () => {
           <div className="p-2 rounded-lg bg-pink-50 text-pink-600 border border-pink-100 group-hover:scale-110 transition-transform">
             <Clock className="w-4 h-4" />
           </div>
-          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">Waitlist</p>
+          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">{t('nav.waitlist')}</p>
         </div>
       </div>
 
@@ -227,10 +227,10 @@ export const PatientDashboard: React.FC = () => {
           <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
             <div className="flex items-center space-x-2">
               <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
-              <span className="text-xs font-black uppercase tracking-widest text-teal-300">Your Next Confirmed Medical Ticket</span>
+              <span className="text-xs font-black uppercase tracking-widest text-teal-300">{t('dashboard.next_ticket')}</span>
             </div>
             <Badge variant="teal" size="md">
-              {nextAppointment.status}
+              {nextAppointment.status === 'CONFIRMED' ? t('status.confirmed') : nextAppointment.status}
             </Badge>
           </div>
 
@@ -265,13 +265,13 @@ export const PatientDashboard: React.FC = () => {
                 onClick={() => navigate(`/patient/appointments/${nextAppointment.id}/reschedule`)}
                 className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all"
               >
-                Reschedule Visit
+                {t('dashboard.reschedule')}
               </button>
               <button
                 onClick={() => handleCancel(nextAppointment.id)}
                 className="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 font-bold text-xs border border-rose-400/30 transition-all"
               >
-                Cancel Visit
+                {t('dashboard.cancel')}
               </button>
             </div>
           </div>
@@ -279,12 +279,12 @@ export const PatientDashboard: React.FC = () => {
       ) : (
         <div className="p-8 rounded-3xl bg-slate-900 border-2 border-dashed border-slate-700 text-center text-slate-300">
           <Calendar className="w-12 h-12 text-teal-400 mx-auto mb-3 animate-bounce" />
-          <h3 className="text-lg font-black text-white">No Upcoming Consultations</h3>
+          <h3 className="text-lg font-black text-white">{t('dashboard.no_upcoming')}</h3>
           <p className="text-xs text-slate-400 max-w-md mx-auto mb-4 font-medium">
-            You currently have no scheduled appointments. Select a physician from SNS Medical College and book your consultation slot.
+            {t('dashboard.no_upcoming_desc')}
           </p>
           <Button variant="primary" size="md" onClick={() => navigate('/patient/book')}>
-            Book Appointment Now
+            {t('nav.book_appointment')}
           </Button>
         </div>
       )}
@@ -293,14 +293,14 @@ export const PatientDashboard: React.FC = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-black text-slate-900">Available Faculty Physicians</h2>
-            <p className="text-xs text-slate-500 font-medium">SNS Medical College and Hospital Specialists</p>
+            <h2 className="text-lg font-black text-slate-900">{t('dashboard.available_doctors')}</h2>
+            <p className="text-xs text-slate-500 font-medium">{t('dashboard.doctors_subtitle')}</p>
           </div>
           <button
             onClick={() => navigate('/patient/book')}
             className="text-xs font-black text-teal-600 hover:text-teal-700 flex items-center gap-1"
           >
-            <span>View All Doctors</span>
+            <span>{t('dashboard.view_all_doctors')}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -333,9 +333,9 @@ export const PatientDashboard: React.FC = () => {
                 </div>
 
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-                  <span className="font-medium">{doc.experience} Years Exp.</span>
+                  <span className="font-medium">{doc.experience} {t('dashboard.exp_years')}</span>
                   <span className="font-bold text-teal-600 group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                    Book Slot <ArrowRight className="w-3 h-3" />
+                    {t('dashboard.book_slot')} <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
               </div>
@@ -347,7 +347,7 @@ export const PatientDashboard: React.FC = () => {
       {/* 📋 ROW 3: APPOINTMENT HISTORY & NOTIFICATIONS HUB 📋 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Appointments List */}
-        <Card title="Appointment History & Schedule" className="lg:col-span-2">
+        <Card title={t('dashboard.history_title')} className="lg:col-span-2">
           {appointments.length === 0 ? (
             <p className="text-xs text-slate-500 text-center py-6">No appointment history found.</p>
           ) : (

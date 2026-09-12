@@ -80,11 +80,30 @@ const translations: Record<Language, Record<string, string>> = {
     'book.evening_session': 'Evening Session',
     'book.confirm_button': 'Confirm Booking',
     'book.next_step': 'Proceed to Review',
-    'book.prev_step': 'Back to Selection'
+    'book.prev_step': 'Back to Selection',
+
+    // Metric Cards & Dashboard Extra
+    'metric.total_visits': 'Total Visits',
+    'metric.attended': 'Attended',
+    'metric.missed': 'Missed',
+    'metric.waitlist': 'Waitlist',
+    'dashboard.next_ticket': 'Your Next Confirmed Medical Ticket',
+    'dashboard.no_upcoming': 'No Upcoming Consultations',
+    'dashboard.no_upcoming_desc': 'You currently have no scheduled appointments. Select a physician from SNS Medical College and book your consultation slot.',
+    'dashboard.available_doctors': 'Available Faculty Physicians',
+    'dashboard.doctors_subtitle': 'SNS Medical College and Hospital Specialists',
+    'dashboard.view_all_doctors': 'View All Doctors',
+    'dashboard.book_slot': 'Book Slot',
+    'dashboard.history_title': 'Appointment History & Schedule',
+    'dashboard.reschedule': 'Reschedule Visit',
+    'dashboard.cancel': 'Cancel Visit',
+    'dashboard.patient_id': 'Patient ID',
+    'dashboard.back_to_dashboard': 'Back to Dashboard',
+    'dashboard.exp_years': 'Years Exp.'
   },
   ta: {
     // Header & Navigation
-    'nav.dashboard': 'முகப்புப்பக்கம் (டாஷ்போர்டு)',
+    'nav.dashboard': 'முகப்பு (டாஷ்போர்டு)',
     'nav.appointments': 'சந்திப்புகள்',
     'nav.patients': 'நோயாளிகள் விவரம்',
     'nav.doctors': 'மருத்துவர்கள்',
@@ -93,7 +112,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.notifications': 'அறிவிப்புகள்',
     'nav.availability': 'மருத்துவர் நேர அட்டவணை',
     'nav.my_appointments': 'எனது சந்திப்புகள்',
-    'nav.book_appointment': 'சந்திப்பு பதிவு செய்ய',
+    'nav.book_appointment': 'சந்திப்பு பதிவு',
     'nav.profile': 'எனது சுயவிவரம்',
     'nav.logout': 'வெளியேறு',
 
@@ -105,7 +124,7 @@ const translations: Record<Language, Record<string, string>> = {
     'welcome.hello': 'வணக்கம்',
 
     // Actions & Buttons
-    'action.book': 'சந்திப்பு பதிவு செய்ய',
+    'action.book': 'சந்திப்பு பதிவு செய்',
     'action.create_patient': 'புதிய நோயாளி கணக்கு',
     'action.create_doctor': 'புதிய மருத்துவர் கணக்கு',
     'action.save': 'சேமி',
@@ -153,7 +172,26 @@ const translations: Record<Language, Record<string, string>> = {
     'book.evening_session': 'மாலை நேரம்',
     'book.confirm_button': 'சந்திப்பை உறுதி செய்',
     'book.next_step': 'அடுத்த நிலை (சரிபார்க்க)',
-    'book.prev_step': 'முந்தைய நிலை'
+    'book.prev_step': 'முந்தைய நிலை',
+
+    // Metric Cards & Dashboard Extra
+    'metric.total_visits': 'மொத்த வருகைகள்',
+    'metric.attended': 'வருகை புரிந்தவை',
+    'metric.missed': 'தவறிய வருகைகள்',
+    'metric.waitlist': 'காத்திருப்பு',
+    'dashboard.next_ticket': 'உங்கள் அடுத்த உறுதிசெய்யப்பட்ட மருத்துவ சீட்டு',
+    'dashboard.no_upcoming': 'வரவிருக்கும் சந்திப்புகள் எதுவும் இல்லை',
+    'dashboard.no_upcoming_desc': 'தற்போது உங்களுக்கு எந்த சந்திப்பும் முன்பதிவு செய்யப்படவில்லை. SNS மருத்துவக் கல்லூரி மருத்துவரைத் தேர்ந்தெடுத்து முன்பதிவு செய்யவும்.',
+    'dashboard.available_doctors': 'கிடைக்கும் சிறப்பு மருத்துவர்கள்',
+    'dashboard.doctors_subtitle': 'SNS மருத்துவக் கல்லூரி மற்றும் மருத்துவமனை நிபுணர்கள்',
+    'dashboard.view_all_doctors': 'அனைத்து மருத்துவர்களையும் காண்க',
+    'dashboard.book_slot': 'முன்பதிவு செய்',
+    'dashboard.history_title': 'சந்திப்பு வரலாறு & அட்டவணை',
+    'dashboard.reschedule': 'தேதியை மாற்றுக',
+    'dashboard.cancel': 'சந்திப்பை ரத்து செய்',
+    'dashboard.patient_id': 'நோயாளி ஐடி',
+    'dashboard.back_to_dashboard': 'முகப்பு பக்கத்திற்கு திரும்புக',
+    'dashboard.exp_years': 'ஆண்டுகள் அனுபவம்'
   }
 
 };
