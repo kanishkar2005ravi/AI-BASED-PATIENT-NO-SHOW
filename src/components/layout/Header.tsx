@@ -145,14 +145,14 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* 📍 DEAD-CENTER HOSPITAL ADDRESS MODAL (MIDDLE OF APP) 📍 */}
+      {/* 📍 DEAD-CENTER HOSPITAL ADDRESS MODAL (ALIGNED TO DASHBOARD CENTER OVER ATTENDED/MISSED VISITS) 📍 */}
       {showAddressModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xl animate-fade-in"
           onClick={() => setShowAddressModal(false)}
         >
           <div
-            className="p-[3px] rounded-[34px] bg-gradient-to-r from-amber-400 via-rose-500 via-purple-500 via-teal-400 to-emerald-400 shadow-2xl shadow-teal-500/40 w-full max-w-md select-none transform transition-all scale-100"
+            className="p-[3px] rounded-[34px] bg-gradient-to-r from-amber-400 via-rose-500 via-purple-500 via-teal-400 to-emerald-400 shadow-2xl shadow-teal-500/40 w-full max-w-md select-none transform transition-all translate-y-16 sm:translate-y-24"
             onClick={e => e.stopPropagation()}
           >
             <div className="w-full bg-slate-950 rounded-[31px] p-6 text-white space-y-5 relative overflow-hidden text-center">
