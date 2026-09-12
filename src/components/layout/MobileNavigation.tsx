@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import {
   Menu,
   X,
@@ -26,6 +27,7 @@ interface MobileNavigationProps {
 export const MobileNavigation: React.FC<MobileNavigationProps> = ({ role }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -34,26 +36,27 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ role }) => {
   };
 
   const adminNavItems = [
-    { label: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { label: 'Patients', path: '/admin/patients', icon: <Users className="w-5 h-5" /> },
-    { label: 'Doctors', path: '/admin/doctors', icon: <Stethoscope className="w-5 h-5" /> },
-    { label: 'Appointments', path: '/admin/appointments', icon: <Calendar className="w-5 h-5" /> },
-    { label: 'Waitlist', path: '/admin/waitlist', icon: <Clock className="w-5 h-5" /> },
-    { label: 'Notifications', path: '/admin/notifications', icon: <Bell className="w-5 h-5" /> },
-    { label: 'Reports', path: '/admin/reports', icon: <FileText className="w-5 h-5" /> },
-    { label: 'Profile', path: '/admin/profile', icon: <User className="w-5 h-5" /> }
+    { label: t('nav.dashboard'), path: '/admin/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { label: t('nav.patients'), path: '/admin/patients', icon: <Users className="w-5 h-5" /> },
+    { label: t('nav.doctors'), path: '/admin/doctors', icon: <Stethoscope className="w-5 h-5" /> },
+    { label: t('nav.appointments'), path: '/admin/appointments', icon: <Calendar className="w-5 h-5" /> },
+    { label: t('nav.waitlist'), path: '/admin/waitlist', icon: <Clock className="w-5 h-5" /> },
+    { label: t('nav.notifications'), path: '/admin/notifications', icon: <Bell className="w-5 h-5" /> },
+    { label: t('nav.reports'), path: '/admin/reports', icon: <FileText className="w-5 h-5" /> },
+    { label: t('nav.profile'), path: '/admin/profile', icon: <User className="w-5 h-5" /> }
   ];
 
   const patientNavItems = [
-    { label: 'Dashboard', path: '/patient/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { label: 'Book Appointment', path: '/patient/book', icon: <Calendar className="w-5 h-5" /> },
-    { label: 'My Appointments', path: '/patient/appointments', icon: <HeartPulse className="w-5 h-5" /> },
-    { label: 'Waitlist', path: '/patient/waitlist', icon: <Clock className="w-5 h-5" /> },
-    { label: 'Notifications', path: '/patient/notifications', icon: <Bell className="w-5 h-5" /> },
-    { label: 'Profile', path: '/patient/profile', icon: <User className="w-5 h-5" /> }
+    { label: t('nav.dashboard'), path: '/patient/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { label: t('nav.book_appointment'), path: '/patient/book', icon: <Calendar className="w-5 h-5" /> },
+    { label: t('nav.my_appointments'), path: '/patient/appointments', icon: <HeartPulse className="w-5 h-5" /> },
+    { label: t('nav.waitlist'), path: '/patient/waitlist', icon: <Clock className="w-5 h-5" /> },
+    { label: t('nav.notifications'), path: '/patient/notifications', icon: <Bell className="w-5 h-5" /> },
+    { label: t('nav.profile'), path: '/patient/profile', icon: <User className="w-5 h-5" /> }
   ];
 
   const navItems = role === 'admin' ? adminNavItems : patientNavItems;
+
 
   return (
     <div className="md:hidden">

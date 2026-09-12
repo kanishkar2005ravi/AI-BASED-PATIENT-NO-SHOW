@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import {
   LayoutDashboard,
   Users,
@@ -25,6 +26,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -33,24 +35,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
   };
 
   const adminNavItems = [
-    { label: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/30' },
-    { label: 'Patients', path: '/admin/patients', icon: <Users className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' },
-    { label: 'Doctors', path: '/admin/doctors', icon: <Stethoscope className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-500/30' },
-    { label: 'Appointments', path: '/admin/appointments', icon: <Calendar className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/30' },
-    { label: 'Waitlist', path: '/admin/waitlist', icon: <Clock className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/30' },
-    { label: 'Notifications', path: '/admin/notifications', icon: <Bell className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/30' },
-    { label: 'Reports', path: '/admin/reports', icon: <FileText className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30' },
-    { label: 'Profile', path: '/admin/profile', icon: <User className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/30' }
+    { label: t('nav.dashboard'), path: '/admin/dashboard', icon: <LayoutDashboard className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/30' },
+    { label: t('nav.patients'), path: '/admin/patients', icon: <Users className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' },
+    { label: t('nav.doctors'), path: '/admin/doctors', icon: <Stethoscope className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-500/30' },
+    { label: t('nav.appointments'), path: '/admin/appointments', icon: <Calendar className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/30' },
+    { label: t('nav.waitlist'), path: '/admin/waitlist', icon: <Clock className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/30' },
+    { label: t('nav.notifications'), path: '/admin/notifications', icon: <Bell className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md shadow-amber-500/30' },
+    { label: t('nav.reports'), path: '/admin/reports', icon: <FileText className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30' },
+    { label: t('nav.profile'), path: '/admin/profile', icon: <User className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/30' }
   ];
 
   const patientNavItems = [
-    { label: 'Dashboard', path: '/patient/dashboard', icon: <LayoutDashboard className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/30' },
-    { label: 'Book Appointment', path: '/patient/book', icon: <Calendar className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-500/30' },
-    { label: 'My Appointments', path: '/patient/appointments', icon: <HeartPulse className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/30' },
-    { label: 'Waitlist', path: '/patient/waitlist', icon: <Clock className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/30' },
-    { label: 'Notifications', path: '/patient/notifications', icon: <Bell className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' },
-    { label: 'Profile', path: '/patient/profile', icon: <User className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/30' }
+    { label: t('nav.dashboard'), path: '/patient/dashboard', icon: <LayoutDashboard className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/30' },
+    { label: t('nav.book_appointment'), path: '/patient/book', icon: <Calendar className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-500/30' },
+    { label: t('nav.my_appointments'), path: '/patient/appointments', icon: <HeartPulse className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/30' },
+    { label: t('nav.waitlist'), path: '/patient/waitlist', icon: <Clock className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/30' },
+    { label: t('nav.notifications'), path: '/patient/notifications', icon: <Bell className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' },
+    { label: t('nav.profile'), path: '/patient/profile', icon: <User className="w-5 h-5" />, activeBg: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md shadow-purple-500/30' }
   ];
+
 
   const navItems = role === 'admin' ? adminNavItems : patientNavItems;
 
@@ -104,8 +107,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
           className="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors"
         >
           <LogOut className="w-5 h-5 flex-shrink-0" />
-          <span>Sign Out</span>
+          <span>{t('nav.logout')}</span>
         </button>
+
       </div>
     </aside>
   );

@@ -1,6 +1,7 @@
 import React from 'react';
 import { AIRiskAssessment, RiskLevel } from '../../types';
 import { AlertTriangle, ShieldCheck, AlertCircle } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface AIRiskBadgeProps {
   risk: AIRiskAssessment;
@@ -15,6 +16,7 @@ export const AIRiskBadge: React.FC<AIRiskBadgeProps> = ({
   onClick,
   size = 'md'
 }) => {
+  const { t } = useLanguage();
   const percentage = Math.round((risk.probability || 0.2) * 100);
 
   const levelStyles: Record<RiskLevel, { bg: string; text: string; border: string; icon: React.ReactNode }> = {
@@ -45,6 +47,8 @@ export const AIRiskBadge: React.FC<AIRiskBadgeProps> = ({
     lg: 'px-3.5 py-1.5 text-sm'
   };
 
+  const riskLabelKey = risk.level === 'HIGH' ? 'risk.high' : risk.level === 'MEDIUM' ? 'risk.medium' : 'risk.low';
+
   return (
     <button
       type="button"
@@ -57,8 +61,9 @@ export const AIRiskBadge: React.FC<AIRiskBadgeProps> = ({
       }`}
     >
       {current.icon}
-      <span>{risk.level} RISK</span>
-      {showProbability && <span className="font-bold opacity-90">({percentage}%)</span>}
+      <span>{t(riskLabelKey)}</span>
+      {showProbability && <span className="opacity-75">({percentage}%)</span>}
     </button>
   );
 };
+
