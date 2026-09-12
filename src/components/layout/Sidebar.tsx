@@ -37,7 +37,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
 
   const patientNavSections = [
     {
-      title: 'MAIN COMMAND',
+      title: 'PATIENT PORTAL',
       items: [
         {
           label: t('nav.dashboard'),
@@ -45,12 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
           icon: <LayoutDashboard className="w-5 h-5" />,
           activeGradient: 'bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600 text-white shadow-lg shadow-teal-500/25 border-l-4 border-amber-400',
           badge: null
-        }
-      ]
-    },
-    {
-      title: 'SETTINGS & NOTICES',
-      items: [
+        },
         {
           label: t('nav.notifications'),
           path: '/patient/notifications',
@@ -63,6 +58,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
           path: '/patient/profile',
           icon: <User className="w-5 h-5 text-emerald-400 group-hover:text-emerald-300" />,
           activeGradient: 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-500/25 border-l-4 border-white',
+          badge: null
+        },
+        {
+          label: t('nav.logout'),
+          path: '#logout',
+          isLogout: true,
+          icon: <LogOut className="w-5 h-5 text-rose-400 group-hover:text-rose-300" />,
+          activeGradient: 'bg-rose-600 text-white',
           badge: null
         }
       ]
@@ -186,32 +189,51 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                 <span>{section.title}</span>
               </p>
               <nav className="space-y-1">
-                {section.items.map(item => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    className={({ isActive }) =>
-                      `group flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all duration-200 ${
-                        isActive
-                          ? `${item.activeGradient} scale-[1.02]`
-                          : 'text-slate-400 hover:text-white hover:bg-slate-900/90 hover:translate-x-1 border border-transparent'
-                      }`
-                    }
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span className="flex-shrink-0 transition-transform group-hover:scale-110">
-                        {item.icon}
-                      </span>
-                      <span className="tracking-wide">{item.label}</span>
-                    </div>
+                {section.items.map(item => {
+                  if ((item as any).isLogout) {
+                    return (
+                      <button
+                        key="logout-item"
+                        onClick={handleLogout}
+                        className="w-full group flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs text-rose-400 hover:text-white hover:bg-rose-950/60 hover:translate-x-1 border border-transparent hover:border-rose-900/40 transition-all duration-200 text-left"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="flex-shrink-0 transition-transform group-hover:scale-110 text-rose-400">
+                            {item.icon}
+                          </span>
+                          <span className="tracking-wide">{item.label}</span>
+                        </div>
+                      </button>
+                    );
+                  }
 
-                    {item.badge && (
-                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${(item.badge as any).color}`}>
-                        {(item.badge as any).text}
-                      </span>
-                    )}
-                  </NavLink>
-                ))}
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      className={({ isActive }) =>
+                        `group flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all duration-200 ${
+                          isActive
+                            ? `${item.activeGradient} scale-[1.02]`
+                            : 'text-slate-400 hover:text-white hover:bg-slate-900/90 hover:translate-x-1 border border-transparent'
+                        }`
+                      }
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className="flex-shrink-0 transition-transform group-hover:scale-110">
+                          {item.icon}
+                        </span>
+                        <span className="tracking-wide">{item.label}</span>
+                      </div>
+
+                      {item.badge && (
+                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${(item.badge as any).color}`}>
+                          {(item.badge as any).text}
+                        </span>
+                      )}
+                    </NavLink>
+                  );
+                })}
               </nav>
             </div>
           ))}
