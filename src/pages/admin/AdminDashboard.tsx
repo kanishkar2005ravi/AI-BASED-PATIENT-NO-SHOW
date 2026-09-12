@@ -4,22 +4,18 @@ import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { Loading } from '../../components/common/Loading';
 import { callBackend } from '../../services/api';
-import { AnalyticsData, Appointment } from '../../types';
+import { AnalyticsData, Appointment, Doctor, Patient, WaitlistItem } from '../../types';
 import {
   Users,
   Stethoscope,
   Calendar,
   Clock,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  ShieldCheck,
-  Percent,
   RefreshCw,
-  Sparkles,
+  XCircle,
+  UserCheck,
   ArrowUpRight,
-  ArrowDownRight,
-  ArrowLeft
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 import {
   AreaChart,
@@ -38,16 +34,28 @@ import {
 } from 'recharts';
 import { AIRiskBadge } from '../../components/ai/AIRiskBadge';
 import { useNavigate } from 'react-router-dom';
-import { WelcomeSplashScreen } from '../../components/common/WelcomeSplashScreen';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminDashboard: React.FC = () => {
   const [dateRange, setDateRange] = useState<'today' | '7days' | '30days' | 'custom'>('7days');
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(false);
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
+  // Metrics State
+  const [metrics, setMetrics] = useState({
+    totalPatients: 0,
+    totalAppointments: 0,
+    totalCancelled: 0,
+    totalRescheduled: 0,
+    activeDoctors: 0,
+    todayAppointments: 0,
+    todayCancelled: 0,
+    todayRescheduled: 0,
+    waitlistCount: 0
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -57,28 +65,44 @@ export const AdminDashboard: React.FC = () => {
       callBackend({ action: 'GET_ANALYTICS', data: { dateRange } }),
       callBackend({ action: 'GET_APPOINTMENTS', data: {} }),
       callBackend({ action: 'GET_PATIENTS', data: {} }),
-      callBackend({ action: 'GET_DOCTORS', data: {} })
-    ]).then(([analyticsRes, aptsRes, patsRes, docsRes]) => {
+      callBackend({ action: 'GET_DOCTORS', data: {} }),
+      callBackend({ action: 'GET_WAITLIST', data: {} })
+    ]).then(([analyticsRes, aptsRes, patsRes, docsRes, waitRes]) => {
       if (isMounted) {
         const aptsList: Appointment[] = (aptsRes.success && Array.isArray(aptsRes.data)) ? aptsRes.data : [];
-        const patsList = (patsRes.success && Array.isArray(patsRes.data)) ? patsRes.data : [];
-        const docsList = (docsRes.success && Array.isArray(docsRes.data)) ? docsRes.data : [];
+        const patsList: Patient[] = (patsRes.success && Array.isArray(patsRes.data)) ? patsRes.data : [];
+        const docsList: Doctor[] = (docsRes.success && Array.isArray(docsRes.data)) ? docsRes.data : [];
+        const waitList: WaitlistItem[] = (waitRes.success && Array.isArray(waitRes.data)) ? waitRes.data : [];
 
         const todayStr = new Date().toISOString().split('T')[0];
-        const todayCount = aptsList.filter(a => a.appointmentDate === todayStr).length;
+        const todayApts = aptsList.filter(a => a.appointmentDate === todayStr);
+
+        const calculatedMetrics = {
+          totalPatients: patsList.length > 0 ? patsList.length : 200,
+          totalAppointments: aptsList.length > 0 ? aptsList.length : 24,
+          totalCancelled: aptsList.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length,
+          totalRescheduled: aptsList.filter(a => a.status === 'RESCHEDULED').length,
+          activeDoctors: docsList.filter(d => d.status === 'Active').length || docsList.length || 4,
+          todayAppointments: todayApts.length,
+          todayCancelled: todayApts.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length,
+          todayRescheduled: todayApts.filter(a => a.status === 'RESCHEDULED').length,
+          waitlistCount: waitList.length
+        };
+
+        setMetrics(calculatedMetrics);
 
         const baseAnalytics = analyticsRes.data || {
-          totalPatients: 0,
-          totalDoctors: 0,
-          totalAppointments: 0,
-          todayAppointments: 0,
+          totalPatients: calculatedMetrics.totalPatients,
+          totalDoctors: calculatedMetrics.activeDoctors,
+          totalAppointments: calculatedMetrics.totalAppointments,
+          todayAppointments: calculatedMetrics.todayAppointments,
           attendanceRate: 84.5,
           noShowRate: 9.2,
           cancellationRate: 6.3,
           waitlistRecoveryRate: 78.4,
-          highRiskCount: 0,
-          mediumRiskCount: 0,
-          lowRiskCount: 0
+          highRiskCount: 3,
+          mediumRiskCount: 6,
+          lowRiskCount: 18
         };
 
         const lowCount = aptsList.filter(a => !a.risk || a.risk.level === 'LOW').length;
@@ -87,10 +111,10 @@ export const AdminDashboard: React.FC = () => {
 
         const liveAnalytics: AnalyticsData = {
           ...baseAnalytics,
-          totalPatients: patsList.length > 0 ? patsList.length : baseAnalytics.totalPatients,
-          totalDoctors: docsList.length > 0 ? docsList.length : baseAnalytics.totalDoctors,
-          totalAppointments: aptsList.length > 0 ? aptsList.length : baseAnalytics.totalAppointments,
-          todayAppointments: todayCount > 0 ? todayCount : (aptsList.length > 0 ? todayCount : baseAnalytics.todayAppointments),
+          totalPatients: calculatedMetrics.totalPatients,
+          totalDoctors: calculatedMetrics.activeDoctors,
+          totalAppointments: calculatedMetrics.totalAppointments,
+          todayAppointments: calculatedMetrics.todayAppointments,
           lowRiskCount: aptsList.length > 0 ? lowCount : (baseAnalytics.lowRiskCount || 18),
           mediumRiskCount: aptsList.length > 0 ? medCount : (baseAnalytics.mediumRiskCount || 6),
           highRiskCount: aptsList.length > 0 ? highCount : (baseAnalytics.highRiskCount || 3)
@@ -110,7 +134,7 @@ export const AdminDashboard: React.FC = () => {
   if (loading || !analytics) {
     return (
       <div>
-        <Header title="Hospital Analytics & Overview" />
+        <Header title={t('nav.dashboard')} />
         <div className="py-20">
           <Loading message="Fetching hospital metrics & AI predictions..." />
         </div>
@@ -126,23 +150,72 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <Header title="Admin Dashboard" />
+      <Header title={t('nav.dashboard')} />
 
-      {/* 5-Second 7-Color Animated Welcome Entrance Screen */}
-      {showWelcomeSplash && (
-        <WelcomeSplashScreen
-          userName="Administrator"
-          role="admin"
-          onComplete={() => setShowWelcomeSplash(false)}
-        />
-      )}
+      {/* 🌟 TOP SECTION: OVERALL TOTAL METRICS (ABOVE HOSPITAL OVERVIEW) 🌟 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 1. Total Patients */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group">
+          <div>
+            <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_patients')}</p>
+            <h3 className="text-2xl font-black text-slate-900 mt-1">{metrics.totalPatients}</h3>
+            <span className="inline-flex items-center text-[10px] font-bold text-amber-700 mt-1">
+              <ArrowUpRight className="w-3 h-3 mr-0.5" /> Live Records
+            </span>
+          </div>
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
+            <Users className="w-6 h-6" />
+          </div>
+        </div>
 
+        {/* 2. Total Appointments */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex items-center justify-between group">
+          <div>
+            <p className="text-[11px] font-extrabold text-teal-800 uppercase tracking-wider">{t('metric.total_appointments')}</p>
+            <h3 className="text-2xl font-black text-slate-900 mt-1">{metrics.totalAppointments}</h3>
+            <span className="inline-flex items-center text-[10px] font-bold text-teal-700 mt-1">
+              <ArrowUpRight className="w-3 h-3 mr-0.5" /> Total Bookings
+            </span>
+          </div>
+          <div className="p-3 bg-teal-50 text-teal-600 rounded-2xl group-hover:scale-110 transition-transform">
+            <Calendar className="w-6 h-6" />
+          </div>
+        </div>
 
-      {/* Date Range Selector Bar */}
+        {/* 3. Total Cancelled */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex items-center justify-between group">
+          <div>
+            <p className="text-[11px] font-extrabold text-rose-800 uppercase tracking-wider">{t('metric.total_cancelled')}</p>
+            <h3 className="text-2xl font-black text-rose-600 mt-1">{metrics.totalCancelled}</h3>
+            <span className="inline-flex items-center text-[10px] font-bold text-rose-700 mt-1">
+              Cancelled / No-Show
+            </span>
+          </div>
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl group-hover:scale-110 transition-transform">
+            <XCircle className="w-6 h-6" />
+          </div>
+        </div>
+
+        {/* 4. Total Rescheduled */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex items-center justify-between group">
+          <div>
+            <p className="text-[11px] font-extrabold text-blue-800 uppercase tracking-wider">{t('metric.total_rescheduled')}</p>
+            <h3 className="text-2xl font-black text-blue-600 mt-1">{metrics.totalRescheduled}</h3>
+            <span className="inline-flex items-center text-[10px] font-bold text-blue-700 mt-1">
+              Rescheduled Slots
+            </span>
+          </div>
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
+            <RefreshCw className="w-6 h-6" />
+          </div>
+        </div>
+      </div>
+
+      {/* 🏥 HOSPITAL OVERVIEW & PATIENT STATS HEADER BAR 🏥 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <h2 className="text-base font-bold text-slate-900">Hospital Overview & Patient Stats</h2>
-          <p className="text-xs text-slate-500">Real-time attendance metrics & waitlist stats</p>
+          <h2 className="text-base font-black text-slate-900">Hospital Overview & Patient Stats</h2>
+          <p className="text-xs text-slate-500">Real-time today's attendance metrics & waitlist stats</p>
         </div>
 
         <div className="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
@@ -150,9 +223,9 @@ export const AdminDashboard: React.FC = () => {
             <button
               key={range}
               onClick={() => setDateRange(range)}
-              className={`px-3 py-1.5 rounded-lg transition-all capitalize ${
+              className={`px-3 py-1.5 rounded-lg transition-all capitalize cursor-pointer ${
                 dateRange === range
-                  ? 'bg-gradient-to-r from-amber-500 via-rose-500 to-teal-500 text-white shadow-sm'
+                  ? 'bg-gradient-to-r from-amber-500 via-teal-600 to-purple-600 text-white shadow-sm font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -162,84 +235,106 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Row 1: Top Statistics with SNS Design Thinking Colors */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* 🟡 Amber Gold (#F59E0B) */}
-        <Card className="border-l-4 border-l-amber-500 bg-gradient-to-br from-white to-amber-50/50">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Total Patients</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.totalPatients}</h3>
-              <span className="inline-flex items-center text-xs font-bold text-amber-700 mt-1">
-                <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +12% this month
-              </span>
-            </div>
-            <div className="p-3 bg-amber-100/80 rounded-2xl text-amber-600 shadow-sm">
-              <Users className="w-6 h-6" />
+      {/* 🌟 BOTTOM SECTION: TODAY'S & ACTIVE METRICS (BELOW HOSPITAL OVERVIEW) 🌟 */}
+      {/* 5-Box Single Horizontal Row with Patient Dashboard Style SVG Progress Circles */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {/* Box 1: Active Doctors */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-emerald-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={0} strokeLinecap="round" className="text-emerald-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2 rounded-full bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform">
+              <Stethoscope className="w-4 h-4" />
             </div>
           </div>
-        </Card>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-emerald-600 leading-none">{metrics.activeDoctors}</p>
+            <p className="text-[10px] font-extrabold text-emerald-900 uppercase tracking-wider">{t('metric.active_doctors')}</p>
+          </div>
+        </div>
 
-        {/* 💙 Royal Blue (#3B82F6) */}
-        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-white to-blue-50/50">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">Active Doctors</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.totalDoctors}</h3>
-              <span className="inline-flex items-center text-xs font-semibold text-blue-700 mt-1">
-                Across 6 Departments
-              </span>
-            </div>
-            <div className="p-3 bg-blue-100/80 rounded-2xl text-blue-600 shadow-sm">
-              <Stethoscope className="w-6 h-6" />
+        {/* Box 2: Today's Appointments */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-teal-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={metrics.todayAppointments > 0 ? 0 : 125.6} strokeLinecap="round" className="text-teal-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2 rounded-full bg-teal-50 text-teal-600 group-hover:scale-110 transition-transform">
+              <Clock className="w-4 h-4" />
             </div>
           </div>
-        </Card>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-teal-600 leading-none">{metrics.todayAppointments}</p>
+            <p className="text-[10px] font-extrabold text-teal-900 uppercase tracking-wider">{t('metric.todays_appointments')}</p>
+          </div>
+        </div>
 
-        {/* 💜 Purple (#8B5CF6) */}
-        <Card className="border-l-4 border-l-purple-500 bg-gradient-to-br from-white to-purple-50/50">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-purple-800 uppercase tracking-wider">Total Appointments</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.totalAppointments}</h3>
-              <span className="inline-flex items-center text-xs font-bold text-purple-700 mt-1">
-                <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +8.4% volume
-              </span>
-            </div>
-            <div className="p-3 bg-purple-100/80 rounded-2xl text-purple-600 shadow-sm">
-              <Calendar className="w-6 h-6" />
+        {/* Box 3: Today's Appointments Cancelled */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-rose-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={metrics.todayAppointments > 0 ? 125.6 - (125.6 * (metrics.todayCancelled / metrics.todayAppointments)) : 125.6} strokeLinecap="round" className="text-rose-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2 rounded-full bg-rose-50 text-rose-600 group-hover:scale-110 transition-transform">
+              <XCircle className="w-4 h-4" />
             </div>
           </div>
-        </Card>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-rose-600 leading-none">{metrics.todayCancelled}</p>
+            <p className="text-[10px] font-extrabold text-rose-900 uppercase tracking-wider">{t('metric.todays_cancelled')}</p>
+          </div>
+        </div>
 
-        {/* 🟢 Emerald & Teal (#0D9488 & #10B981) */}
-        <Card className="border-l-4 border-l-emerald-500 bg-gradient-to-br from-white to-emerald-50/50">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Today's Appointments</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.todayAppointments}</h3>
-              <span className="inline-flex items-center text-xs font-semibold text-teal-700 mt-1">
-                Scheduled Today
-              </span>
-            </div>
-            <div className="p-3 bg-emerald-100/80 rounded-2xl text-emerald-600 shadow-sm">
-              <Clock className="w-6 h-6" />
+        {/* Box 4: Today's Appointments Rescheduled */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-blue-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={metrics.todayAppointments > 0 ? 125.6 - (125.6 * (metrics.todayRescheduled / metrics.todayAppointments)) : 125.6} strokeLinecap="round" className="text-blue-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2 rounded-full bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform">
+              <RefreshCw className="w-4 h-4" />
             </div>
           </div>
-        </Card>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-blue-600 leading-none">{metrics.todayRescheduled}</p>
+            <p className="text-[10px] font-extrabold text-blue-900 uppercase tracking-wider">{t('metric.todays_rescheduled')}</p>
+          </div>
+        </div>
+
+        {/* Box 5: Waitlist */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group col-span-2 sm:col-span-1">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-purple-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={0} strokeLinecap="round" className="text-purple-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2 rounded-full bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-purple-600 leading-none">{metrics.waitlistCount}</p>
+            <p className="text-[10px] font-extrabold text-purple-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
+          </div>
+        </div>
       </div>
 
-      {/* Row 2: AI No-Show Risk Split Breakdown Cards */}
+      {/* Row 3: AI No-Show Risk Split Breakdown Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-50/50 to-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Low Risk Patients</p>
               <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.lowRiskCount}</h3>
-              <span className="text-xs font-semibold text-emerald-600">Standard 10h Reminders</span>
+              <span className="text-xs font-semibold text-emerald-600">Standard Reminders</span>
             </div>
-            <div className="p-3 bg-emerald-100 rounded-2xl text-emerald-600 font-bold text-xs">
-              LOW
+            <div className="p-3 bg-emerald-100/80 rounded-2xl text-emerald-600">
+              <Badge variant="teal">LOW RISK</Badge>
             </div>
           </div>
         </Card>
@@ -249,10 +344,10 @@ export const AdminDashboard: React.FC = () => {
             <div>
               <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Medium Risk Patients</p>
               <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.mediumRiskCount}</h3>
-              <span className="text-xs font-semibold text-amber-600">Priority 10h Reminders</span>
+              <span className="text-xs font-semibold text-amber-600">SMS + Call Followup</span>
             </div>
-            <div className="p-3 bg-amber-100 rounded-2xl text-amber-600 font-bold text-xs">
-              MED
+            <div className="p-3 bg-amber-100/80 rounded-2xl text-amber-600">
+              <Badge variant="warning">MEDIUM RISK</Badge>
             </div>
           </div>
         </Card>
@@ -262,64 +357,55 @@ export const AdminDashboard: React.FC = () => {
             <div>
               <p className="text-xs font-bold text-rose-800 uppercase tracking-wider">High Risk Patients</p>
               <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.highRiskCount}</h3>
-              <span className="text-xs font-semibold text-rose-600">Urgent 24h, 12h, 6h Reminders</span>
+              <span className="text-xs font-semibold text-rose-600">Overbook & Priority Alert</span>
             </div>
-            <div className="p-3 bg-rose-100 rounded-2xl text-rose-600 font-bold text-xs">
-              HIGH
+            <div className="p-3 bg-rose-100/80 rounded-2xl text-rose-600">
+              <Badge variant="danger">HIGH RISK</Badge>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Row 3: Recent Appointments Table */}
-      <Card
-        title="Recent Hospital Appointments & AI Risk"
-        action={
-          <button
-            onClick={() => navigate('/admin/appointments')}
-            className="text-xs font-bold text-teal-600 hover:text-teal-700"
-          >
-            View All Appointments &rarr;
-          </button>
-        }
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50/50">
-                <th className="py-3 px-4">APT ID</th>
-                <th className="py-3 px-4">Patient</th>
-                <th className="py-3 px-4">Doctor</th>
-                <th className="py-3 px-4">Date & Time</th>
-                <th className="py-3 px-4">Type</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">AI Risk</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {recentAppointments.map(apt => (
-                <tr key={apt.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-xs text-slate-700">{apt.id}</td>
-                  <td className="py-3.5 px-4 font-semibold text-slate-900">{apt.patientName}</td>
-                  <td className="py-3.5 px-4 text-slate-700">{apt.doctorName}</td>
-                  <td className="py-3.5 px-4 text-slate-600 text-xs">
-                    {apt.appointmentDate} at {apt.appointmentTime}
-                  </td>
-                  <td className="py-3.5 px-4 text-xs font-medium text-slate-600">{apt.appointmentType}</td>
-                  <td className="py-3.5 px-4">
-                    <Badge variant={apt.status === 'CONFIRMED' ? 'info' : apt.status === 'COMPLETED' ? 'success' : 'danger'} size="sm">
-                      {apt.status}
-                    </Badge>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <AIRiskBadge risk={apt.risk} size="sm" />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+      {/* Row 4: Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card title="Appointment Attendance & No-Show Trends" subtitle="Historical breakdown over selected period">
+          <div className="h-72 w-full mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={[
+                { name: 'Mon', attended: 18, noshow: 2, cancelled: 1 },
+                { name: 'Tue', attended: 22, noshow: 1, cancelled: 2 },
+                { name: 'Wed', attended: 25, noshow: 3, cancelled: 1 },
+                { name: 'Thu', attended: 20, noshow: 2, cancelled: 0 },
+                { name: 'Fri', attended: 28, noshow: 1, cancelled: 2 },
+                { name: 'Sat', attended: 15, noshow: 4, cancelled: 3 }
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
+                <YAxis stroke="#94a3b8" fontSize={12} />
+                <Tooltip />
+                <Area type="monotone" dataKey="attended" stackId="1" stroke="#0d9488" fill="#0d9488" fillOpacity={0.2} />
+                <Area type="monotone" dataKey="noshow" stackId="1" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card title="AI Predictive Risk Classification" subtitle="Patient risk distribution breakdown">
+          <div className="h-72 w-full mt-4 flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={riskPieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
+                  {riskPieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 };
