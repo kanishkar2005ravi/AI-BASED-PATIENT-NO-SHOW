@@ -330,24 +330,7 @@ export const AdminDashboard: React.FC = () => {
       {/* 🌟 BOTTOM SECTION: TODAY'S & ACTIVE METRICS (BELOW HOSPITAL OVERVIEW) 🌟 */}
       {/* 7-Box Horizontal Row with Patient Dashboard Style SVG Progress Circles */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        {/* Box 1: Attended Appointments */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
-          <div className="relative w-11 h-11 flex items-center justify-center">
-            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0 animate-pulse" viewBox="0 0 48 48">
-              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-emerald-100" fill="transparent" />
-              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={metrics.todayAppointments > 0 ? 125.6 - (125.6 * (metrics.todayAttended / metrics.todayAppointments)) : 0} strokeLinecap="round" className="text-emerald-500 transition-all duration-700 animate-pulse" fill="transparent" />
-            </svg>
-            <div className="p-2 rounded-full bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform animate-pulse ring-2 ring-emerald-400/40">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-2xl font-black text-emerald-600 leading-none">{metrics.todayAttended}</p>
-            <p className="text-[10px] font-extrabold text-emerald-900 uppercase tracking-wider">{getFilteredMetricLabel('attended')}</p>
-          </div>
-        </div>
-
-        {/* Box 2: Appointments */}
+        {/* Box 1: Appointments */}
         <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0 animate-pulse" viewBox="0 0 48 48">
@@ -361,6 +344,23 @@ export const AdminDashboard: React.FC = () => {
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-teal-600 leading-none">{metrics.todayAppointments}</p>
             <p className="text-[10px] font-extrabold text-teal-900 uppercase tracking-wider">{getFilteredMetricLabel('appointments')}</p>
+          </div>
+        </div>
+
+        {/* Box 2: Attended Appointments */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0 animate-pulse" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-emerald-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={metrics.todayAppointments > 0 ? 125.6 - (125.6 * (metrics.todayAttended / metrics.todayAppointments)) : 0} strokeLinecap="round" className="text-emerald-500 transition-all duration-700 animate-pulse" fill="transparent" />
+            </svg>
+            <div className="p-2 rounded-full bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform animate-pulse ring-2 ring-emerald-400/40">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-emerald-600 leading-none">{metrics.todayAttended}</p>
+            <p className="text-[10px] font-extrabold text-emerald-900 uppercase tracking-wider">{getFilteredMetricLabel('attended')}</p>
           </div>
         </div>
 
