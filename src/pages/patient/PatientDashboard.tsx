@@ -126,44 +126,19 @@ export const PatientDashboard: React.FC = () => {
         />
       )}
 
-      {/* 🌟 DISTINCTIVE HERO COMMAND CENTER BANNER 🌟 */}
+      {/* 🌟 SIMPLE CLEAN HERO BANNER 🌟 */}
       <div className="relative rounded-3xl p-6 md:p-8 overflow-hidden bg-gradient-to-r from-slate-950 via-teal-950 to-slate-900 border-2 border-teal-500/30 shadow-2xl">
         {/* Animated Background Mesh */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
         <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-teal-500/20 to-purple-500/20 border-2 border-amber-400/50 text-amber-300 text-xs font-black uppercase tracking-widest flex items-center gap-2.5 shadow-lg shadow-amber-500/10 whitespace-nowrap">
-                <CarePilotLogo size="sm" showText={false} />
-                <span>{t('welcome.institution')}</span>
-              </span>
-              <button
-                onClick={() => setShowWelcomeSplash(true)}
-                className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 text-xs font-black transition-all flex items-center gap-1.5 shadow-sm"
-              >
-                <Play className="w-3 h-3 fill-current text-amber-300" /> {t('action.replay')}
-              </button>
-            </div>
-
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
-              {t('welcome.hello')}, <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">{user?.name || 'Patient'}</span>
-            </h1>
-            <p className="text-xs md:text-sm text-teal-200/90 font-medium max-w-xl">
-              Patient ID: <span className="font-mono font-bold text-amber-300">{user?.id || 'PAT-1001'}</span> • CarePilot SNS AI Health Workstation
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/patient/book')}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 hover:from-teal-500 hover:to-cyan-500 text-slate-950 font-black text-sm shadow-xl flex items-center gap-2 transition-all transform hover:scale-105"
-            >
-              <Plus className="w-5 h-5 stroke-[3]" />
-              <span>{t('action.book')}</span>
-            </button>
-          </div>
+        <div className="relative z-10 space-y-1">
+          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+            Hello, <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">{user?.name || 'Patient'}</span>
+          </h1>
+          <p className="text-sm font-bold text-slate-300">
+            Patient ID: <span className="font-mono font-black text-amber-400">{user?.id || 'PAT-1001'}</span>
+          </p>
         </div>
       </div>
 
