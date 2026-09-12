@@ -103,25 +103,15 @@ export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userNa
         </div>
       </div>
 
-      {/* 🎬 BOTTOM FULL-SCREEN VIDEO PLAYBACK CONTROLS & TIMELINE 🎬 */}
-      <div className="relative z-10 p-6 md:p-8 w-full max-w-5xl mx-auto space-y-3">
-        <div className="flex items-center justify-end text-xs font-extrabold text-slate-300 px-2">
-          <button
-            onClick={onComplete}
-            className="flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 transition-all hover:scale-105"
-          >
-            <span>Skip</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* 7-COLOR SPECTRUM FULL-WIDTH VIDEO PROGRESS BAR */}
-        <div className="h-4 w-full bg-slate-900/90 rounded-full overflow-hidden p-0.5 border border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.3)]">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-teal-400 via-emerald-400 via-cyan-400 via-indigo-400 via-purple-400 via-pink-400 to-amber-400 transition-all duration-75 ease-linear shadow-lg"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+      {/* 🎬 BOTTOM FULL-SCREEN CONTROLS 🎬 */}
+      <div className="relative z-10 p-6 md:p-8 w-full max-w-5xl mx-auto flex items-center justify-end">
+        <button
+          onClick={onComplete}
+          className="flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 transition-all hover:scale-105"
+        >
+          <span>Skip</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
 
     </div>
