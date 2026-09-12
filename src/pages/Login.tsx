@@ -135,14 +135,6 @@ export const Login: React.FC = () => {
             <p className="text-lg md:text-2xl font-black text-white tracking-wide">
               Welcome <span className="text-teal-300 underline underline-offset-4 decoration-amber-400">{welcomeName}</span>!
             </p>
-
-            {/* 3-Second Animated Progress Bar */}
-            <div className="w-full bg-slate-800/80 rounded-full h-3 p-0.5 border border-slate-700/60 overflow-hidden shadow-inner mt-4">
-              <div
-                className="bg-gradient-to-r from-amber-500 via-teal-400 to-purple-500 h-full rounded-full transition-all duration-300 shadow-md shadow-teal-500/50"
-                style={{ width: `${introProgress}%` }}
-              />
-            </div>
           </div>
         </div>
       )}
