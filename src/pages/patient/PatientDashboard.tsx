@@ -401,7 +401,7 @@ export const PatientDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* 📋 VIBRANT GOLDEN YELLOW HOSPITAL ADVISORY NOTE 📋 */}
+      {/* 📋 VIBRANT GOLDEN YELLOW HOSPITAL ADVISORY & APP FEATURES NOTE 📋 */}
       <div className="p-6 md:p-7 rounded-3xl bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 border-2 border-amber-400 shadow-xl shadow-amber-500/10 space-y-4 relative overflow-hidden">
         {/* Top Decorative Yellow Tag */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-amber-300/30 rounded-full blur-xl pointer-events-none" />
@@ -413,9 +413,9 @@ export const PatientDashboard: React.FC = () => {
             </div>
             <div>
               <h4 className="text-base font-extrabold text-amber-950 flex items-center gap-2">
-                <span>Important Hospital Advisory & Patient Guidelines</span>
+                <span>Important Hospital Advisory & CarePilot Platform Features</span>
               </h4>
-              <p className="text-xs text-amber-900 font-semibold">SNS Medical College & Hospital Patient Desk Guidelines</p>
+              <p className="text-xs text-amber-900 font-semibold">SNS Medical College 24/7 Healthcare Support & App Capabilities</p>
             </div>
           </div>
           <span className="text-[10px] font-black uppercase px-3 py-1 rounded-full bg-amber-500 text-slate-950 shadow-sm border border-amber-600/30 tracking-wider">
@@ -438,7 +438,7 @@ export const PatientDashboard: React.FC = () => {
               <span>📞 Telephone Call-In Booking Helpline (1st Come, 1st Serve)</span>
             </p>
             <p className="text-slate-700 leading-relaxed text-[11px]">
-              For non-smartphone users without digital access, call helpline (<strong className="text-blue-950">+91 422 2661100</strong>). Reserved limited daily slots are assigned on a strict First-Come, First-Served priority.
+              For non-smartphone patients without digital access, call helpline (<strong className="text-blue-950">+91 422 2661100</strong>). Reserved limited daily slots are assigned on a strict First-Come, First-Served priority.
             </p>
           </div>
 
@@ -460,39 +460,23 @@ export const PatientDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-white/90 border border-purple-300 shadow-xs space-y-1 md:col-span-2">
+          <div className="p-3.5 rounded-2xl bg-white/90 border border-purple-300 shadow-xs space-y-1">
             <p className="font-extrabold text-purple-950 flex items-center gap-1.5 text-xs">
               <span>🔄 Automatic Slot Cancellation & Real-Time Waitlist Reallocation</span>
             </p>
             <p className="text-slate-700 leading-relaxed text-[11px]">
-              If you need to cancel or reschedule, please do so at least 2 hours in advance. Cancelled slots are automatically reallocated in real-time to the highest-priority waitlisted patient.
+              If you cancel or reschedule 2 hours in advance, slots are automatically reallocated in real-time to the highest-priority waitlisted patient.
             </p>
           </div>
-        </div>
-      </div>
 
-      {/* 🏥 TOUCH TO VIEW 24/7 SUPPORT & APP FEATURES BANNER 🏥 */}
-      <div
-        onClick={() => setShowFeaturesModal(true)}
-        className="p-4 md:p-5 rounded-3xl bg-gradient-to-r from-teal-950 via-slate-900 to-emerald-950 text-white border-2 border-teal-500/40 shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-4 group"
-      >
-        <div className="flex items-center space-x-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 text-white flex items-center justify-center font-black shadow-lg flex-shrink-0">
-            <Sparkles className="w-6 h-6 text-white animate-pulse" />
-          </div>
-          <div>
-            <h4 className="text-sm md:text-base font-extrabold text-white group-hover:text-amber-300 transition-colors flex items-center gap-2">
-              🏥 Touch Here: View 24/7 Healthcare Support & CarePilot App Features
-            </h4>
-            <p className="text-xs text-slate-300 font-medium mt-0.5">
-              Email (kanis.r.ad.2024@snsce.ac.in), Phone Helpline, Gmail/WhatsApp Alerts & AI Analytics
+          <div className="p-3.5 rounded-2xl bg-white/90 border border-indigo-300 shadow-xs space-y-1">
+            <p className="font-extrabold text-indigo-950 flex items-center gap-1.5 text-xs">
+              <span>🤖 AI XGBoost Attendance Analytics</span>
+            </p>
+            <p className="text-slate-700 leading-relaxed text-[11px]">
+              Machine learning models analyze attendance history to optimize doctor schedules and prevent appointment slot downtime.
             </p>
           </div>
-        </div>
-
-        <div className="px-5 py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
-          <span>Touch to View</span>
-          <ChevronRight className="w-4 h-4 text-slate-950 group-hover:translate-x-1 transition-transform" />
         </div>
       </div>
 
