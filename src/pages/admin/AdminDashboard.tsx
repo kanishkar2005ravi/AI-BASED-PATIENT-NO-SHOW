@@ -39,7 +39,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminDashboard: React.FC = () => {
-  const [dateRange, setDateRange] = useState<'today' | 'yesterday' | '7days' | '30days' | 'custom'>('today');
+  const [dateRange, setDateRange] = useState<'today' | 'yesterday' | 'custom'>('today');
   const [customDate, setCustomDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
@@ -66,8 +66,6 @@ export const AdminDashboard: React.FC = () => {
   const getFilteredMetricLabel = (type: 'appointments' | 'cancelled' | 'rescheduled' | 'missed') => {
     if (dateRange === 'yesterday') return t(`metric.yesterdays_${type}`);
     if (dateRange === 'custom') return t(`metric.custom_${type}`);
-    if (dateRange === '7days') return t(`metric.7days_${type}`);
-    if (dateRange === '30days') return t(`metric.30days_${type}`);
     return t(`metric.todays_${type}`);
   };
 
@@ -99,20 +97,10 @@ export const AdminDashboard: React.FC = () => {
           targetDateStr = customDate;
         }
 
-        let dateFilteredApts: Appointment[] = [];
-        if (dateRange === '7days') {
-          const d7 = new Date();
-          d7.setDate(d7.getDate() - 7);
-          const d7Str = d7.toISOString().split('T')[0];
-          dateFilteredApts = aptsList.filter(a => a.appointmentDate >= d7Str && a.appointmentDate <= todayStr);
-        } else if (dateRange === '30days') {
-          const d30 = new Date();
-          d30.setDate(d30.getDate() - 30);
-          const d30Str = d30.toISOString().split('T')[0];
-          dateFilteredApts = aptsList.filter(a => a.appointmentDate >= d30Str && a.appointmentDate <= todayStr);
-        } else {
-          dateFilteredApts = aptsList.filter(a => a.appointmentDate === targetDateStr);
-        }
+        const dateFilteredApts = aptsList.filter(a => a.appointmentDate === targetDateStr);
+        const dateFilteredWaitlist = waitList.filter(w => w.requestedDate === targetDateStr || (w.createdAt && w.createdAt.startsWith(targetDateStr)));
+        const activeDocsCount = docsList.filter(d => d.status === 'Active').length || docsList.length || 4;
+        const workingDocsCount = new Set(dateFilteredApts.map(a => a.doctorId)).size;
 
         const calculatedMetrics = {
           totalPatients: patsList.length > 0 ? patsList.length : 200,
@@ -120,13 +108,13 @@ export const AdminDashboard: React.FC = () => {
           totalCancelled: aptsList.filter(a => a.status === 'CANCELLED').length,
           totalRescheduled: aptsList.filter(a => a.status === 'RESCHEDULED').length,
           totalMissed: aptsList.filter(a => a.status === 'NO_SHOW').length,
-          activeDoctors: docsList.filter(d => d.status === 'Active').length || docsList.length || 4,
+          activeDoctors: workingDocsCount > 0 ? workingDocsCount : activeDocsCount,
           todayAppointments: dateFilteredApts.length,
           todayCancelled: dateFilteredApts.filter(a => a.status === 'CANCELLED').length,
           todayRescheduled: dateFilteredApts.filter(a => a.status === 'RESCHEDULED').length,
           todayMissed: dateFilteredApts.filter(a => a.status === 'NO_SHOW').length,
-          waitlistCount: waitList.length,
-          acceptedWaitlistCount: waitList.filter(w => w.status === 'ACCEPTED').length
+          waitlistCount: dateFilteredWaitlist.length,
+          acceptedWaitlistCount: dateFilteredWaitlist.filter(w => w.status === 'ACCEPTED').length
         };
 
         setMetrics(calculatedMetrics);
@@ -332,17 +320,17 @@ export const AdminDashboard: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
-            {(['today', 'yesterday', '7days', '30days'] as const).map(range => (
+            {(['today', 'yesterday'] as const).map(range => (
               <button
                 key={range}
                 onClick={() => setDateRange(range)}
-                className={`px-3 py-1.5 rounded-lg transition-all capitalize cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-lg transition-all capitalize cursor-pointer ${
                   dateRange === range
                     ? 'bg-gradient-to-r from-amber-500 via-teal-600 to-purple-600 text-white shadow-sm font-bold'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {range === '7days' ? '7 Days' : range === '30days' ? '30 Days' : range === 'yesterday' ? 'Yesterday' : 'Today'}
+                {range === 'yesterday' ? 'Yesterday' : 'Today'}
               </button>
             ))}
           </div>
