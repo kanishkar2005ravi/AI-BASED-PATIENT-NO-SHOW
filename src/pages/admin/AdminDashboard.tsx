@@ -20,7 +20,8 @@ import {
   AlertCircle,
   Mail,
   MessageSquare,
-  PhoneCall
+  PhoneCall,
+  CheckCircle2
 } from 'lucide-react';
 import { AIRiskBadge } from '../../components/ai/AIRiskBadge';
 import { Modal } from '../../components/common/Modal';
@@ -50,6 +51,7 @@ export const AdminDashboard: React.FC = () => {
     totalWaitlistCount: 0,
     activeDoctors: 0,
     todayAppointments: 0,
+    todayAttended: 0,
     todayCancelled: 0,
     todayRescheduled: 0,
     todayMissed: 0,
@@ -57,7 +59,9 @@ export const AdminDashboard: React.FC = () => {
     acceptedWaitlistCount: 0
   });
 
-  const getFilteredMetricLabel = (type: 'appointments' | 'cancelled' | 'rescheduled' | 'missed') => {
+  const getFilteredMetricLabel = (type: 'appointments' | 'cancelled' | 'rescheduled' | 'missed' | 'attended') => {
+    const prefix = dateRange === 'yesterday' ? "Yesterday's" : dateRange === 'custom' ? "Selected Date" : "Today's";
+    if (type === 'attended') return `${prefix} Attended`;
     if (dateRange === 'yesterday') return t(`metric.yesterdays_${type}`);
     if (dateRange === 'custom') return t(`metric.custom_${type}`);
     return t(`metric.todays_${type}`);
@@ -103,6 +107,9 @@ export const AdminDashboard: React.FC = () => {
         const activeDocsCount = docsList.filter(d => d.status === 'Active').length || docsList.length || 4;
         const workingDocsCount = new Set(dateFilteredApts.map(a => a.doctorId)).size;
 
+        const dateAttendedCount = dateFilteredApts.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT').length;
+        const fallbackAttended = Math.max(0, dateFilteredApts.length - dateFilteredApts.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length);
+
         const calculatedMetrics = {
           totalPatients: patsList.length > 0 ? patsList.length : 200,
           totalAppointments: aptsList.length > 0 ? aptsList.length : 24,
@@ -112,6 +119,7 @@ export const AdminDashboard: React.FC = () => {
           totalWaitlistCount: waitList.length,
           activeDoctors: workingDocsCount > 0 ? workingDocsCount : activeDocsCount,
           todayAppointments: dateFilteredApts.length,
+          todayAttended: dateAttendedCount > 0 ? dateAttendedCount : (dateFilteredApts.length > 0 ? fallbackAttended : 18),
           todayCancelled: dateFilteredApts.filter(a => a.status === 'CANCELLED').length,
           todayRescheduled: dateFilteredApts.filter(a => a.status === 'RESCHEDULED').length,
           todayMissed: dateFilteredApts.filter(a => a.status === 'NO_SHOW').length,
@@ -322,20 +330,20 @@ export const AdminDashboard: React.FC = () => {
       {/* 🌟 BOTTOM SECTION: TODAY'S & ACTIVE METRICS (BELOW HOSPITAL OVERVIEW) 🌟 */}
       {/* 7-Box Horizontal Row with Patient Dashboard Style SVG Progress Circles */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        {/* Box 1: Active Doctors */}
+        {/* Box 1: Attended Appointments */}
         <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0 animate-pulse" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-emerald-100" fill="transparent" />
-              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={0} strokeLinecap="round" className="text-emerald-500 transition-all duration-700 animate-pulse" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={metrics.todayAppointments > 0 ? 125.6 - (125.6 * (metrics.todayAttended / metrics.todayAppointments)) : 0} strokeLinecap="round" className="text-emerald-500 transition-all duration-700 animate-pulse" fill="transparent" />
             </svg>
             <div className="p-2 rounded-full bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform animate-pulse ring-2 ring-emerald-400/40">
-              <Stethoscope className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
           <div className="space-y-0.5">
-            <p className="text-2xl font-black text-emerald-600 leading-none">{metrics.activeDoctors}</p>
-            <p className="text-[10px] font-extrabold text-emerald-900 uppercase tracking-wider">{t('metric.active_doctors')}</p>
+            <p className="text-2xl font-black text-emerald-600 leading-none">{metrics.todayAttended}</p>
+            <p className="text-[10px] font-extrabold text-emerald-900 uppercase tracking-wider">{getFilteredMetricLabel('attended')}</p>
           </div>
         </div>
 
