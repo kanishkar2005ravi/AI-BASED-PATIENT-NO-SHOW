@@ -47,13 +47,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
           badge: null
         },
         {
-          label: t('nav.notifications'),
-          path: '/patient/notifications',
-          icon: <Bell className="w-5 h-5 text-cyan-400 group-hover:text-cyan-300" />,
-          activeGradient: 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-500/25 border-l-4 border-amber-400',
-          badge: null
-        },
-        {
           label: t('nav.profile'),
           path: '/patient/profile',
           icon: <User className="w-5 h-5 text-emerald-400 group-hover:text-emerald-300" />,
@@ -173,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
               <div className="flex items-center space-x-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                 <span className="text-[10px] font-black uppercase tracking-widest text-teal-400">
-                  {role === 'patient' ? 'Patient Command Center' : 'Hospital Admin'}
+                  {role === 'patient' ? 'Patient Portal' : 'Hospital Admin'}
                 </span>
               </div>
               <p className="text-xs font-bold text-white truncate leading-tight mt-0.5">{user?.name || user?.email}</p>
@@ -238,26 +231,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
             </div>
           ))}
         </div>
-
-        {/* Sidebar Direct Fast Booking Callout for Patients */}
-        {role === 'patient' && (
-          <div className="mx-1 p-3.5 rounded-2xl bg-gradient-to-br from-slate-900 via-teal-950/40 to-slate-900 border border-teal-500/30 text-xs space-y-2 shadow-lg">
-            <div className="flex items-center justify-between">
-              <span className="font-extrabold text-teal-300 flex items-center gap-1 text-[11px]">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" /> Fast Appointment
-              </span>
-              <span className="text-[9px] font-black bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded">SNS Care</span>
-            </div>
-            <p className="text-[10px] text-slate-400 leading-snug">Need an urgent doctor consultation at SNS Hospital?</p>
-            <button
-              onClick={() => navigate('/patient/book')}
-              className="w-full py-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center space-x-1 shadow-md shadow-amber-500/20 transition-all hover:scale-[1.02]"
-            >
-              <span>Book Appointment</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Footer / Logout Section */}
