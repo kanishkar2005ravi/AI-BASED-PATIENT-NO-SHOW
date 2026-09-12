@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   role: UserRole | null;
   isAuthenticated: boolean;
-  login: (role: UserRole, email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  login: (role: UserRole, email: string, password: string) => Promise<{ success: boolean; message: string; user?: User }>;
   logout: () => void;
   loading: boolean;
   setUser: (user: User | null) => void;
