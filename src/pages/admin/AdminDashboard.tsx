@@ -458,22 +458,13 @@ export const AdminDashboard: React.FC = () => {
             <div className="p-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600">
               <Sparkles className="w-4 h-4 animate-pulse text-indigo-600" />
             </div>
-            <div>
-              <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <span>AI Predictive No-Show Risk Breakdown</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 uppercase">
-                  {dateRange === 'yesterday' ? 'Yesterday' : dateRange === 'custom' ? customDate : 'Today'}
-                </span>
-              </h3>
-              <p className="text-[11px] font-semibold text-slate-500">
-                Machine learning risk stratification for scheduled patient appointments
-              </p>
-            </div>
+            <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <span>AI Predictive No-Show Risk Breakdown</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 uppercase">
+                {dateRange === 'yesterday' ? 'Yesterday' : dateRange === 'custom' ? customDate : 'Today'}
+              </span>
+            </h3>
           </div>
-          <span className="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-            <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
-            <span>Random Forest Model v2.4</span>
-          </span>
         </div>
 
         {/* 3 High-Tech Styled Risk Cards */}
