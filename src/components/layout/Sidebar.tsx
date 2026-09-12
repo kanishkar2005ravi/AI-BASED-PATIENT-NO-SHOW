@@ -237,10 +237,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
       {/* Footer Section */}
       <div className="relative z-10 pt-2 border-t border-teal-500/20 space-y-2">
         <div className="px-2 py-1 flex items-center justify-between text-[10px] text-slate-400 font-semibold">
-          <span className="flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> CarePilot v2.5
-          </span>
-          <span className="text-teal-400">SNS Medical</span>
+          <span className="text-teal-400 font-bold">SNS Medical College</span>
         </div>
 
         {role === 'admin' && (
