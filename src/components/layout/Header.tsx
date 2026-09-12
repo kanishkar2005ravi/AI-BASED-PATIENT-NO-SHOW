@@ -5,6 +5,7 @@ import { Bell, Search, Wifi, WifiOff, Sparkles, User as UserIcon, Globe, MapPin,
 import { useNavigate } from 'react-router-dom';
 import { isDemoMode, callBackend } from '../../services/api';
 import { CarePilotLogo } from '../common/CarePilotLogo';
+import { AppFeaturesModal } from '../common/AppFeaturesModal';
 
 interface HeaderProps {
   title: string;
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const [unreadCount, setUnreadCount] = useState(2);
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -77,6 +79,16 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Globe className="w-4 h-4 text-teal-700 animate-spin-slow" />
           <span>{language === 'en' ? '🇬🇧 EN' : '🇮🇳 தமிழ்'}</span>
+        </button>
+
+        {/* App Features Modal Icon Button */}
+        <button
+          onClick={() => setShowFeaturesModal(true)}
+          className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white text-xs font-black transition-all shadow-xs flex-shrink-0 cursor-pointer hover:scale-105"
+          title="CarePilot App Features / கணினி அம்சங்கள்"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-200 animate-pulse" />
+          <span className="hidden sm:inline">Features</span>
         </button>
 
         {/* Refresh Symbol Button to Refresh App */}
@@ -252,6 +264,9 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       )}
+
+      {/* 🚀 CAREPILOT APP FEATURES MODAL 🚀 */}
+      <AppFeaturesModal isOpen={showFeaturesModal} onClose={() => setShowFeaturesModal(false)} />
     </header>
   );
 };

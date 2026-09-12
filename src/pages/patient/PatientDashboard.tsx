@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { WelcomeSplashScreen } from '../../components/common/WelcomeSplashScreen';
+import { AppFeaturesModal } from '../../components/common/AppFeaturesModal';
 import { formatTime } from '../../utils/helpers';
 
 export const PatientDashboard: React.FC = () => {
@@ -51,6 +52,7 @@ export const PatientDashboard: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [showAllDoctorsModal, setShowAllDoctorsModal] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const [selectedEmergencyDoctorId, setSelectedEmergencyDoctorId] = useState<string>('');
   const [emergencyDate, setEmergencyDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [emergencyReason, setEmergencyReason] = useState<string>('');
@@ -453,7 +455,17 @@ export const PatientDashboard: React.FC = () => {
         </Card>
 
         {/* Card 2: Platform App Features */}
-        <Card title="CarePilot Platform App Features">
+        <Card
+          title="CarePilot Platform App Features"
+          action={
+            <button
+              onClick={() => setShowFeaturesModal(true)}
+              className="text-xs font-black text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3 py-1 rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> View Details
+            </button>
+          }
+        >
           <div className="space-y-3 text-xs">
             <div className="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-start space-x-3">
               <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
@@ -820,6 +832,9 @@ export const PatientDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 🚀 CAREPILOT APP FEATURES MODAL 🚀 */}
+      <AppFeaturesModal isOpen={showFeaturesModal} onClose={() => setShowFeaturesModal(false)} />
     </div>
   );
 };
