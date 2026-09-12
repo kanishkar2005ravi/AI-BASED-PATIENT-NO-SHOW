@@ -95,15 +95,7 @@ export const PatientDashboard: React.FC = () => {
     }
   };
 
-  const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(() => {
-    return !sessionStorage.getItem('carepilot_patient_splash_shown');
-  });
-
-  useEffect(() => {
-    if (showWelcomeSplash) {
-      sessionStorage.setItem('carepilot_patient_splash_shown', 'true');
-    }
-  }, [showWelcomeSplash]);
+  const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(false);
 
   const fetchData = async () => {
     setLoading(true);

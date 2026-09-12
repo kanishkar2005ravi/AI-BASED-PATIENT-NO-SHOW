@@ -44,7 +44,7 @@ export const AdminDashboard: React.FC = () => {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(true);
+  const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(false);
   const navigate = useNavigate();
 
 
