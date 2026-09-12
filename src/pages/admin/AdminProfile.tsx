@@ -16,12 +16,12 @@ export const AdminProfile: React.FC = () => {
   const navigate = useNavigate();
 
   const [name, setName] = useState(user?.name || 'Administrator');
-  const [email, setEmail] = useState(user?.email || 'admin@gmail.com');
+  const [email, setEmail] = useState(user?.email || 'kanis.r.ad.2024@snsce.ac.in');
   const [phone, setPhone] = useState(user?.phone || '+919876543210');
   const [basicPhone, setBasicPhone] = useState(user?.basicPhone || '+919876543211');
   const [whatsappPhone, setWhatsappPhone] = useState(user?.whatsappPhone || '+918300096676');
-  const [emergencyContactName, setEmergencyContactName] = useState(user?.emergencyContactName || 'SNS Emergency Desk');
-  const [emergencyPhone, setEmergencyPhone] = useState(user?.emergencyPhone || '+919876543299');
+  const [emergencyContactName, setEmergencyContactName] = useState(user?.emergencyContactName || 'SNS 24/7 Emergency Desk');
+  const [emergencyPhone, setEmergencyPhone] = useState(user?.emergencyPhone || '+914222661100');
   const [address, setAddress] = useState(user?.address || 'SNS Medical College & Hospital Admin Block, Coimbatore, TN');
   const [saving, setSaving] = useState(false);
 
