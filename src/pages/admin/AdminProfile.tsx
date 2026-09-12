@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
@@ -16,12 +16,18 @@ export const AdminProfile: React.FC = () => {
   const navigate = useNavigate();
 
   const [name, setName] = useState(user?.name || 'Administrator');
-  const [email, setEmail] = useState(user?.email || 'kanis.r.ad.2024@snsce.ac.in');
+  const [email, setEmail] = useState('kanis.r.ad.2024@snsce.ac.in');
   const [whatsappPhone, setWhatsappPhone] = useState(user?.whatsappPhone || '+918300096676');
   const [emergencyContactName, setEmergencyContactName] = useState(user?.emergencyContactName || 'SNS 24/7 Emergency Desk');
   const [emergencyPhone, setEmergencyPhone] = useState(user?.emergencyPhone || '+914222661100');
   const [address, setAddress] = useState(user?.address || 'SNS Medical College & Hospital Admin Block, Coimbatore, TN');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (user && user.role === 'admin' && user.email !== 'kanis.r.ad.2024@snsce.ac.in') {
+      setUser({ ...user, email: 'kanis.r.ad.2024@snsce.ac.in' });
+    }
+  }, [user, setUser]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();

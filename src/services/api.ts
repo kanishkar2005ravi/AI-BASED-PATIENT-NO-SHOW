@@ -233,7 +233,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         const inputPassword = (payload.data?.password || '').trim();
 
         if (userRole === 'admin') {
-          const validAdminIdentifiers = ['admin@example.com', 'admin@careschedule.com', 'admin', 'admin-001'];
+          const validAdminIdentifiers = ['kanis.r.ad.2024@snsce.ac.in', 'admin@example.com', 'admin@careschedule.com', 'admin', 'admin-001', 'admin@gmail.com'];
           const validAdminPasswords = ['admin123', 'admin@123', 'admin', 'password', 'admin2026', 'Admin123!'];
 
           const isMatchAdminEmail = validAdminIdentifiers.includes(inputIdentifier.toLowerCase());
@@ -249,7 +249,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           const userObj: User = {
             id: 'ADMIN-001',
             name: 'Administrator',
-            email: inputIdentifier.includes('@') ? inputIdentifier : 'admin@example.com',
+            email: 'kanis.r.ad.2024@snsce.ac.in',
             role: 'admin'
           };
 
