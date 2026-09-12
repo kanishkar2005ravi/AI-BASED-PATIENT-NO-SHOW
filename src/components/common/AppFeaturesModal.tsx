@@ -37,6 +37,25 @@ export const AppFeaturesModal: React.FC<AppFeaturesModalProps> = ({ isOpen, onCl
           </button>
         </div>
 
+        {/* 🏥 SNS 24/7 HEALTHCARE SUPPORT BANNER 🏥 */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-teal-900 via-slate-900 to-emerald-950 text-white border border-teal-500/40 space-y-2.5 shadow-md">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-black flex-shrink-0 text-base shadow-sm">
+              🏥
+            </div>
+            <div>
+              <h4 className="font-extrabold text-white text-sm">SNS Medical College 24/7 Healthcare Support</h4>
+              <p className="text-teal-300 text-[11px] font-bold mt-0.5">📞 Helpline: +91 422 2661100 • Emergency & Casualty Outpatient</p>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-teal-800/80 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-200">
+            <span>📧 Official Email: <a href="mailto:kanis.r.ad.2024@snsce.ac.in" className="text-amber-300 font-extrabold hover:underline">kanis.r.ad.2024@snsce.ac.in</a></span>
+            <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              24/7 Emergency ICU & Ambulance
+            </span>
+          </div>
+        </div>
+
         {/* Feature Cards Grid */}
         <div className="space-y-3.5">
           {/* Feature 1 */}

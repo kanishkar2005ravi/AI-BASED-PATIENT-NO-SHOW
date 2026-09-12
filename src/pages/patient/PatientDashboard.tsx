@@ -401,91 +401,29 @@ export const PatientDashboard: React.FC = () => {
         </button>
       </div>
 
-      {/* 🏥 SNS 24/7 HEALTHCARE SUPPORT & APP FEATURES 🏥 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Card 1: SNS 24/7 Medical Services */}
-        <Card title="SNS Medical College 24/7 Healthcare Support">
-          <div className="space-y-3.5 text-xs text-slate-700">
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/80 flex items-start space-x-3">
-              <div className="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center font-black flex-shrink-0 shadow-xs mt-0.5">
-                <Hospital className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-extrabold text-slate-900 text-sm">24/7 Outpatient & Emergency Support</h4>
-                <p className="text-slate-600 text-[11px] mt-0.5 font-medium leading-relaxed">
-                  SNS Medical College & Hospital provides round-the-clock emergency casualty care, intensive consultation, and outpatient services across all major medical specialties.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200/80 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black flex-shrink-0 text-sm">
-                    📞
-                  </div>
-                  <div>
-                    <p className="font-extrabold text-slate-900 text-xs">Phone Call Booking Helpline</p>
-                    <p className="text-blue-800 text-[11px] font-bold">+91 422 2661100 • Limited Call-In Slots</p>
-                  </div>
-                </div>
-                <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-blue-600 text-white shadow-xs">
-                  1st Come 1st Serve
-                </span>
-              </div>
-              <div className="pt-1.5 border-t border-blue-200/60 flex items-center justify-between text-[11px]">
-                <span className="font-bold text-slate-700 flex items-center gap-1">
-                  📧 Official Support Email:
-                </span>
-                <a href="mailto:kanis.r.ad.2024@snsce.ac.in" className="font-extrabold text-teal-700 hover:underline">
-                  kanis.r.ad.2024@snsce.ac.in
-                </a>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2.5 font-bold">
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center space-x-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span className="text-[11px] text-slate-800">NABH Accredited</span>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center space-x-2">
-                <Stethoscope className="w-4 h-4 text-teal-600 flex-shrink-0" />
-                <span className="text-[11px] text-slate-800">100+ Specialist Docs</span>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center space-x-2">
-                <Activity className="w-4 h-4 text-rose-500 flex-shrink-0" />
-                <span className="text-[11px] text-slate-800">Emergency ICU</span>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center space-x-2">
-                <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                <span className="text-[11px] text-slate-800">AI Priority Care</span>
-              </div>
-            </div>
+      {/* 🏥 TOUCH TO VIEW 24/7 SUPPORT & APP FEATURES BANNER 🏥 */}
+      <div
+        onClick={() => setShowFeaturesModal(true)}
+        className="p-4 md:p-5 rounded-3xl bg-gradient-to-r from-teal-950 via-slate-900 to-emerald-950 text-white border-2 border-teal-500/40 shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-4 group"
+      >
+        <div className="flex items-center space-x-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 text-white flex items-center justify-center font-black shadow-lg flex-shrink-0">
+            <Sparkles className="w-6 h-6 text-white animate-pulse" />
           </div>
-        </Card>
-
-        {/* Card 2: Platform App Features */}
-        <Card title="CarePilot Platform App Features">
-          <div className="py-4 px-2 flex flex-col items-center justify-center text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 text-white flex items-center justify-center font-black shadow-lg shadow-purple-500/20">
-              <Sparkles className="w-7 h-7 text-white animate-pulse" />
-            </div>
-            <div className="space-y-1">
-              <h4 className="text-sm font-extrabold text-slate-900">Explore Platform App Features</h4>
-              <p className="text-xs text-slate-500 font-medium max-w-xs mx-auto leading-relaxed">
-                Click below to view full details on Gmail/WhatsApp alerts, phone booking helpline, AI risk model & waitlist auto-fills.
-              </p>
-            </div>
-            <button
-              onClick={() => setShowFeaturesModal(true)}
-              className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-700 hover:from-teal-700 hover:to-emerald-800 text-white font-black text-xs transition-all shadow-md hover:shadow-lg hover:scale-[1.01] flex items-center justify-center space-x-2 cursor-pointer border border-teal-400/30 group"
-            >
-              <Sparkles className="w-4 h-4 text-amber-300 animate-pulse group-hover:rotate-12 transition-transform" />
-              <span>Click to View App Features</span>
-              <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
-            </button>
+          <div>
+            <h4 className="text-sm md:text-base font-extrabold text-white group-hover:text-amber-300 transition-colors flex items-center gap-2">
+              🏥 Touch Here: View 24/7 Healthcare Support & CarePilot App Features
+            </h4>
+            <p className="text-xs text-slate-300 font-medium mt-0.5">
+              Email (kanis.r.ad.2024@snsce.ac.in), Phone Helpline, Gmail/WhatsApp Alerts & AI Analytics
+            </p>
           </div>
-        </Card>
+        </div>
+
+        <div className="px-5 py-2.5 rounded-2xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
+          <span>Touch to View</span>
+          <ChevronRight className="w-4 h-4 text-slate-950 group-hover:translate-x-1 transition-transform" />
+        </div>
       </div>
 
       {/* 🩺 ALL FACULTY PHYSICIANS MODAL 🩺 */}
