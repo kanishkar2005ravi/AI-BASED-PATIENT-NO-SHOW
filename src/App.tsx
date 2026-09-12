@@ -2,8 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 // Layouts
+
 import { AdminLayout } from './components/layout/AdminLayout';
 import { PatientLayout } from './components/layout/PatientLayout';
 
@@ -64,9 +66,11 @@ const RootRedirect: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <Router>
+    <LanguageProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <Router>
+
           <Routes>
             {/* Root & Public Routes */}
             <Route path="/" element={<RootRedirect />} />
@@ -125,7 +129,9 @@ export const App: React.FC = () => {
         </Router>
       </ToastProvider>
     </AuthProvider>
+  </LanguageProvider>
   );
 };
+
 
 export default App;

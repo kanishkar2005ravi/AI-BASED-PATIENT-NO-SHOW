@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Hospital, HeartPulse, ArrowRight } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface WelcomeSplashScreenProps {
   userName?: string;
@@ -10,6 +11,7 @@ interface WelcomeSplashScreenProps {
 export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userName, role = 'patient', onComplete }) => {
   const [progress, setProgress] = useState<number>(0);
   const [secondsLeft, setSecondsLeft] = useState<number>(5);
+  const { language, t } = useLanguage();
 
   useEffect(() => {
     // Progress bar over 5 seconds (5000ms)
@@ -59,7 +61,7 @@ export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userNa
           <div className="flex items-center space-x-2 bg-slate-950/80 px-4 py-1.5 rounded-full border border-teal-500/40 shadow-inner z-10">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
             <span className="text-xs font-black text-teal-300 tracking-widest uppercase flex items-center gap-1.5">
-              <Hospital className="w-3.5 h-3.5 text-teal-300" /> SNS MEDICAL COLLEGE AND HOSPITAL
+              <Hospital className="w-3.5 h-3.5 text-teal-300" /> {t('welcome.institution')}
             </span>
           </div>
 
@@ -71,24 +73,25 @@ export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userNa
 
             <div className="space-y-2">
               <span className="text-xs md:text-sm font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full bg-teal-950/80 border border-teal-400/30 text-teal-300">
-                Official Healthcare Portal
+                {t('welcome.portal')}
               </span>
               
               <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-lg">
-                Welcome to <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">CarePilot SNS</span>
+                {t('welcome.title')}
               </h1>
               
               <p className="text-base md:text-xl font-extrabold text-amber-300 tracking-wide">
-                Run by SNS Medical College and Hospital
+                {t('welcome.institution')}
               </p>
 
               {userName && (
                 <p className="text-sm md:text-base text-slate-300 font-semibold pt-2">
-                  Hello, <span className="text-white font-bold">{userName}</span> ({role === 'admin' ? 'System Administrator' : 'Patient Portal'})
+                  {t('welcome.hello')}, <span className="text-white font-bold">{userName}</span> ({role === 'admin' ? 'System Administrator' : 'Patient Portal'})
                 </p>
               )}
             </div>
           </div>
+
 
           {/* Bottom 5-Second Animated Progress Bar */}
           <div className="w-full z-10 space-y-3">

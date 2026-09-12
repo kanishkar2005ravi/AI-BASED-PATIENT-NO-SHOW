@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Bell, Search, Wifi, WifiOff, Sparkles, User as UserIcon } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { Bell, Search, Wifi, WifiOff, Sparkles, User as UserIcon, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { isDemoMode, callBackend } from '../../services/api';
 
@@ -18,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSearch
 }) => {
   const { user, role } = useAuth();
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(2);
   const demoActive = isDemoMode();
@@ -74,7 +76,17 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center justify-end space-x-4 w-1/4">
+      <div className="flex items-center justify-end space-x-3 w-1/4">
+        {/* Language Switcher Button (English / Tamil) */}
+        <button
+          onClick={() => setLanguage(language === 'en' ? 'ta' : 'en')}
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 border border-teal-300/80 text-teal-900 text-xs font-black transition-all shadow-xs"
+          title="Switch Language / மொழியை மாற்றுக"
+        >
+          <Globe className="w-4 h-4 text-teal-700 animate-spin-slow" />
+          <span>{language === 'en' ? '🇬🇧 EN' : '🇮🇳 தமிழ்'}</span>
+        </button>
+
         {/* Notifications Icon */}
         <button
           onClick={handleNotificationClick}
@@ -88,6 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           )}
         </button>
+
 
         {/* User Profile Quick Link */}
         <div
