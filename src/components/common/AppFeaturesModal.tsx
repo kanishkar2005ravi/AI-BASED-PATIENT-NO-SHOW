@@ -45,7 +45,7 @@ export const AppFeaturesModal: React.FC<AppFeaturesModalProps> = ({ isOpen, onCl
             </div>
             <div>
               <h4 className="font-extrabold text-white text-sm">CarePilot SNS 24/7 Healthcare Support</h4>
-              <p className="text-teal-300 text-[11px] font-bold mt-0.5">📞 Helpline: +91 422 2661100 • WhatsApp: +91 830096676</p>
+              <p className="text-teal-300 text-[11px] font-bold mt-0.5">📞 Helpline: +91 422 2661100 • WhatsApp: +91 8300096676</p>
             </div>
           </div>
           <div className="pt-2 border-t border-teal-800/80 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-200">
@@ -69,7 +69,7 @@ export const AppFeaturesModal: React.FC<AppFeaturesModalProps> = ({ isOpen, onCl
                 <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-200 text-emerald-950">Live Sync</span>
               </div>
               <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                Automated instant multi-channel notifications sent to registered Email (<strong>kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong>+91 830096676</strong>) upon Account Creation, Slot Booking, Cancellations, Rescheduling, and Waitlist Allocations.
+                Automated instant multi-channel notifications sent to registered Email (<strong>kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong>+91 8300096676</strong>) upon Account Creation, Slot Booking, Cancellations, Rescheduling, and Waitlist Allocations.
               </p>
             </div>
           </div>

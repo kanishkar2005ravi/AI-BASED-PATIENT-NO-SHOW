@@ -159,7 +159,7 @@ export const Waitlist: React.FC = () => {
               <span>📩 Instant Multi-Channel Alerts (Gmail & WhatsApp)</span>
             </p>
             <p className="text-slate-700 leading-relaxed text-[11px]">
-              Automated notifications sent via Gmail (<strong className="text-emerald-950">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong className="text-emerald-950">+91 830096676</strong>) for Account Signup, Slot Booking, Cancellation, Rescheduling & Waitlist Confirmations.
+              Automated notifications sent via Gmail (<strong className="text-emerald-950">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong className="text-emerald-950">+91 8300096676</strong>) for Account Signup, Slot Booking, Cancellation, Rescheduling & Waitlist Confirmations.
             </p>
           </div>
 
