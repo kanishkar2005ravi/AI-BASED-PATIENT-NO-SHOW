@@ -55,6 +55,13 @@ export const AdminDashboard: React.FC = () => {
     return t(`metric.todays_${type}`);
   };
 
+  const getFilteredRiskLabel = (level: 'low' | 'medium' | 'high') => {
+    const prefix = dateRange === 'yesterday' ? "Yesterday's" : dateRange === 'custom' ? "Selected Date" : "Today's";
+    if (level === 'low') return `${prefix} Low Risk`;
+    if (level === 'medium') return `${prefix} Medium Risk`;
+    return `${prefix} High Risk`;
+  };
+
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -120,6 +127,10 @@ export const AdminDashboard: React.FC = () => {
           lowRiskCount: 18
         };
 
+        const filteredLowCount = dateFilteredApts.filter(a => !a.risk || a.risk.level === 'LOW').length;
+        const filteredMedCount = dateFilteredApts.filter(a => a.risk && a.risk.level === 'MEDIUM').length;
+        const filteredHighCount = dateFilteredApts.filter(a => a.risk && a.risk.level === 'HIGH').length;
+
         const lowCount = aptsList.filter(a => !a.risk || a.risk.level === 'LOW').length;
         const medCount = aptsList.filter(a => a.risk && a.risk.level === 'MEDIUM').length;
         const highCount = aptsList.filter(a => a.risk && a.risk.level === 'HIGH').length;
@@ -130,9 +141,9 @@ export const AdminDashboard: React.FC = () => {
           totalDoctors: calculatedMetrics.activeDoctors,
           totalAppointments: calculatedMetrics.totalAppointments,
           todayAppointments: calculatedMetrics.todayAppointments,
-          lowRiskCount: aptsList.length > 0 ? lowCount : (baseAnalytics.lowRiskCount || 18),
-          mediumRiskCount: aptsList.length > 0 ? medCount : (baseAnalytics.mediumRiskCount || 6),
-          highRiskCount: aptsList.length > 0 ? highCount : (baseAnalytics.highRiskCount || 3)
+          lowRiskCount: dateFilteredApts.length > 0 ? filteredLowCount : (aptsList.length > 0 ? lowCount : (baseAnalytics.lowRiskCount || 18)),
+          mediumRiskCount: dateFilteredApts.length > 0 ? filteredMedCount : (aptsList.length > 0 ? medCount : (baseAnalytics.mediumRiskCount || 6)),
+          highRiskCount: dateFilteredApts.length > 0 ? filteredHighCount : (aptsList.length > 0 ? highCount : (baseAnalytics.highRiskCount || 3))
         };
 
         setAnalytics(liveAnalytics);
@@ -385,46 +396,232 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Row 3: AI No-Show Risk Split Breakdown Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-50/50 to-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Low Risk Patients</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.lowRiskCount}</h3>
-              <span className="text-xs font-semibold text-emerald-600">Standard Reminders</span>
+      {/* 🔮 ROW 3: AI NO-SHOW RISK BREAKDOWN CARDS (TODAY'S / DATE-FILTERED LOW, MEDIUM, HIGH RISK IN NEW HIGH-TECH STYLE) 🔮 */}
+      <div className="space-y-3">
+        {/* Risk Section Title Bar */}
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center space-x-2">
+            <div className="p-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600">
+              <Sparkles className="w-4 h-4 animate-pulse text-indigo-600" />
             </div>
-            <div className="p-3 bg-emerald-100/80 rounded-2xl text-emerald-600">
-              <Badge variant="teal">LOW RISK</Badge>
+            <div>
+              <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <span>AI Predictive No-Show Risk Breakdown</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 uppercase">
+                  {dateRange === 'yesterday' ? 'Yesterday' : dateRange === 'custom' ? customDate : 'Today'}
+                </span>
+              </h3>
+              <p className="text-[11px] font-semibold text-slate-500">
+                Machine learning risk stratification for scheduled patient appointments
+              </p>
             </div>
           </div>
-        </Card>
+          <span className="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+            <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
+            <span>Random Forest Model v2.4</span>
+          </span>
+        </div>
 
-        <Card className="border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-50/50 to-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Medium Risk Patients</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.mediumRiskCount}</h3>
-              <span className="text-xs font-semibold text-amber-600">SMS + Call Followup</span>
-            </div>
-            <div className="p-3 bg-amber-100/80 rounded-2xl text-amber-600">
-              <Badge variant="warning">MEDIUM RISK</Badge>
-            </div>
-          </div>
-        </Card>
+        {/* 3 High-Tech Styled Risk Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* 1. Low Risk Card */}
+          <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-emerald-900/5 via-emerald-50/40 to-teal-50/30 border-2 border-emerald-300/80 shadow-md hover:shadow-xl hover:border-emerald-400 transition-all group">
+            {/* Ambient Background Blur Glow */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform" />
 
-        <Card className="border-l-4 border-l-rose-500 bg-gradient-to-r from-rose-50/50 to-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-rose-800 uppercase tracking-wider">High Risk Patients</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{analytics.highRiskCount}</h3>
-              <span className="text-xs font-semibold text-rose-600">Overbook & Priority Alert</span>
+            <div className="flex items-start justify-between relative z-10">
+              <div className="flex items-center space-x-3">
+                {/* SVG Progress Circle */}
+                <div className="relative w-12 h-12 flex items-center justify-center">
+                  <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" className="text-emerald-100" fill="transparent" />
+                    <circle
+                      cx="24"
+                      cy="24"
+                      r="20"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      strokeDasharray={125.6}
+                      strokeDashoffset={125.6 - (125.6 * (analytics.lowRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))))}
+                      strokeLinecap="round"
+                      className="text-emerald-500 transition-all duration-700 animate-pulse"
+                      fill="transparent"
+                    />
+                  </svg>
+                  <div className="p-2.5 rounded-full bg-emerald-100/80 text-emerald-700 shadow-inner">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-wider text-emerald-900">
+                    {getFilteredRiskLabel('low')}
+                  </p>
+                  <h4 className="text-3xl font-black text-slate-900 tracking-tight mt-0.5">
+                    {analytics.lowRiskCount}
+                  </h4>
+                </div>
+              </div>
+
+              <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> LOW RISK
+              </span>
             </div>
-            <div className="p-3 bg-rose-100/80 rounded-2xl text-rose-600">
-              <Badge variant="danger">HIGH RISK</Badge>
+
+            {/* Percentage Bar & Protocol */}
+            <div className="mt-4 pt-3 border-t border-emerald-200/60 relative z-10 space-y-2">
+              <div className="flex items-center justify-between text-[11px] font-bold text-emerald-900">
+                <span>Distribution Volume</span>
+                <span>
+                  {Math.round((analytics.lowRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))) * 100)}%
+                </span>
+              </div>
+              <div className="w-full bg-emerald-200/60 h-2 rounded-full overflow-hidden p-0.5">
+                <div
+                  className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${Math.min(100, Math.round((analytics.lowRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))) * 100))}%`
+                  }}
+                />
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 pt-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>Action: Automated SMS Reminders</span>
+              </div>
             </div>
           </div>
-        </Card>
+
+          {/* 2. Medium Risk Card */}
+          <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-amber-900/5 via-amber-50/40 to-orange-50/30 border-2 border-amber-300/80 shadow-md hover:shadow-xl hover:border-amber-400 transition-all group">
+            {/* Ambient Background Blur Glow */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform" />
+
+            <div className="flex items-start justify-between relative z-10">
+              <div className="flex items-center space-x-3">
+                {/* SVG Progress Circle */}
+                <div className="relative w-12 h-12 flex items-center justify-center">
+                  <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" className="text-amber-100" fill="transparent" />
+                    <circle
+                      cx="24"
+                      cy="24"
+                      r="20"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      strokeDasharray={125.6}
+                      strokeDashoffset={125.6 - (125.6 * (analytics.mediumRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))))}
+                      strokeLinecap="round"
+                      className="text-amber-500 transition-all duration-700 animate-pulse"
+                      fill="transparent"
+                    />
+                  </svg>
+                  <div className="p-2.5 rounded-full bg-amber-100/80 text-amber-700 shadow-inner">
+                    <AlertTriangle className="w-5 h-5 text-amber-600" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-wider text-amber-900">
+                    {getFilteredRiskLabel('medium')}
+                  </p>
+                  <h4 className="text-3xl font-black text-slate-900 tracking-tight mt-0.5">
+                    {analytics.mediumRiskCount}
+                  </h4>
+                </div>
+              </div>
+
+              <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-100 text-amber-800 border border-amber-300 shadow-sm flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" /> MED RISK
+              </span>
+            </div>
+
+            {/* Percentage Bar & Protocol */}
+            <div className="mt-4 pt-3 border-t border-amber-200/60 relative z-10 space-y-2">
+              <div className="flex items-center justify-between text-[11px] font-bold text-amber-900">
+                <span>Distribution Volume</span>
+                <span>
+                  {Math.round((analytics.mediumRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))) * 100)}%
+                </span>
+              </div>
+              <div className="w-full bg-amber-200/60 h-2 rounded-full overflow-hidden p-0.5">
+                <div
+                  className="bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${Math.min(100, Math.round((analytics.mediumRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))) * 100))}%`
+                  }}
+                />
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 pt-1">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <span>Action: SMS + Call Verification</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. High Risk Card */}
+          <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-rose-900/5 via-rose-50/40 to-red-50/30 border-2 border-rose-300/80 shadow-md hover:shadow-xl hover:border-rose-400 transition-all group">
+            {/* Ambient Background Blur Glow */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-rose-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform" />
+
+            <div className="flex items-start justify-between relative z-10">
+              <div className="flex items-center space-x-3">
+                {/* SVG Progress Circle */}
+                <div className="relative w-12 h-12 flex items-center justify-center">
+                  <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" className="text-rose-100" fill="transparent" />
+                    <circle
+                      cx="24"
+                      cy="24"
+                      r="20"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      strokeDasharray={125.6}
+                      strokeDashoffset={125.6 - (125.6 * (analytics.highRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))))}
+                      strokeLinecap="round"
+                      className="text-rose-500 transition-all duration-700 animate-pulse"
+                      fill="transparent"
+                    />
+                  </svg>
+                  <div className="p-2.5 rounded-full bg-rose-100/80 text-rose-700 shadow-inner animate-bounce">
+                    <AlertCircle className="w-5 h-5 text-rose-600" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-wider text-rose-900">
+                    {getFilteredRiskLabel('high')}
+                  </p>
+                  <h4 className="text-3xl font-black text-slate-900 tracking-tight mt-0.5">
+                    {analytics.highRiskCount}
+                  </h4>
+                </div>
+              </div>
+
+              <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase bg-rose-100 text-rose-800 border border-rose-300 shadow-sm flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" /> HIGH RISK
+              </span>
+            </div>
+
+            {/* Percentage Bar & Protocol */}
+            <div className="mt-4 pt-3 border-t border-rose-200/60 relative z-10 space-y-2">
+              <div className="flex items-center justify-between text-[11px] font-bold text-rose-900">
+                <span>Distribution Volume</span>
+                <span>
+                  {Math.round((analytics.highRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))) * 100)}%
+                </span>
+              </div>
+              <div className="w-full bg-rose-200/60 h-2 rounded-full overflow-hidden p-0.5">
+                <div
+                  className="bg-gradient-to-r from-rose-500 to-red-600 h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${Math.min(100, Math.round((analytics.highRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))) * 100))}%`
+                  }}
+                />
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-rose-800 pt-1">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                <span>Action: Overbook Slot + Priority Call</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
