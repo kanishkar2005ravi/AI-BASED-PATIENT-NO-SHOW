@@ -81,13 +81,13 @@ export const PatientProfile: React.FC = () => {
       <Header title="Patient Medical Account Profile" />
 
       {/* 🔙 BACK TO DASHBOARD BUTTON 🔙 */}
-      <div className="flex items-center justify-between">
+      <div>
         <button
           onClick={() => navigate('/patient/dashboard')}
-          className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-teal-700 text-white text-xs font-black transition-all shadow-sm group cursor-pointer border border-slate-800"
+          className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold text-xs shadow-xs group cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4 text-teal-400 group-hover:-translate-x-1 transition-transform" />
-          <span>&larr; Back to Dashboard</span>
+          <ArrowLeft className="w-4 h-4 text-teal-600 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Dashboard</span>
         </button>
       </div>
 
