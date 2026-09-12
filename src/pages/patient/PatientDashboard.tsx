@@ -54,12 +54,13 @@ export const PatientDashboard: React.FC = () => {
   const [selectedEmergencyDoctorId, setSelectedEmergencyDoctorId] = useState<string>('');
   const [emergencyDate, setEmergencyDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [emergencyReason, setEmergencyReason] = useState<string>('');
+  const [priorityLevel, setPriorityLevel] = useState<'EMERGENCY' | 'HIGH' | 'STANDARD'>('HIGH');
   const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
   const [emergencySubmittedSuccess, setEmergencySubmittedSuccess] = useState(false);
 
   const handleSubmitEmergencyRequest = async () => {
     if (!emergencyReason.trim()) {
-      showToast('Please type the reason for your emergency booking request.', 'error');
+      showToast('Please type the reason for your priority booking request.', 'error');
       return;
     }
 
@@ -74,18 +75,18 @@ export const PatientDashboard: React.FC = () => {
         doctorId: selectedDoc?.id,
         doctorName: selectedDoc?.name,
         requestedDate: emergencyDate,
-        reason: `[EMERGENCY PRIORITY] ${emergencyReason}`,
-        priority: 'EMERGENCY_PRIORITY'
+        reason: `[${priorityLevel} PRIORITY] ${emergencyReason}`,
+        priority: priorityLevel
       }
     });
 
     setIsSubmittingEmergency(false);
     if (res.success) {
       setEmergencySubmittedSuccess(true);
-      showToast('Emergency request submitted! Admin will verify and confirm.', 'success');
+      showToast('Priority request submitted! Admin will verify and confirm.', 'success');
       fetchData();
     } else {
-      showToast(res.message || 'Emergency request submission failed.', 'error');
+      showToast(res.message || 'Priority request submission failed.', 'error');
     }
   };
 
@@ -624,6 +625,53 @@ export const PatientDashboard: React.FC = () => {
                     onChange={e => setEmergencyDate(e.target.value)}
                     className="w-full px-4 py-3 rounded-2xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-900 font-bold text-sm bg-slate-50/50"
                   />
+                </div>
+
+                {/* 3. Priority Level Selector */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-800 uppercase tracking-wider block">
+                    {t('emergency.priority_label')}
+                  </label>
+                  <div className="grid grid-cols-3 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setPriorityLevel('EMERGENCY')}
+                      className={`p-3 rounded-2xl border-2 text-center transition-all cursor-pointer space-y-1 ${
+                        priorityLevel === 'EMERGENCY'
+                          ? 'border-rose-600 bg-rose-50 text-rose-950 font-black shadow-xs'
+                          : 'border-slate-200 bg-slate-50 text-slate-600 font-bold hover:bg-white'
+                      }`}
+                    >
+                      <span className="block text-base">🔴</span>
+                      <p className="text-[11px] leading-tight">{t('emergency.priority_emergency')}</p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPriorityLevel('HIGH')}
+                      className={`p-3 rounded-2xl border-2 text-center transition-all cursor-pointer space-y-1 ${
+                        priorityLevel === 'HIGH'
+                          ? 'border-amber-500 bg-amber-50 text-amber-950 font-black shadow-xs'
+                          : 'border-slate-200 bg-slate-50 text-slate-600 font-bold hover:bg-white'
+                      }`}
+                    >
+                      <span className="block text-base">🟠</span>
+                      <p className="text-[11px] leading-tight">{t('emergency.priority_high')}</p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPriorityLevel('STANDARD')}
+                      className={`p-3 rounded-2xl border-2 text-center transition-all cursor-pointer space-y-1 ${
+                        priorityLevel === 'STANDARD'
+                          ? 'border-teal-500 bg-teal-50 text-teal-950 font-black shadow-xs'
+                          : 'border-slate-200 bg-slate-50 text-slate-600 font-bold hover:bg-white'
+                      }`}
+                    >
+                      <span className="block text-base">🟡</span>
+                      <p className="text-[11px] leading-tight">{t('emergency.priority_standard')}</p>
+                    </button>
+                  </div>
                 </div>
 
                 {/* 3. Reason Textarea */}
