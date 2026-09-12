@@ -187,19 +187,19 @@ export const BookAppointment: React.FC = () => {
           className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold text-xs shadow-xs group cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 text-teal-600 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Dashboard</span>
+          <span>{t('dashboard.back_to_dashboard')}</span>
         </button>
       </div>
 
       {/* 📋 CANCELLATION & RESCHEDULE POLICY NOTE 📋 */}
       <div className="p-4 md:p-5 rounded-2xl bg-white border-2 border-slate-200 shadow-sm flex items-start space-x-3.5 max-w-3xl mx-auto">
         <div className="px-2.5 py-1 rounded-lg bg-teal-600 text-white font-extrabold text-xs uppercase tracking-wider flex-shrink-0 shadow-xs mt-0.5">
-          NOTE
+          {t('note.label')}
         </div>
         <div className="text-xs text-slate-700 font-medium leading-relaxed">
-          <p className="font-extrabold text-slate-900 text-sm mb-0.5">Cancellation & Rescheduling Policy:</p>
+          <p className="font-extrabold text-slate-900 text-sm mb-0.5">{t('note.policy_title')}</p>
           <p className="text-slate-600 text-xs">
-            You can <strong className="text-slate-900 font-bold">cancel</strong> or <strong className="text-slate-900 font-bold">reschedule</strong> your appointment up to <strong className="text-teal-700 font-extrabold">6 hours</strong> prior to your scheduled time slot.
+            {t('note.policy_desc')}
           </p>
         </div>
       </div>
