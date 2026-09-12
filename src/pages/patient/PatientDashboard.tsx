@@ -5,6 +5,7 @@ import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { Loading } from '../../components/common/Loading';
+import { CarePilotLogo } from '../../components/common/CarePilotLogo';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { callBackend } from '../../services/api';
@@ -24,8 +25,11 @@ import {
   UserCheck,
   AlertCircle,
   Hospital,
+  Plus,
   ArrowRight,
-  Plus
+  CheckCircle2,
+  AlertTriangle,
+  FileText
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { WelcomeSplashScreen } from '../../components/common/WelcomeSplashScreen';
@@ -37,35 +41,43 @@ export const PatientDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
+  const [loading, setLoading] = useState(true);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistItem[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(true);
+  const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(() => {
+    return !sessionStorage.getItem('carepilot_patient_splash_shown');
+  });
 
-  const fetchData = () => {
+  useEffect(() => {
+    if (showWelcomeSplash) {
+      sessionStorage.setItem('carepilot_patient_splash_shown', 'true');
+    }
+  }, [showWelcomeSplash]);
+
+  const fetchData = async () => {
     setLoading(true);
-    Promise.all([
-      callBackend({ action: 'GET_APPOINTMENTS', data: { patientId: user?.id } }),
-      callBackend({ action: 'GET_WAITLIST', data: { patientId: user?.id } }),
+    const [aptsRes, waitRes, notifRes, docsRes] = await Promise.all([
+      callBackend({ action: 'GET_APPOINTMENTS', data: { role: 'patient', userId: user?.id } }),
+      callBackend({ action: 'GET_WAITLIST' }),
       callBackend({ action: 'GET_NOTIFICATIONS', data: { userId: user?.id } }),
       callBackend({ action: 'GET_DOCTORS' })
-    ]).then(([aptsRes, wtlRes, notifRes, docsRes]) => {
-      if (aptsRes.success && Array.isArray(aptsRes.data)) {
-        setAppointments(aptsRes.data);
-      }
-      if (wtlRes.success && Array.isArray(wtlRes.data)) {
-        setWaitlist(wtlRes.data.filter((w: WaitlistItem) => w.patientId === user?.id));
-      }
-      if (notifRes.success && Array.isArray(notifRes.data)) {
-        setNotifications(notifRes.data.slice(0, 3));
-      }
-      if (docsRes.success && Array.isArray(docsRes.data)) {
-        setDoctors(docsRes.data.filter((d: Doctor) => d.status === 'Active'));
-      }
-      setLoading(false);
-    });
+    ]);
+
+    if (aptsRes.success && Array.isArray(aptsRes.data)) {
+      setAppointments(aptsRes.data);
+    }
+    if (waitRes.success && Array.isArray(waitRes.data)) {
+      setWaitlist(waitRes.data.filter((w: WaitlistItem) => w.patientId === user?.id));
+    }
+    if (notifRes.success && Array.isArray(notifRes.data)) {
+      setNotifications(notifRes.data.slice(0, 3));
+    }
+    if (docsRes.success && Array.isArray(docsRes.data)) {
+      setDoctors(docsRes.data.filter((d: Doctor) => d.status === 'Active'));
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -123,9 +135,9 @@ export const PatientDashboard: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-teal-500/20 to-purple-500/20 border-2 border-amber-400/50 text-amber-300 text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-amber-500/10 whitespace-nowrap">
-                <Hospital className="w-4 h-4 text-amber-400 animate-pulse" />
-                <span>CarePilot SNS • {t('welcome.institution')}</span>
+              <span className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-teal-500/20 to-purple-500/20 border-2 border-amber-400/50 text-amber-300 text-xs font-black uppercase tracking-widest flex items-center gap-2.5 shadow-lg shadow-amber-500/10 whitespace-nowrap">
+                <CarePilotLogo size="sm" showText={false} />
+                <span>{t('welcome.institution')}</span>
               </span>
               <button
                 onClick={() => setShowWelcomeSplash(true)}

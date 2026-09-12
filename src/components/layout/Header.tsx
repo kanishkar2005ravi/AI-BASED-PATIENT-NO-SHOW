@@ -4,6 +4,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { Bell, Search, Wifi, WifiOff, Sparkles, User as UserIcon, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { isDemoMode, callBackend } from '../../services/api';
+import { CarePilotLogo } from '../common/CarePilotLogo';
 
 interface HeaderProps {
   title: string;
@@ -63,14 +64,12 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Center Title: CarePilot SNS • SNS Medical College & Hospital (Single Line 3D Crest Badge) */}
+      {/* Center Title: Login CarePilot Logo Icon + SNS Medical College & Hospital (One Line) */}
       <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
-        <div className="inline-flex items-center space-x-2.5 px-4 py-1.5 rounded-2xl bg-gradient-to-r from-slate-950 via-teal-950 to-slate-900 border-2 border-teal-400/40 shadow-lg shadow-teal-500/10 hover:shadow-teal-500/20 transition-all hover:scale-105 cursor-default whitespace-nowrap">
-          <div className="w-5 h-5 rounded-lg bg-gradient-to-tr from-amber-400 to-amber-500 text-slate-950 font-black text-[9px] flex items-center justify-center shadow-md">
-            SNS
-          </div>
+        <div className="inline-flex items-center space-x-2.5 px-4 py-1 rounded-2xl bg-gradient-to-r from-slate-950 via-teal-950 to-slate-900 border-2 border-teal-400/40 shadow-lg shadow-teal-500/10 hover:shadow-teal-500/20 transition-all hover:scale-105 cursor-default whitespace-nowrap">
+          <CarePilotLogo size="sm" showText={false} />
           <span className="text-xs font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-white to-teal-200">
-            CarePilot SNS • {t('welcome.institution')}
+            {t('welcome.institution')}
           </span>
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
         </div>
