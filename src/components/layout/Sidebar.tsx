@@ -12,6 +12,8 @@ import {
   Bell,
   FileText,
   FileDown,
+  FileBarChart,
+  BarChart3,
   User,
   LogOut,
   Sparkles,
@@ -120,15 +122,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
         {
           label: t('nav.analytics'),
           path: '/admin/analytics',
-          icon: <Activity className="w-5 h-5" />,
+          icon: <FileBarChart className="w-5 h-5" />,
           activeGradient: 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30 border-l-4 border-amber-300',
-          badge: null
-        },
-        {
-          label: t('nav.reports'),
-          path: '/admin/reports',
-          icon: <FileDown className="w-5 h-5" />,
-          activeGradient: 'bg-gradient-to-r from-indigo-600 to-blue-700 text-white shadow-lg shadow-indigo-500/30 border-l-4 border-cyan-300',
           badge: null
         },
         {

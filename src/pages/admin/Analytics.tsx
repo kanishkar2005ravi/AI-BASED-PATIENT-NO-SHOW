@@ -260,7 +260,7 @@ export const Analytics: React.FC = () => {
   if (loading || !modelPerf) {
     return (
       <div>
-        <Header title="Hospital Analytics & Appointment Metrics" />
+        <Header title="Hospital Analytics & Reports" />
         <div className="py-20">
           <Loading message="Loading hospital analytics & appointment statistics..." />
         </div>
@@ -282,7 +282,7 @@ export const Analytics: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <Header title="Hospital Analytics & Appointment Performance" />
+      <Header title="Hospital Analytics & Reports" />
       <BackButton variant="admin" />
 
       {/* Demo Data Notice Banner */}
