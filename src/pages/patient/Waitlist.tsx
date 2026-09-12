@@ -114,15 +114,15 @@ export const Waitlist: React.FC = () => {
         </button>
       </div>
 
-      {/* 📋 SLEEK TEAL WAITLIST NOTE 📋 */}
-      <div className="p-4 md:p-5 rounded-2xl bg-gradient-to-r from-teal-900 to-slate-900 text-white border border-teal-500/40 shadow-md flex items-start space-x-3.5">
-        <div className="px-2.5 py-1 rounded-lg bg-teal-500 text-slate-950 font-black text-xs uppercase tracking-wider flex-shrink-0 shadow-xs mt-0.5">
+      {/* 📋 CLEAN WHITE WAITLIST NOTE 📋 */}
+      <div className="p-4 md:p-5 rounded-2xl bg-white border-2 border-slate-200 shadow-sm flex items-start space-x-3.5">
+        <div className="px-2.5 py-1 rounded-lg bg-teal-600 text-white font-extrabold text-xs uppercase tracking-wider flex-shrink-0 shadow-xs mt-0.5">
           NOTE
         </div>
-        <div className="text-xs text-slate-200 font-medium leading-relaxed">
-          <p className="font-extrabold text-white text-sm mb-0.5">How Waitlist Auto-Recovery Works:</p>
-          <p className="text-teal-200 text-xs">
-            If your preferred physician is fully booked, join the waitlist. When another patient cancels an appointment, the system automatically alerts you via Gmail (<strong className="text-white">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong className="text-white">+91 8300096676</strong>) in real time to claim the recovered slot!
+        <div className="text-xs text-slate-700 font-medium leading-relaxed">
+          <p className="font-extrabold text-slate-900 text-sm mb-0.5">How Waitlist Auto-Recovery Works:</p>
+          <p className="text-slate-600 text-xs">
+            If your preferred physician is fully booked, join the waitlist. When another patient cancels an appointment, the system automatically alerts you via Gmail (<strong className="font-bold text-teal-700">kanis.r.ad.2024@snsce.ac.in</strong>) & WhatsApp (<strong className="font-bold text-teal-700">+91 8300096676</strong>) in real time to claim the recovered slot!
           </p>
         </div>
       </div>
