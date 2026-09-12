@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Hospital, HeartPulse, ArrowRight, Play, Film, Radio } from 'lucide-react';
+import { HeartPulse, ArrowRight, Play } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 interface WelcomeSplashScreenProps {
@@ -76,21 +76,8 @@ export const WelcomeSplashScreen: React.FC<WelcomeSplashScreenProps> = ({ userNa
         <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-teal-400 via-amber-400 to-transparent shadow-[0_0_25px_#2dd4bf] animate-bounce top-1/3" />
       </div>
 
-      {/* 🔴 TOP VIDEO PLAYER STATUS HEADER 🔴 */}
-      <div className="relative z-10 p-6 md:p-8 flex items-center justify-between w-full">
-        <div className="flex items-center space-x-3 bg-slate-900/90 px-4 py-2 rounded-full border border-teal-500/40 backdrop-blur-md shadow-lg">
-          <Radio className="w-4 h-4 text-rose-500 animate-ping" />
-          <span className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-            <span>CAREPILOT INTRO VIDEO</span>
-            <span className="bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded text-[10px] border border-rose-500/30">1080p HD</span>
-          </span>
-        </div>
-
-        <div className="flex items-center space-x-2 bg-slate-900/80 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
-          <Film className="w-4 h-4 text-teal-300" />
-          <span className="text-xs font-extrabold text-teal-200 uppercase tracking-wider">{t('welcome.institution')}</span>
-        </div>
-      </div>
+      {/* Top Spacer for Clean Layout */}
+      <div className="pt-6" />
 
       {/* 🌟 CENTER FULL-SCREEN CINEMATIC TITLE & ANIMATION 🌟 */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto space-y-6 animate-slide-up">
