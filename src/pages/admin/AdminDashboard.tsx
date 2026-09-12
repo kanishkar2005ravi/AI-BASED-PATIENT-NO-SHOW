@@ -54,7 +54,8 @@ export const AdminDashboard: React.FC = () => {
     todayAppointments: 0,
     todayCancelled: 0,
     todayRescheduled: 0,
-    waitlistCount: 0
+    waitlistCount: 0,
+    acceptedWaitlistCount: 0
   });
 
   useEffect(() => {
@@ -86,7 +87,8 @@ export const AdminDashboard: React.FC = () => {
           todayAppointments: todayApts.length,
           todayCancelled: todayApts.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length,
           todayRescheduled: todayApts.filter(a => a.status === 'RESCHEDULED').length,
-          waitlistCount: waitList.length
+          waitlistCount: waitList.length,
+          acceptedWaitlistCount: waitList.filter(w => w.status === 'ACCEPTED').length
         };
 
         setMetrics(calculatedMetrics);
@@ -236,8 +238,8 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* 🌟 BOTTOM SECTION: TODAY'S & ACTIVE METRICS (BELOW HOSPITAL OVERVIEW) 🌟 */}
-      {/* 5-Box Single Horizontal Row with Patient Dashboard Style SVG Progress Circles */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      {/* 6-Box Single Horizontal Row with Patient Dashboard Style SVG Progress Circles */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {/* Box 1: Active Doctors */}
         <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
@@ -307,7 +309,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Box 5: Waitlist */}
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group col-span-2 sm:col-span-1">
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
           <div className="relative w-11 h-11 flex items-center justify-center">
             <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-purple-100" fill="transparent" />
@@ -320,6 +322,23 @@ export const AdminDashboard: React.FC = () => {
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-purple-600 leading-none">{metrics.waitlistCount}</p>
             <p className="text-[10px] font-extrabold text-purple-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
+          </div>
+        </div>
+
+        {/* Box 6: Accepted Waitlist */}
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 transition-all flex flex-col items-center justify-center text-center gap-2 min-h-[110px] group">
+          <div className="relative w-11 h-11 flex items-center justify-center">
+            <svg className="w-11 h-11 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-indigo-100" fill="transparent" />
+              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" strokeDasharray={125.6} strokeDashoffset={0} strokeLinecap="round" className="text-indigo-500 transition-all duration-700" fill="transparent" />
+            </svg>
+            <div className="p-2 rounded-full bg-indigo-50 text-indigo-600 group-hover:scale-110 transition-transform">
+              <UserCheck className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-indigo-600 leading-none">{metrics.acceptedWaitlistCount}</p>
+            <p className="text-[10px] font-extrabold text-indigo-900 uppercase tracking-wider">{t('metric.accepted_waitlist')}</p>
           </div>
         </div>
       </div>
