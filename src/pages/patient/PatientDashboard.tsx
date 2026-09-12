@@ -401,6 +401,59 @@ export const PatientDashboard: React.FC = () => {
         </button>
       </div>
 
+      {/* 📋 IMPORTANT PATIENT ADVISORY & HOSPITAL NOTE 📋 */}
+      <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-teal-500/10 border-2 border-amber-400/60 shadow-md space-y-3">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center shadow-xs text-sm">
+            📋
+          </div>
+          <div>
+            <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+              <span>Important Hospital Advisory & Patient Guidelines</span>
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 shadow-2xs">Note</span>
+            </h4>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-700 font-medium">
+          <div className="p-3 rounded-2xl bg-white/80 border border-amber-200/80 space-y-1">
+            <p className="font-extrabold text-amber-950 flex items-center gap-1.5">
+              <span>⏰ Reporting Time & Identity Verification</span>
+            </p>
+            <p className="text-slate-600 leading-relaxed text-[11px]">
+              Please report to reception 15 mins prior to your scheduled consultation time. Bring your Patient ID (<strong className="text-slate-900">{user?.id || 'PAT-686'}</strong>) or registered phone number.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-white/80 border border-teal-200/80 space-y-1">
+            <p className="font-extrabold text-teal-950 flex items-center gap-1.5">
+              <span>📞 Phone Call-In Booking Helpline</span>
+            </p>
+            <p className="text-slate-600 leading-relaxed text-[11px]">
+              For patients without smartphone/digital access, telephone call-in booking helpline (<strong className="text-slate-900">+91 422 2661100</strong>) allocates limited reserved daily slots on a 1st Come, 1st Serve basis.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-white/80 border border-rose-200/80 space-y-1">
+            <p className="font-extrabold text-rose-950 flex items-center gap-1.5">
+              <span>⚡ Priority Care & Emergency Casualty</span>
+            </p>
+            <p className="text-slate-600 leading-relaxed text-[11px]">
+              If regular slots are full, request an urgent priority consultation. For acute emergencies, visit our Casualty Unit or call emergency helpline (<strong className="text-slate-900">0422-2666222</strong>).
+            </p>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-white/80 border border-purple-200/80 space-y-1">
+            <p className="font-extrabold text-purple-950 flex items-center gap-1.5">
+              <span>🔄 Automatic Slot Reallocation</span>
+            </p>
+            <p className="text-slate-600 leading-relaxed text-[11px]">
+              If you need to cancel or reschedule, please do so at least 2 hours in advance so your slot can be offered automatically to waitlisted patients.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* 🏥 TOUCH TO VIEW 24/7 SUPPORT & APP FEATURES BANNER 🏥 */}
       <div
         onClick={() => setShowFeaturesModal(true)}
