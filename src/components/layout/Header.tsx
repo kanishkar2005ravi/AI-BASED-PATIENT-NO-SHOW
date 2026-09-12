@@ -19,8 +19,9 @@ export const Header: React.FC<HeaderProps> = ({
   onSearch
 }) => {
   const { user, role } = useAuth();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
+
   const [unreadCount, setUnreadCount] = useState(2);
   const demoActive = isDemoMode();
 
@@ -67,13 +68,22 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="inline-flex items-center space-x-2 px-4 py-1 rounded-full bg-gradient-to-r from-amber-500/10 via-rose-500/10 via-purple-500/10 via-blue-500/10 to-teal-500/10 border border-slate-300/80 shadow-xs">
           <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-amber-500 to-teal-500 animate-pulse flex-shrink-0" />
           <span className="text-[11px] font-black uppercase tracking-widest text-slate-800">
-            SNS Medical College & Hospital
+            {t('welcome.institution')}
           </span>
         </div>
         <p className="text-base font-black text-slate-900 leading-tight mt-1">
-          {title === 'Admin Hospital Dashboard' || title === 'Hospital Overview & AI Intelligence' ? 'Admin Dashboard' : title}
+          {title === 'Patient Dashboard' ? t('nav.dashboard') :
+           title === 'Admin Dashboard' || title === 'Admin Hospital Dashboard' || title === 'Hospital Overview & AI Intelligence' ? t('nav.dashboard') :
+           title === 'Book Consultation' || title === 'Book Appointment' ? t('nav.book_appointment') :
+           title === 'Patient Directory' || title === 'Patients' ? t('nav.patients') :
+           title === 'Physician Directory' || title === 'Doctors' ? t('nav.doctors') :
+           title === 'Appointments Schedule' || title === 'Appointments' || title === 'My Appointments' ? t('nav.appointments') :
+           title === 'Waitlist Queue' || title === 'Waitlist' ? t('nav.waitlist') :
+           title === 'Notifications' ? t('nav.notifications') :
+           title}
         </p>
       </div>
+
 
       {/* Right Controls */}
       <div className="flex items-center justify-end space-x-3 w-1/4">

@@ -11,12 +11,15 @@ import { callBackend } from '../../services/api';
 import { Doctor, TimeSlot, Appointment } from '../../types';
 import { Calendar, Clock, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { formatTime } from '../../utils/helpers';
 
 export const BookAppointment: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { showToast } = useToast();
+
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -175,33 +178,33 @@ export const BookAppointment: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <Header title="Book New Appointment" />
+      <Header title={t('book.title')} />
 
       {/* Progress Wizard Header */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between max-w-3xl mx-auto">
         <div className={`flex items-center space-x-2 text-xs font-bold ${step >= 1 ? 'text-teal-700' : 'text-slate-400'}`}>
           <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center">1</span>
-          <span>Select Doctor & Time</span>
+          <span>{t('book.step1')}</span>
         </div>
         <div className="h-0.5 w-12 bg-slate-200" />
         <div className={`flex items-center space-x-2 text-xs font-bold ${step >= 2 ? 'text-teal-700' : 'text-slate-400'}`}>
           <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center">2</span>
-          <span>Review Details</span>
+          <span>{t('book.step2')}</span>
         </div>
         <div className="h-0.5 w-12 bg-slate-200" />
         <div className={`flex items-center space-x-2 text-xs font-bold ${step === 3 ? 'text-teal-700' : 'text-slate-400'}`}>
           <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center">3</span>
-          <span>Confirmation</span>
+          <span>{t('book.step3')}</span>
         </div>
       </div>
 
       {/* STEP 1: Select Doctor, Date, Slot & Type */}
       {step === 1 && (
-        <Card title="Appointment Selection Wizard" className="max-w-3xl mx-auto">
+        <Card title={t('book.title')} className="max-w-3xl mx-auto">
           <div className="space-y-6">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                1. Choose Active Physician
+                {t('book.choose_doctor')}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {doctors.map((doc, idx) => {
@@ -239,7 +242,7 @@ export const BookAppointment: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="2. Preferred Date"
+                label={t('book.preferred_date')}
                 type="date"
                 value={selectedDate}
                 onChange={e => setSelectedDate(e.target.value)}
@@ -247,7 +250,8 @@ export const BookAppointment: React.FC = () => {
               />
 
               <Select
-                label="3. Visit Purpose / Type"
+                label={t('book.visit_purpose')}
+
                 value={appointmentType}
                 onChange={e => setAppointmentType(e.target.value)}
                 options={[
@@ -436,7 +440,7 @@ export const BookAppointment: React.FC = () => {
                 icon={<ArrowRight className="w-4 h-4" />}
                 onClick={() => setStep(2)}
               >
-                Proceed to Review
+                {t('book.next_step')}
               </Button>
             </div>
           </div>
@@ -445,25 +449,25 @@ export const BookAppointment: React.FC = () => {
 
       {/* STEP 2: Review Booking */}
       {step === 2 && selectedDoctor && (
-        <Card title="Review & Confirm Appointment" className="max-w-2xl mx-auto space-y-6">
+        <Card title={t('book.step2')} className="max-w-2xl mx-auto space-y-6">
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
             <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-              <span className="text-xs text-slate-500 font-semibold">Physician</span>
+              <span className="text-xs text-slate-500 font-semibold">{t('label.doctor')}</span>
               <span className="text-sm font-bold text-slate-900">{selectedDoctor.name} ({selectedDoctor.specialization})</span>
             </div>
             <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-              <span className="text-xs text-slate-500 font-semibold">Date & Time</span>
+              <span className="text-xs text-slate-500 font-semibold">{t('label.date')} & {t('label.time')}</span>
               <span className="text-sm font-bold text-slate-900">{selectedDate} at {formatTime(selectedTimeSlot)}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-500 font-semibold">Appointment Type</span>
+              <span className="text-xs text-slate-500 font-semibold">{t('label.reason')}</span>
               <span className="text-sm font-bold text-slate-900">{appointmentType}</span>
             </div>
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t border-slate-100">
             <Button variant="outline" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => setStep(1)}>
-              Back to Selection
+              {t('book.prev_step')}
             </Button>
             <Button
               variant="primary"
@@ -472,7 +476,7 @@ export const BookAppointment: React.FC = () => {
               icon={<CheckCircle2 className="w-4 h-4" />}
               onClick={handleConfirmBooking}
             >
-              Book Appointment
+              {t('book.confirm_button')}
             </Button>
           </div>
         </Card>
@@ -485,19 +489,20 @@ export const BookAppointment: React.FC = () => {
             <CheckCircle2 className="w-10 h-10" />
           </div>
 
-          <h2 className="text-2xl font-black text-slate-900">Appointment booked successfully</h2>
+          <h2 className="text-2xl font-black text-slate-900">{t('book.step3')}</h2>
           <p className="text-xs text-slate-600 mt-2 mb-6">Your reservation with {bookingResult.doctorName} for {bookingResult.appointmentDate} at {formatTime(bookingResult.appointmentTime)} has been confirmed by the backend.</p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Button variant="primary" onClick={() => navigate('/patient/dashboard')}>
-              Go to Patient Dashboard
+              {t('nav.dashboard')}
             </Button>
             <Button variant="outline" onClick={() => navigate('/patient/appointments')}>
-              View My Appointments
+              {t('nav.my_appointments')}
             </Button>
           </div>
         </Card>
       )}
+
     </div>
   );
 };

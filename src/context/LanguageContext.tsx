@@ -65,7 +65,22 @@ const translations: Record<Language, Record<string, string>> = {
     'label.experience': 'Experience',
     'label.date': 'Date',
     'label.time': 'Time Slot',
-    'label.reason': 'Reason for Visit'
+    'label.reason': 'Reason for Visit',
+
+    // Book Appointment Keys
+    'book.title': 'Book Consultation',
+    'book.step1': '1. Select Doctor & Time',
+    'book.step2': '2. Review Details',
+    'book.step3': '3. Confirmation',
+    'book.choose_doctor': '1. Choose Active Physician',
+    'book.preferred_date': '2. Preferred Date',
+    'book.visit_purpose': '3. Visit Purpose / Type',
+    'book.select_slot': '4. Select 20-Minute Time Slot',
+    'book.morning_session': 'Morning Session',
+    'book.evening_session': 'Evening Session',
+    'book.confirm_button': 'Confirm Booking',
+    'book.next_step': 'Proceed to Review',
+    'book.prev_step': 'Back to Selection'
   },
   ta: {
     // Header & Navigation
@@ -123,8 +138,24 @@ const translations: Record<Language, Record<string, string>> = {
     'label.experience': 'அனுபவம்',
     'label.date': 'தேதி',
     'label.time': 'நேரம்',
-    'label.reason': 'சிகிச்சைக்கான காரணம்'
+    'label.reason': 'சிகிச்சைக்கான காரணம்',
+
+    // Book Appointment Keys
+    'book.title': 'சந்திப்பு பதிவு செய்ய',
+    'book.step1': '1. மருத்துவர் & நேரம்',
+    'book.step2': '2. விவரங்களை சரிபார்க்க',
+    'book.step3': '3. சந்திப்பு உறுதிப்பட்டது',
+    'book.choose_doctor': '1. மருத்துவரைத் தேர்ந்தெடுக்கவும்',
+    'book.preferred_date': '2. விரும்பிய தேதி',
+    'book.visit_purpose': '3. சிகிச்சை வகை',
+    'book.select_slot': '4. நேரத்தைத் தேர்ந்தெடுக்கவும் (20 நிமிடங்கள்)',
+    'book.morning_session': 'காலை நேரம்',
+    'book.evening_session': 'மாலை நேரம்',
+    'book.confirm_button': 'சந்திப்பை உறுதி செய்',
+    'book.next_step': 'அடுத்த நிலை (சரிபார்க்க)',
+    'book.prev_step': 'முந்தைய நிலை'
   }
+
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
