@@ -15,7 +15,8 @@ import {
   UserCheck,
   ArrowUpRight,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  AlertTriangle
 } from 'lucide-react';
 import {
   AreaChart,
@@ -340,6 +341,45 @@ export const AdminDashboard: React.FC = () => {
             <p className="text-2xl font-black text-indigo-600 leading-none">{metrics.acceptedWaitlistCount}</p>
             <p className="text-[10px] font-extrabold text-indigo-900 uppercase tracking-wider">{t('metric.accepted_waitlist')}</p>
           </div>
+        </div>
+      </div>
+
+      {/* 🚨 DEDICATED URGENT EMERGENCY REQUESTS BOX (ABOVE LOW, MEDIUM, HIGH RISK) 🚨 */}
+      <div
+        onClick={() => navigate('/admin/waitlist')}
+        className="rounded-2xl p-5 md:p-6 border-2 border-rose-500/60 bg-gradient-to-r from-rose-500/10 via-purple-500/5 to-white hover:shadow-lg transition-all cursor-pointer group"
+      >
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-rose-500 text-white rounded-2xl shadow-md group-hover:scale-110 transition-transform">
+              <AlertTriangle className="w-6 h-6 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-black uppercase text-rose-700 tracking-wider">
+                  {t('metric.urgent_requests')}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-extrabold animate-pulse">
+                  LIVE URGENT QUEUE
+                </span>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 mt-0.5">
+                {metrics.waitlistCount} <span className="text-xs font-bold text-slate-500">Pending Priority Requests</span>
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">Real-time emergency & priority consultation requests submitted by patients</p>
+            </div>
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate('/admin/waitlist');
+            }}
+            className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+          >
+            <span>View & Assign Urgent Slots</span>
+            <ArrowUpRight className="w-4 h-4 text-amber-400" />
+          </button>
         </div>
       </div>
 
