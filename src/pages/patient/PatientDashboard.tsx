@@ -136,70 +136,50 @@ export const PatientDashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* 📊 SIMPLE SINGLE-LINE METRIC BOXES 📊 */}
-      <div className="space-y-2.5">
-        {/* Metric 1: Total Visits */}
-        <div className="p-3.5 px-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-between hover:border-teal-400 transition-all">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-teal-50 text-teal-600 border border-teal-100">
-              <Calendar className="w-4.5 h-4.5" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Total Visits</span>
-              <p className="text-[11px] text-slate-500 font-medium">Scheduled Consultations</p>
-            </div>
+      {/* 📊 SIMPLE SIDE-BY-SIDE SQUARE METRIC BOXES 📊 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Box 1: Total Visits */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-between text-center min-h-[140px]">
+          <div className="p-2.5 rounded-xl bg-teal-50 text-teal-600 border border-teal-100">
+            <Calendar className="w-5 h-5" />
           </div>
-          <span className="text-base font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
-            {appointments.length}
-          </span>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-slate-900 leading-none">{appointments.length}</p>
+            <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Total Visits</p>
+          </div>
         </div>
 
-        {/* Metric 2: Attended Visits */}
-        <div className="p-3.5 px-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-between hover:border-emerald-400 transition-all">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
-              <UserCheck className="w-4.5 h-4.5" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider">Attended Visits</span>
-              <p className="text-[11px] text-emerald-700 font-medium">🟢 Completed Consultations</p>
-            </div>
+        {/* Box 2: Attended Visits */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-between text-center min-h-[140px]">
+          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+            <UserCheck className="w-5 h-5" />
           </div>
-          <span className="text-base font-black text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
-            {attendedCount}
-          </span>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-emerald-600 leading-none">{attendedCount}</p>
+            <p className="text-xs font-bold text-emerald-900 uppercase tracking-wider">Attended</p>
+          </div>
         </div>
 
-        {/* Metric 3: Missed Visits */}
-        <div className="p-3.5 px-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-between hover:border-rose-400 transition-all">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-rose-50 text-rose-600 border border-rose-100">
-              <AlertCircle className="w-4.5 h-4.5" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-rose-900 uppercase tracking-wider">Missed Visits</span>
-              <p className="text-[11px] text-rose-700 font-medium">🔴 No-Show Records</p>
-            </div>
+        {/* Box 3: Missed Visits */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col items-center justify-between text-center min-h-[140px]">
+          <div className="p-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-100">
+            <AlertCircle className="w-5 h-5" />
           </div>
-          <span className="text-base font-black text-rose-700 bg-rose-50 px-3 py-1 rounded-lg border border-rose-200">
-            {noShowCount}
-          </span>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-rose-600 leading-none">{noShowCount}</p>
+            <p className="text-xs font-bold text-rose-900 uppercase tracking-wider">Missed</p>
+          </div>
         </div>
 
-        {/* Metric 4: Waitlist Requests */}
-        <div className="p-3.5 px-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-between hover:border-purple-400 transition-all">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-purple-50 text-purple-600 border border-purple-100">
-              <Clock className="w-4.5 h-4.5" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-purple-900 uppercase tracking-wider">Waitlist Requests</span>
-              <p className="text-[11px] text-purple-700 font-medium">Pending Slot Alerts</p>
-            </div>
+        {/* Box 4: Waitlist Requests */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-between text-center min-h-[140px]">
+          <div className="p-2.5 rounded-xl bg-purple-50 text-purple-600 border border-purple-100">
+            <Clock className="w-5 h-5" />
           </div>
-          <span className="text-base font-black text-purple-700 bg-purple-50 px-3 py-1 rounded-lg border border-purple-200">
-            {waitlist.length}
-          </span>
+          <div className="space-y-0.5">
+            <p className="text-2xl font-black text-purple-600 leading-none">{waitlist.length}</p>
+            <p className="text-xs font-bold text-purple-900 uppercase tracking-wider">Waitlist</p>
+          </div>
         </div>
       </div>
 
