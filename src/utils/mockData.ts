@@ -4,7 +4,7 @@ export const INITIAL_USERS: User[] = [
   {
     "id": "ADMIN-001",
     "name": "Administrator",
-    "email": "admin@gmail.com",
+    "email": "kanis.r.ad.2024@snsce.ac.in",
     "role": "admin",
     "phone": "+919876543210"
   },

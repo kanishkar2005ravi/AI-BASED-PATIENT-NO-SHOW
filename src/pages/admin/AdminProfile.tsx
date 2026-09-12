@@ -5,7 +5,7 @@ import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Save, ArrowLeft, Mail, Phone, Smartphone, PhoneCall, MessageSquare, ShieldAlert, MapPin, User as UserIcon } from 'lucide-react';
+import { Save, ArrowLeft, Mail, Phone, MessageSquare, ShieldAlert, MapPin, User as UserIcon } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -17,8 +17,6 @@ export const AdminProfile: React.FC = () => {
 
   const [name, setName] = useState(user?.name || 'Administrator');
   const [email, setEmail] = useState(user?.email || 'kanis.r.ad.2024@snsce.ac.in');
-  const [phone, setPhone] = useState(user?.phone || '+919876543210');
-  const [basicPhone, setBasicPhone] = useState(user?.basicPhone || '+919876543211');
   const [whatsappPhone, setWhatsappPhone] = useState(user?.whatsappPhone || '+918300096676');
   const [emergencyContactName, setEmergencyContactName] = useState(user?.emergencyContactName || 'SNS 24/7 Emergency Desk');
   const [emergencyPhone, setEmergencyPhone] = useState(user?.emergencyPhone || '+914222661100');
@@ -34,8 +32,6 @@ export const AdminProfile: React.FC = () => {
           ...user,
           name,
           email,
-          phone,
-          basicPhone,
           whatsappPhone,
           emergencyContactName,
           emergencyPhone,
@@ -85,22 +81,6 @@ export const AdminProfile: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start space-x-2.5">
-                <Smartphone className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Primary Mobile (Smartphone)</p>
-                  <p className="font-mono font-bold text-slate-900">{phone}</p>
-                </div>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start space-x-2.5">
-                <PhoneCall className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Contact No. (Non-Smartphone Users)</p>
-                  <p className="font-mono font-bold text-slate-900">{basicPhone || 'Not configured'}</p>
-                </div>
-              </div>
-
               <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-200/80 flex items-start space-x-2.5">
                 <MessageSquare className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                 <div className="min-w-0 flex-1">
@@ -121,7 +101,7 @@ export const AdminProfile: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="md:col-span-2" title="Admin Profile & Multi-Channel Contact Details" subtitle="Manage official contact numbers, non-smartphone fallback channel, WhatsApp alerts, and emergency contact details.">
+        <Card className="md:col-span-2" title="Admin Profile & Contact Details" subtitle="Manage official hospital email, WhatsApp alerts, and emergency contact details.">
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
@@ -143,28 +123,10 @@ export const AdminProfile: React.FC = () => {
             </div>
 
             <p className="text-xs font-bold text-slate-700 uppercase tracking-wider pt-2">
-              Multi-Channel Phone & Emergency Configuration
+              WhatsApp & Emergency Helpline Configuration
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                label="Primary Mobile Number (Smartphone)"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                icon={<Smartphone className="w-4 h-4 text-slate-400" />}
-                placeholder="Enter 10-digit mobile number..."
-                required
-              />
-
-              <Input
-                label="Contact No. (For Non-Smartphone / Feature Phone Users)"
-                value={basicPhone}
-                onChange={e => setBasicPhone(e.target.value)}
-                icon={<PhoneCall className="w-4 h-4 text-amber-500" />}
-                placeholder="Basic feature phone contact for SMS/Voice calls..."
-                helperText="Used as fallback for non-tech / basic phone users"
-              />
-
               <Input
                 label="WhatsApp Number"
                 value={whatsappPhone}

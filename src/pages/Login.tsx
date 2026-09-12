@@ -41,7 +41,7 @@ export const Login: React.FC = () => {
 
     // Direct Failsafe Guard for Admin Login
     if (role === 'admin') {
-      const allowedAdminEmails = ['admin@example.com', 'admin@careschedule.com', 'admin', 'admin-001'];
+      const allowedAdminEmails = ['admin@example.com', 'admin@careschedule.com', 'admin', 'admin-001', 'kanis.r.ad.2024@snsce.ac.in', 'admin@gmail.com'];
       const allowedAdminPasses = ['admin123', 'admin', 'password', 'admin2026', 'Admin123!'];
 
       if (!allowedAdminEmails.includes(cleanInput.toLowerCase()) || !allowedAdminPasses.includes(cleanPass)) {
