@@ -6,31 +6,52 @@ import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { Loading } from '../../components/common/Loading';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { callBackend } from '../../services/api';
-import { Appointment, WaitlistItem, NotificationItem } from '../../types';
-import { Calendar, Clock, ChevronRight, Bell, Sparkles, HeartPulse, Play } from 'lucide-react';
+import { Appointment, WaitlistItem, NotificationItem, Doctor } from '../../types';
+import {
+  Calendar,
+  Clock,
+  ChevronRight,
+  Bell,
+  Sparkles,
+  HeartPulse,
+  Play,
+  Stethoscope,
+  ShieldCheck,
+  Award,
+  Activity,
+  UserCheck,
+  AlertCircle,
+  Hospital,
+  ArrowRight,
+  Plus
+} from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { WelcomeSplashScreen } from '../../components/common/WelcomeSplashScreen';
+import { formatTime } from '../../utils/helpers';
 
 export const PatientDashboard: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistItem[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(true);
-
 
   const fetchData = () => {
     setLoading(true);
     Promise.all([
       callBackend({ action: 'GET_APPOINTMENTS', data: { patientId: user?.id } }),
       callBackend({ action: 'GET_WAITLIST', data: { patientId: user?.id } }),
-      callBackend({ action: 'GET_NOTIFICATIONS', data: { userId: user?.id } })
-    ]).then(([aptsRes, wtlRes, notifRes]) => {
+      callBackend({ action: 'GET_NOTIFICATIONS', data: { userId: user?.id } }),
+      callBackend({ action: 'GET_DOCTORS' })
+    ]).then(([aptsRes, wtlRes, notifRes, docsRes]) => {
       if (aptsRes.success && Array.isArray(aptsRes.data)) {
         setAppointments(aptsRes.data);
       }
@@ -39,6 +60,9 @@ export const PatientDashboard: React.FC = () => {
       }
       if (notifRes.success && Array.isArray(notifRes.data)) {
         setNotifications(notifRes.data.slice(0, 3));
+      }
+      if (docsRes.success && Array.isArray(docsRes.data)) {
+        setDoctors(docsRes.data.filter((d: Doctor) => d.status === 'Active'));
       }
       setLoading(false);
     });
@@ -51,6 +75,9 @@ export const PatientDashboard: React.FC = () => {
   const nextAppointment = appointments.find(
     a => a.status === 'CONFIRMED' || a.status === 'CHECKED_IN' || a.status === 'RESCHEDULED'
   );
+
+  const attendedCount = appointments.filter(a => a.status === 'COMPLETED').length;
+  const noShowCount = appointments.filter(a => a.status === 'NO_SHOW').length;
 
   const handleCancel = async (aptId: string) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
@@ -66,9 +93,9 @@ export const PatientDashboard: React.FC = () => {
   if (loading) {
     return (
       <div>
-        <Header title="Patient Portal" />
+        <Header title={t('nav.dashboard')} />
         <div className="py-20">
-          <Loading message="Welcome back! Fetching your schedule..." />
+          <Loading message="Loading your personal health command center..." />
         </div>
       </div>
     );
@@ -76,7 +103,7 @@ export const PatientDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <Header title="Patient Dashboard" />
+      <Header title={t('nav.dashboard')} />
 
       {/* 5-Second 7-Color Animated Welcome Entrance Screen */}
       {showWelcomeSplash && (
@@ -87,130 +114,240 @@ export const PatientDashboard: React.FC = () => {
         />
       )}
 
-      {/* Greeting Header Banner */}
-      <div className="bg-gradient-to-r from-teal-800 via-teal-900 to-slate-900 text-white p-6 md:p-8 rounded-3xl shadow-lg relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* 🌟 DISTINCTIVE HERO COMMAND CENTER BANNER 🌟 */}
+      <div className="relative rounded-3xl p-6 md:p-8 overflow-hidden bg-gradient-to-r from-slate-950 via-teal-950 to-slate-900 border-2 border-teal-500/30 shadow-2xl">
+        {/* Animated Background Mesh */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+        <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-teal-300 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-teal-300" /> Patient Care Portal
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/40 text-teal-300 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-inner">
+                <Hospital className="w-3.5 h-3.5 text-teal-300" /> {t('welcome.institution')}
               </span>
               <button
                 onClick={() => setShowWelcomeSplash(true)}
-                className="px-2.5 py-0.5 rounded-full bg-teal-500/20 hover:bg-teal-500/40 border border-teal-400/30 text-[10px] font-black text-teal-200 transition-all flex items-center gap-1"
-                title="Replay 5s Welcome Animation"
+                className="px-3 py-1 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 text-xs font-black transition-all flex items-center gap-1.5 shadow-sm"
               >
-                <Play className="w-3 h-3 fill-current" /> Replay Welcome Intro
+                <Play className="w-3 h-3 fill-current text-amber-300" /> {t('action.replay')}
               </button>
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
-              Welcome to CarePilot SNS
+            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+              {t('welcome.hello')}, <span className="bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">{user?.name || 'Patient'}</span>
             </h1>
-            <p className="text-xs md:text-sm text-teal-200 font-semibold mt-1">
-              Run by <span className="text-amber-300 font-black">SNS Medical College and Hospital</span> • Hello, {user?.name || 'Patient'}!
+            <p className="text-xs md:text-sm text-teal-200/90 font-medium max-w-xl">
+              Patient ID: <span className="font-mono font-bold text-amber-300">{user?.id || 'PAT-1001'}</span> • CarePilot SNS AI Health Workstation
             </p>
           </div>
 
-          <Button
-            variant="primary"
-            size="lg"
-            className="bg-white text-teal-900 hover:bg-teal-50 shadow-md border-0 font-bold"
-            icon={<Calendar className="w-4 h-4 text-teal-700" />}
-            onClick={() => navigate('/patient/book')}
-          >
-            Book Appointment
-          </Button>
-
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/patient/book')}
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 hover:from-teal-500 hover:to-cyan-500 text-slate-950 font-black text-sm shadow-xl flex items-center gap-2 transition-all transform hover:scale-105"
+            >
+              <Plus className="w-5 h-5 stroke-[3]" />
+              <span>{t('action.book')}</span>
+            </button>
+          </div>
         </div>
       </div>
 
-
-      {/* Next Appointment Hero Card (NO AI Risk Details, NO Check-in button) */}
-      {nextAppointment ? (
-        <Card className="border-2 border-teal-500/40 bg-gradient-to-br from-white via-teal-50/20 to-white shadow-md">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-            <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-ping" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">Your Next Scheduled Visit</h3>
+      {/* 📊 4-GRID DISTINCTIVE MEDICAL STATS CARDS 📊 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Metric 1: Total Appointments */}
+        <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-5 rounded-2xl border border-slate-700/80 text-white shadow-md relative overflow-hidden group hover:border-teal-500/50 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Visits</span>
+            <div className="p-2.5 rounded-xl bg-teal-500/20 text-teal-400 border border-teal-500/30">
+              <Calendar className="w-5 h-5" />
             </div>
-            <Badge variant={nextAppointment.status === 'CHECKED_IN' ? 'purple' : 'info'}>
+          </div>
+          <p className="text-3xl font-black text-white mt-3">{appointments.length}</p>
+          <p className="text-[11px] text-teal-300/80 font-medium mt-1">Scheduled Consultations</p>
+        </div>
+
+        {/* Metric 2: Attended Visits */}
+        <div className="bg-gradient-to-br from-emerald-950/80 to-slate-900 p-5 rounded-2xl border border-emerald-800/60 text-white shadow-md relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">Attended Visits</span>
+            <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <UserCheck className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-3xl font-black text-emerald-300 mt-3">{attendedCount}</p>
+          <p className="text-[11px] text-emerald-200/80 font-medium mt-1">🟢 Completed Consultations</p>
+        </div>
+
+        {/* Metric 3: Missed / No-Show */}
+        <div className="bg-gradient-to-br from-rose-950/80 to-slate-900 p-5 rounded-2xl border border-rose-800/60 text-white shadow-md relative overflow-hidden group hover:border-rose-500/50 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-rose-300">Missed Visits</span>
+            <div className="p-2.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-3xl font-black text-rose-300 mt-3">{noShowCount}</p>
+          <p className="text-[11px] text-rose-200/80 font-medium mt-1">🔴 No-Show Records</p>
+        </div>
+
+        {/* Metric 4: Active Waitlist */}
+        <div className="bg-gradient-to-br from-purple-950/80 to-slate-900 p-5 rounded-2xl border border-purple-800/60 text-white shadow-md relative overflow-hidden group hover:border-purple-500/50 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-purple-300">Waitlist Requests</span>
+            <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
+              <Clock className="w-5 h-5" />
+            </div>
+          </div>
+          <p className="text-3xl font-black text-purple-300 mt-3">{waitlist.length}</p>
+          <p className="text-[11px] text-purple-200/80 font-medium mt-1">Pending Slot Alerts</p>
+        </div>
+      </div>
+
+      {/* 🎟️ HERO FEATURED MEDICAL BOARDING PASS (NEXT APPOINTMENT) 🎟️ */}
+      {nextAppointment ? (
+        <div className="relative rounded-3xl p-6 md:p-8 bg-gradient-to-r from-teal-900 via-slate-900 to-indigo-950 text-white border-2 border-teal-400/40 shadow-xl overflow-hidden">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+            <div className="flex items-center space-x-2">
+              <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
+              <span className="text-xs font-black uppercase tracking-widest text-teal-300">Your Next Confirmed Medical Ticket</span>
+            </div>
+            <Badge variant="teal" size="md">
               {nextAppointment.status}
             </Badge>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <span className="text-xs text-teal-700 font-bold uppercase">{nextAppointment.doctorSpecialization}</span>
-              <h2 className="text-2xl font-extrabold text-slate-900">{nextAppointment.doctorName}</h2>
-              <div className="flex items-center space-x-4 text-xs font-semibold text-slate-600">
-                <span className="flex items-center space-x-1">
-                  <Calendar className="w-4 h-4 text-teal-600" />
-                  <span>{nextAppointment.appointmentDate}</span>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-teal-400 to-emerald-500 text-slate-950 font-black text-2xl flex items-center justify-center shadow-lg border-2 border-white/20">
+                {nextAppointment.doctorName.replace('Dr. ', '').charAt(0)}
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-teal-300 bg-teal-950/60 px-2.5 py-0.5 rounded-full border border-teal-500/30">
+                  {nextAppointment.doctorSpecialization}
                 </span>
-                <span className="flex items-center space-x-1">
-                  <Clock className="w-4 h-4 text-teal-600" />
-                  <span>{nextAppointment.appointmentTime}</span>
-                </span>
-                <span className="bg-slate-100 px-2.5 py-1 rounded-lg text-slate-700 font-medium">
-                  {nextAppointment.appointmentType}
-                </span>
+                <h2 className="text-2xl font-black text-white">{nextAppointment.doctorName}</h2>
+                <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-200 pt-1">
+                  <span className="flex items-center gap-1.5 bg-black/30 px-3 py-1 rounded-xl border border-white/10">
+                    <Calendar className="w-4 h-4 text-teal-400" />
+                    <span>{nextAppointment.appointmentDate}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-black/30 px-3 py-1 rounded-xl border border-white/10">
+                    <Clock className="w-4 h-4 text-amber-400" />
+                    <span>{formatTime(nextAppointment.appointmentTime)}</span>
+                  </span>
+                  <span className="bg-teal-500/20 text-teal-300 px-3 py-1 rounded-xl border border-teal-400/30 font-extrabold">
+                    {nextAppointment.appointmentType}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Patient Actions (Reschedule & Cancel ONLY) */}
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="md"
+            <div className="flex items-center space-x-3 pt-2 lg:pt-0">
+              <button
                 onClick={() => navigate(`/patient/appointments/${nextAppointment.id}/reschedule`)}
+                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all"
               >
                 Reschedule Visit
-              </Button>
-              <Button
-                variant="ghost"
-                size="md"
-                className="text-rose-600 hover:bg-rose-50"
+              </button>
+              <button
                 onClick={() => handleCancel(nextAppointment.id)}
+                className="px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 font-bold text-xs border border-rose-400/30 transition-all"
               >
-                Cancel
-              </Button>
+                Cancel Visit
+              </button>
             </div>
           </div>
-        </Card>
+        </div>
       ) : (
-        <Card className="text-center p-8 bg-slate-50 border-dashed border-slate-300">
-          <Calendar className="w-10 h-10 text-teal-600 mx-auto mb-2" />
-          <h3 className="text-base font-bold text-slate-900">No Upcoming Appointments</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-            You currently have no scheduled medical visits. Book a consultation or join the waitlist.
+        <div className="p-8 rounded-3xl bg-slate-900 border-2 border-dashed border-slate-700 text-center text-slate-300">
+          <Calendar className="w-12 h-12 text-teal-400 mx-auto mb-3 animate-bounce" />
+          <h3 className="text-lg font-black text-white">No Upcoming Consultations</h3>
+          <p className="text-xs text-slate-400 max-w-md mx-auto mb-4 font-medium">
+            You currently have no scheduled appointments. Select a physician from SNS Medical College and book your consultation slot.
           </p>
-          <Button variant="primary" size="sm" onClick={() => navigate('/patient/book')}>
+          <Button variant="primary" size="md" onClick={() => navigate('/patient/book')}>
             Book Appointment Now
           </Button>
-        </Card>
+        </div>
       )}
 
-      {/* Row 2: Upcoming List & Quick Links */}
+      {/* 🩺 SPECIALIST PHYSICIANS CAROUSEL / FAST BOOKING 🩺 */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-black text-slate-900">Available Faculty Physicians</h2>
+            <p className="text-xs text-slate-500 font-medium">SNS Medical College and Hospital Specialists</p>
+          </div>
+          <button
+            onClick={() => navigate('/patient/book')}
+            className="text-xs font-black text-teal-600 hover:text-teal-700 flex items-center gap-1"
+          >
+            <span>View All Doctors</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {doctors.slice(0, 4).map((doc, idx) => {
+            const badgeColors = [
+              'bg-amber-100 text-amber-900 border-amber-300',
+              'bg-blue-100 text-blue-900 border-blue-300',
+              'bg-teal-100 text-teal-900 border-teal-300',
+              'bg-purple-100 text-purple-900 border-purple-300'
+            ][idx % 4];
+
+            return (
+              <div
+                key={doc.id}
+                onClick={() => navigate('/patient/book')}
+                className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer space-y-3 hover:border-teal-400 group"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-900 text-teal-300 font-black text-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                    {doc.name.replace('Dr. ', '').charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-slate-900 group-hover:text-teal-600 transition-colors">{doc.name}</h4>
+                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${badgeColors}`}>
+                      {doc.specialization}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                  <span className="font-medium">{doc.experience} Years Exp.</span>
+                  <span className="font-bold text-teal-600 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                    Book Slot <ArrowRight className="w-3 h-3" />
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 📋 ROW 3: APPOINTMENT HISTORY & NOTIFICATIONS HUB 📋 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Appointments List */}
-        <Card title="Upcoming & Recent Appointments" className="lg:col-span-2">
+        <Card title="Appointment History & Schedule" className="lg:col-span-2">
           {appointments.length === 0 ? (
             <p className="text-xs text-slate-500 text-center py-6">No appointment history found.</p>
           ) : (
             <div className="space-y-3">
-              {appointments.slice(0, 4).map(apt => (
+              {appointments.slice(0, 5).map(apt => (
                 <div
                   key={apt.id}
-                  className="p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/50 flex items-center justify-between hover:bg-white transition-colors"
+                  className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/60 flex items-center justify-between hover:bg-white hover:border-slate-300 transition-all shadow-2xs"
                 >
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900">{apt.doctorName}</h4>
-                    <p className="text-xs text-slate-500">
-                      {apt.appointmentDate} at {apt.appointmentTime} ({apt.appointmentType})
-                    </p>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-black text-slate-900">{apt.doctorName}</h4>
+                    <div className="flex items-center space-x-3 text-xs text-slate-500 font-medium">
+                      <span>📅 {apt.appointmentDate}</span>
+                      <span>⏰ {formatTime(apt.appointmentTime)}</span>
+                      <span className="bg-slate-200 px-2 py-0.5 rounded text-slate-700 font-bold text-[10px]">{apt.appointmentType}</span>
+                    </div>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Badge variant={apt.status === 'CONFIRMED' ? 'info' : apt.status === 'COMPLETED' ? 'success' : 'danger'} size="sm">
@@ -218,7 +355,7 @@ export const PatientDashboard: React.FC = () => {
                     </Badge>
                     <button
                       onClick={() => navigate(`/patient/appointments/${apt.id}`)}
-                      className="p-1 text-slate-400 hover:text-teal-600"
+                      className="p-2 rounded-xl text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition-all"
                     >
                       <ChevronRight className="w-5 h-5" />
                     </button>
@@ -229,17 +366,19 @@ export const PatientDashboard: React.FC = () => {
           )}
         </Card>
 
-        {/* Notifications & Waitlist Summary */}
+        {/* Notifications & Announcements Hub */}
         <div className="space-y-6">
-          <Card title="Notifications & Reminders">
+          <Card title="Hospital Alerts & Notices">
             {notifications.length === 0 ? (
               <p className="text-xs text-slate-500 text-center py-4">No new notifications.</p>
             ) : (
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {notifications.map(n => (
-                  <div key={n.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                    <p className="font-bold text-slate-900">{n.title}</p>
-                    <p className="text-slate-600 mt-0.5">{n.message}</p>
+                  <div key={n.id} className="p-3.5 rounded-2xl bg-teal-50/50 border border-teal-200/80 text-xs space-y-1">
+                    <p className="font-bold text-teal-950 flex items-center gap-1.5">
+                      <Bell className="w-3.5 h-3.5 text-teal-600" /> {n.title}
+                    </p>
+                    <p className="text-teal-800 font-medium leading-relaxed">{n.message}</p>
                   </div>
                 ))}
               </div>
@@ -247,15 +386,15 @@ export const PatientDashboard: React.FC = () => {
           </Card>
 
           {waitlist.length > 0 && (
-            <Card title="Active Waitlist Requests">
+            <Card title="Active Waitlist Position">
               <div className="space-y-2">
                 {waitlist.map(w => (
-                  <div key={w.id} className="p-3 rounded-xl bg-teal-50 border border-teal-200 text-xs flex justify-between items-center">
+                  <div key={w.id} className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-xs flex justify-between items-center">
                     <div>
-                      <p className="font-bold text-teal-900">{w.doctorName}</p>
-                      <p className="text-teal-700">{w.requestedDate}</p>
+                      <p className="font-extrabold text-purple-950">{w.doctorName}</p>
+                      <p className="text-purple-700 font-medium">{w.requestedDate}</p>
                     </div>
-                    <Badge variant="teal" size="sm">
+                    <Badge variant="purple" size="md">
                       Pos #{w.position}
                     </Badge>
                   </div>
