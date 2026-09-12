@@ -13,6 +13,7 @@ import {
   Clock,
   Bell,
   FileText,
+  FileDown,
   User,
   LogOut,
   Activity
@@ -43,7 +44,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ role }) => {
     { label: t('nav.waitlist'), path: '/admin/waitlist', icon: <Clock className="w-5 h-5 text-pink-400" /> },
     { label: t('nav.analytics'), path: '/admin/analytics', icon: <Activity className="w-5 h-5 text-emerald-400" /> },
     { label: t('nav.notifications'), path: '/admin/notifications', icon: <Bell className="w-5 h-5 text-orange-400" /> },
-    { label: t('nav.reports'), path: '/admin/reports', icon: <FileText className="w-5 h-5 text-indigo-400" /> },
+    { label: t('nav.reports'), path: '/admin/reports', icon: <FileDown className="w-5 h-5 text-indigo-400" /> },
     { label: t('nav.profile'), path: '/admin/profile', icon: <User className="w-5 h-5 text-emerald-400" /> }
   ];
 

@@ -11,6 +11,7 @@ import {
   Clock,
   Bell,
   FileText,
+  FileDown,
   User,
   LogOut,
   Sparkles,
@@ -126,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role }) => {
         {
           label: t('nav.reports'),
           path: '/admin/reports',
-          icon: <FileText className="w-5 h-5" />,
+          icon: <FileDown className="w-5 h-5" />,
           activeGradient: 'bg-gradient-to-r from-indigo-600 to-blue-700 text-white shadow-lg shadow-indigo-500/30 border-l-4 border-cyan-300',
           badge: null
         },
