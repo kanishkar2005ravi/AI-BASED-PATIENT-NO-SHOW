@@ -455,104 +455,39 @@ export const PatientDashboard: React.FC = () => {
         </Card>
 
         {/* Card 2: Platform App Features */}
-        <Card
-          title="CarePilot Platform App Features"
-          action={
+        <Card title="CarePilot Platform App Features">
+          <div className="space-y-4 text-xs">
+            <p className="text-slate-600 font-medium leading-relaxed">
+              Explore CarePilot's smart AI scheduling system, automated Multi-Channel Gmail & WhatsApp notifications, phone helpline booking, and real-time waitlist auto-reallocation.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2 font-bold text-[11px]">
+              <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center space-x-2">
+                <span>📩</span>
+                <span>Gmail & WhatsApp</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 flex items-center space-x-2">
+                <span>📞</span>
+                <span>Phone Booking</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center space-x-2">
+                <span>🤖</span>
+                <span>AI No-Show Analytics</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center space-x-2">
+                <span>⚡</span>
+                <span>Priority Care</span>
+              </div>
+            </div>
+
             <button
               onClick={() => setShowFeaturesModal(true)}
-              className="text-xs font-black text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3 py-1 rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-700 hover:from-teal-700 hover:to-emerald-800 text-white font-black text-xs transition-all shadow-md hover:shadow-lg hover:scale-[1.01] flex items-center justify-center space-x-2 cursor-pointer border border-teal-400/30 group mt-2"
             >
-              <Sparkles className="w-3.5 h-3.5" /> View Details
+              <Sparkles className="w-4 h-4 text-amber-300 animate-pulse group-hover:rotate-12 transition-transform" />
+              <span>View More App Features & System Details</span>
+              <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
             </button>
-          }
-        >
-          <div className="space-y-3 text-xs">
-            <div className="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-start space-x-3">
-              <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
-                📩
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-extrabold text-slate-900 text-xs">Instant Gmail & WhatsApp Alerts</p>
-                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-200 text-emerald-900">Live</span>
-                </div>
-                <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
-                  Receive instant notifications via Email & WhatsApp for Account Creation, Slot Booking, Cancellations, Rescheduling & Waitlist Confirmations.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-blue-50/70 border border-blue-200/80 flex items-start space-x-3">
-              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
-                📞
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-extrabold text-slate-900 text-xs">Phone Call Booking (Limited Slots)</p>
-                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-blue-200 text-blue-900">1st Priority</span>
-                </div>
-                <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
-                  Telephone booking helpline for non-smartphone users with reserved limited slots assigned on a strict First Come, First Served priority.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-start space-x-3">
-              <div className="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
-                🤖
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-extrabold text-slate-900 text-xs">AI No-Show Risk Prediction</p>
-                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-200 text-amber-900">XGBoost</span>
-                </div>
-                <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
-                  Machine learning model analyzes attendance probability to optimize schedule slotting & dispatch smart pre-visit reminders.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-rose-50/70 border border-rose-200/80 flex items-start space-x-3">
-              <div className="w-8 h-8 rounded-xl bg-rose-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
-                ⚡
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-extrabold text-slate-900 text-xs">Urgent Priority Faculty Consults</p>
-                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-rose-200 text-rose-900">Admin Verified</span>
-                </div>
-                <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
-                  Request urgent faculty specialist consultations when regular slots are full with instant admin verification & confirmation.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-purple-50/70 border border-purple-200/80 flex items-start space-x-3">
-              <div className="w-8 h-8 rounded-xl bg-purple-600 text-white font-black flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">
-                🔄
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-extrabold text-slate-900 text-xs">Smart Auto-Fill Waitlist Queue</p>
-                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-purple-200 text-purple-900">Real-Time</span>
-                </div>
-                <p className="text-slate-600 text-[11px] font-medium leading-tight mt-0.5">
-                  Automatically reallocates cancelled appointment slots to highest-priority waitlisted patients in real time.
-                </p>
-              </div>
-            </div>
-
-            {/* Click for Full Features Overview Banner */}
-            <div
-              onClick={() => setShowFeaturesModal(true)}
-              className="p-3 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-extrabold text-xs flex items-center justify-between shadow-md hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer mt-3"
-            >
-              <div className="flex items-center space-x-2">
-                <Sparkles className="w-4 h-4 text-amber-200 animate-pulse" />
-                <span>Click here for Full System Features & Capabilities Details</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-white" />
-            </div>
           </div>
         </Card>
       </div>
