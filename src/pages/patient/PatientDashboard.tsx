@@ -182,51 +182,141 @@ export const PatientDashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* 📊 SIMPLE SIDE-BY-SIDE SQUARE METRIC BOXES 📊 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* 📊 ANIMATED CIRCULAR PROGRESS METRIC BOXES 📊 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Box 1: Total Visits */}
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[96px]">
-          <div className="p-2 rounded-lg bg-teal-50 text-teal-600 border border-teal-100">
-            <Calendar className="w-4 h-4" />
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex items-center space-x-3.5 min-h-[100px] group">
+          <div className="relative w-13 h-13 flex-shrink-0 flex items-center justify-center">
+            <svg className="w-13 h-13 transform -rotate-90" viewBox="0 0 52 52">
+              <circle cx="26" cy="26" r="22" stroke="currentColor" strokeWidth="4" className="text-teal-100/80" fill="transparent" />
+              <circle
+                cx="26"
+                cy="26"
+                r="22"
+                stroke="currentColor"
+                strokeWidth="4"
+                strokeDasharray={138.2}
+                strokeDashoffset={0}
+                strokeLinecap="round"
+                className="text-teal-500 transition-all duration-1000 ease-out group-hover:scale-105"
+                fill="transparent"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center text-teal-600 bg-teal-50/60 rounded-full m-1 border border-teal-200/60 shadow-xs">
+              <Calendar className="w-5 h-5" />
+            </div>
           </div>
           <div className="space-y-0.5">
-            <p className="text-xl font-black text-slate-900 leading-none">{appointments.length}</p>
+            <p className="text-2xl font-black text-slate-900 leading-none">{appointments.length}</p>
             <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">{t('metric.total_visits')}</p>
+            <span className="inline-block text-[9px] font-extrabold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/50">100% Tracked</span>
           </div>
         </div>
 
         {/* Box 2: Attended Visits */}
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[96px]">
-          <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
-            <UserCheck className="w-4 h-4" />
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-xl font-black text-emerald-600 leading-none">{attendedCount}</p>
-            <p className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider">{t('metric.attended')}</p>
-          </div>
-        </div>
+        {(() => {
+          const attendedPct = appointments.length > 0 ? Math.round((attendedCount / appointments.length) * 100) : 100;
+          const offset = 138.2 - (138.2 * (attendedPct / 100));
+          return (
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex items-center space-x-3.5 min-h-[100px] group">
+              <div className="relative w-13 h-13 flex-shrink-0 flex items-center justify-center">
+                <svg className="w-13 h-13 transform -rotate-90" viewBox="0 0 52 52">
+                  <circle cx="26" cy="26" r="22" stroke="currentColor" strokeWidth="4" className="text-emerald-100/80" fill="transparent" />
+                  <circle
+                    cx="26"
+                    cy="26"
+                    r="22"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeDasharray={138.2}
+                    strokeDashoffset={offset}
+                    strokeLinecap="round"
+                    className="text-emerald-500 transition-all duration-1000 ease-out group-hover:scale-105"
+                    fill="transparent"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-emerald-600 bg-emerald-50/60 rounded-full m-1 border border-emerald-200/60 shadow-xs">
+                  <UserCheck className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-2xl font-black text-emerald-600 leading-none">{attendedCount}</p>
+                <p className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider">{t('metric.attended')}</p>
+                <span className="inline-block text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/50">{attendedPct}% Success Rate</span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Box 3: Missed Visits */}
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[96px]">
-          <div className="p-2 rounded-lg bg-rose-50 text-rose-600 border border-rose-100">
-            <AlertCircle className="w-4 h-4" />
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-xl font-black text-rose-600 leading-none">{noShowCount}</p>
-            <p className="text-[11px] font-bold text-rose-900 uppercase tracking-wider">{t('metric.missed')}</p>
-          </div>
-        </div>
+        {(() => {
+          const missedPct = appointments.length > 0 ? Math.round((noShowCount / appointments.length) * 100) : 0;
+          const offset = 138.2 - (138.2 * (missedPct / 100));
+          return (
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-rose-400 transition-all flex items-center space-x-3.5 min-h-[100px] group">
+              <div className="relative w-13 h-13 flex-shrink-0 flex items-center justify-center">
+                <svg className="w-13 h-13 transform -rotate-90" viewBox="0 0 52 52">
+                  <circle cx="26" cy="26" r="22" stroke="currentColor" strokeWidth="4" className="text-rose-100/80" fill="transparent" />
+                  <circle
+                    cx="26"
+                    cy="26"
+                    r="22"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeDasharray={138.2}
+                    strokeDashoffset={offset}
+                    strokeLinecap="round"
+                    className="text-rose-500 transition-all duration-1000 ease-out group-hover:scale-105"
+                    fill="transparent"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-rose-600 bg-rose-50/60 rounded-full m-1 border border-rose-200/60 shadow-xs">
+                  <AlertCircle className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-2xl font-black text-rose-600 leading-none">{noShowCount}</p>
+                <p className="text-[11px] font-bold text-rose-900 uppercase tracking-wider">{t('metric.missed')}</p>
+                <span className="inline-block text-[9px] font-extrabold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/50">{missedPct}% Missed Rate</span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Box 4: Waitlist Requests */}
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[96px]">
-          <div className="p-2 rounded-lg bg-purple-50 text-purple-600 border border-purple-100">
-            <Clock className="w-4 h-4" />
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-xl font-black text-purple-600 leading-none">{waitlist.length}</p>
-            <p className="text-[11px] font-bold text-purple-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
-          </div>
-        </div>
+        {(() => {
+          const waitlistPct = waitlist.length > 0 ? 100 : 15;
+          const offset = 138.2 - (138.2 * (waitlistPct / 100));
+          return (
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex items-center space-x-3.5 min-h-[100px] group">
+              <div className="relative w-13 h-13 flex-shrink-0 flex items-center justify-center">
+                <svg className="w-13 h-13 transform -rotate-90 animate-spin-slow" viewBox="0 0 52 52">
+                  <circle cx="26" cy="26" r="22" stroke="currentColor" strokeWidth="4" className="text-purple-100/80" fill="transparent" />
+                  <circle
+                    cx="26"
+                    cy="26"
+                    r="22"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeDasharray={138.2}
+                    strokeDashoffset={offset}
+                    strokeLinecap="round"
+                    className="text-purple-500 transition-all duration-1000 ease-out group-hover:scale-105"
+                    fill="transparent"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-purple-600 bg-purple-50/60 rounded-full m-1 border border-purple-200/60 shadow-xs">
+                  <Clock className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-2xl font-black text-purple-600 leading-none">{waitlist.length}</p>
+                <p className="text-[11px] font-bold text-purple-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
+                <span className="inline-block text-[9px] font-extrabold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200/50">{waitlist.length > 0 ? 'Active Queue' : 'Queue Idle'}</span>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* 🎟️ HERO FEATURED MEDICAL BOARDING PASS (NEXT APPOINTMENT) 🎟️ */}
@@ -244,8 +334,14 @@ export const PatientDashboard: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-teal-400 to-emerald-500 text-slate-950 font-black text-2xl flex items-center justify-center shadow-lg border-2 border-white/20">
-                {nextAppointment.doctorName.replace('Dr. ', '').charAt(0)}
+              <div className="relative w-16 h-16 flex items-center justify-center flex-shrink-0">
+                <svg className="w-16 h-16 transform -rotate-90 absolute inset-0" viewBox="0 0 64 64">
+                  <circle cx="32" cy="32" r="28" stroke="rgba(20, 184, 166, 0.3)" strokeWidth="4" fill="transparent" />
+                  <circle cx="32" cy="32" r="28" stroke="#2DD4BF" strokeWidth="4" strokeDasharray={175.9} strokeDashoffset={25} strokeLinecap="round" className="animate-pulse" fill="transparent" />
+                </svg>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-teal-400 to-emerald-500 text-slate-950 font-black text-2xl flex items-center justify-center shadow-lg border-2 border-white/20">
+                  {nextAppointment.doctorName.replace('Dr. ', '').charAt(0)}
+                </div>
               </div>
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-teal-300 bg-teal-950/60 px-2.5 py-0.5 rounded-full border border-teal-500/30">
@@ -297,15 +393,21 @@ export const PatientDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* 📦 SQUARE ACTION BOXES: QUICK ACTIONS & MODAL TRIGGER 📦 */}
+      {/* 📦 SQUARE ACTION BOXES WITH CIRCULAR ANIMATION RINGS 📦 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Box 1: Book Appointment */}
           <div
             onClick={() => navigate('/patient/book')}
             className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col items-center justify-center gap-2.5 text-center min-h-[120px] cursor-pointer group"
           >
-            <div className="p-3 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 group-hover:scale-110 transition-transform">
-              <CalendarPlus className="w-6 h-6" />
+            <div className="relative w-12 h-12 flex items-center justify-center">
+              <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" className="text-amber-100" fill="transparent" />
+                <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" strokeDasharray={125.6} strokeDashoffset={25} strokeLinecap="round" className="text-amber-500 group-hover:rotate-180 transition-transform duration-700" fill="transparent" />
+              </svg>
+              <div className="p-2.5 rounded-full bg-amber-50 text-amber-600 group-hover:scale-110 transition-transform">
+                <CalendarPlus className="w-5 h-5" />
+              </div>
             </div>
             <div>
               <p className="text-xs font-black text-slate-900 leading-tight">{t('nav.book_appointment')}</p>
@@ -313,13 +415,19 @@ export const PatientDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Box 2: Available Faculty Physicians (Opens Modal) */}
+          {/* Box 2: Available Faculty Physicians */}
           <div
             onClick={() => setShowAllDoctorsModal(true)}
             className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center gap-2.5 text-center min-h-[120px] cursor-pointer group"
           >
-            <div className="p-3 rounded-xl bg-teal-50 text-teal-600 border border-teal-100 group-hover:scale-110 transition-transform">
-              <Stethoscope className="w-6 h-6" />
+            <div className="relative w-12 h-12 flex items-center justify-center">
+              <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" className="text-teal-100" fill="transparent" />
+                <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" strokeDasharray={125.6} strokeDashoffset={15} strokeLinecap="round" className="text-teal-500 group-hover:rotate-180 transition-transform duration-700" fill="transparent" />
+              </svg>
+              <div className="p-2.5 rounded-full bg-teal-50 text-teal-600 group-hover:scale-110 transition-transform">
+                <Stethoscope className="w-5 h-5" />
+              </div>
             </div>
             <div>
               <p className="text-xs font-black text-slate-900 leading-tight">{t('dashboard.available_doctors')}</p>
@@ -332,8 +440,14 @@ export const PatientDashboard: React.FC = () => {
             onClick={() => navigate('/patient/appointments')}
             className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 transition-all flex flex-col items-center justify-center gap-2.5 text-center min-h-[120px] cursor-pointer group"
           >
-            <div className="p-3 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 group-hover:scale-110 transition-transform">
-              <CalendarCheck className="w-6 h-6" />
+            <div className="relative w-12 h-12 flex items-center justify-center">
+              <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" className="text-indigo-100" fill="transparent" />
+                <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" strokeDasharray={125.6} strokeDashoffset={35} strokeLinecap="round" className="text-indigo-500 group-hover:rotate-180 transition-transform duration-700" fill="transparent" />
+              </svg>
+              <div className="p-2.5 rounded-full bg-indigo-50 text-indigo-600 group-hover:scale-110 transition-transform">
+                <CalendarCheck className="w-5 h-5" />
+              </div>
             </div>
             <div>
               <p className="text-xs font-black text-slate-900 leading-tight">{t('dashboard.history_title')}</p>
@@ -346,8 +460,14 @@ export const PatientDashboard: React.FC = () => {
             onClick={() => navigate('/patient/waitlist')}
             className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center gap-2.5 text-center min-h-[120px] cursor-pointer group"
           >
-            <div className="p-3 rounded-xl bg-purple-50 text-purple-600 border border-purple-100 group-hover:scale-110 transition-transform">
-              <Clock className="w-6 h-6" />
+            <div className="relative w-12 h-12 flex items-center justify-center">
+              <svg className="w-12 h-12 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" className="text-purple-100" fill="transparent" />
+                <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" strokeDasharray={125.6} strokeDashoffset={20} strokeLinecap="round" className="text-purple-500 group-hover:rotate-180 transition-transform duration-700" fill="transparent" />
+              </svg>
+              <div className="p-2.5 rounded-full bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform">
+                <Clock className="w-5 h-5" />
+              </div>
             </div>
             <div>
               <p className="text-xs font-black text-slate-900 leading-tight">{t('nav.waitlist')}</p>
