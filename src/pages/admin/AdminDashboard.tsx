@@ -535,7 +535,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 pt-1">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 <span className="flex items-center gap-1">
-                  Action: Email <Mail className="w-3 h-3 inline text-emerald-600" /> & WhatsApp <MessageSquare className="w-3 h-3 inline text-emerald-600" /> Reminders
+                  Action: Email <Mail className="w-3 h-3 inline text-emerald-600" /> & WhatsApp <MessageSquare className="w-3 h-3 inline text-emerald-600" />
                 </span>
               </div>
             </div>
@@ -606,7 +606,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 pt-1">
                 <span className="w-2 h-2 rounded-full bg-amber-500" />
                 <span className="flex items-center gap-1">
-                  Action: Email <Mail className="w-3 h-3 inline text-amber-600" /> & WhatsApp <MessageSquare className="w-3 h-3 inline text-amber-600" /> Verification
+                  Action: Email <Mail className="w-3 h-3 inline text-amber-600" /> & WhatsApp <MessageSquare className="w-3 h-3 inline text-amber-600" />
                 </span>
               </div>
             </div>
@@ -677,7 +677,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-rose-800 pt-1">
                 <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
                 <span className="flex items-center gap-1">
-                  Action: Priority Email <Mail className="w-3 h-3 inline text-rose-600" />, WhatsApp Alert <MessageSquare className="w-3 h-3 inline text-rose-600" /> & Nurse Call <PhoneCall className="w-3 h-3 inline text-rose-600" />
+                  Action: Email <Mail className="w-3 h-3 inline text-rose-600" /> & WhatsApp <MessageSquare className="w-3 h-3 inline text-rose-600" />
                 </span>
               </div>
             </div>
