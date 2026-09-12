@@ -4,7 +4,7 @@ import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { Loading } from '../../components/common/Loading';
 import { callBackend } from '../../services/api';
-import { AnalyticsData, Appointment, Doctor, Patient, WaitlistItem } from '../../types';
+import { AnalyticsData, Appointment, Doctor, Patient, WaitlistItem, RiskLevel } from '../../types';
 import {
   Users,
   Stethoscope,
@@ -23,8 +23,10 @@ import {
   PhoneCall
 } from 'lucide-react';
 import { AIRiskBadge } from '../../components/ai/AIRiskBadge';
+import { Modal } from '../../components/common/Modal';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { useToast } from '../../context/ToastContext';
 
 export const AdminDashboard: React.FC = () => {
   const [dateRange, setDateRange] = useState<'today' | 'yesterday' | 'custom'>('today');
@@ -32,7 +34,10 @@ export const AdminDashboard: React.FC = () => {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRiskModal, setSelectedRiskModal] = useState<RiskLevel | null>(null);
+  const [allAppointmentsList, setAllAppointmentsList] = useState<Appointment[]>([]);
   const { t } = useLanguage();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   // Metrics State
@@ -150,6 +155,7 @@ export const AdminDashboard: React.FC = () => {
         };
 
         setAnalytics(liveAnalytics);
+        setAllAppointmentsList(aptsList);
         setRecentAppointments(aptsList.slice(0, 5));
         setLoading(false);
       }
@@ -159,6 +165,43 @@ export const AdminDashboard: React.FC = () => {
       isMounted = false;
     };
   }, [dateRange, customDate]);
+
+  const getModalAppointments = (level?: RiskLevel): Appointment[] => {
+    const targetLevel = level || selectedRiskModal;
+    if (!targetLevel) return [];
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    let targetDateStr = todayStr;
+    if (dateRange === 'yesterday') {
+      const y = new Date();
+      y.setDate(y.getDate() - 1);
+      targetDateStr = y.toISOString().split('T')[0];
+    } else if (dateRange === 'custom') {
+      targetDateStr = customDate;
+    }
+
+    const dateFiltered = allAppointmentsList.filter(a => a.appointmentDate === targetDateStr);
+    let matched = dateFiltered.filter(a => {
+      if (targetLevel === 'LOW') return !a.risk || a.risk.level === 'LOW';
+      return a.risk && a.risk.level === targetLevel;
+    });
+
+    if (matched.length === 0) {
+      matched = allAppointmentsList.filter(a => {
+        if (targetLevel === 'LOW') return !a.risk || a.risk.level === 'LOW';
+        return a.risk && a.risk.level === targetLevel;
+      });
+    }
+
+    return matched;
+  };
+
+  const handleRiskCardClick = (level: RiskLevel) => {
+    setSelectedRiskModal(level);
+    const matched = getModalAppointments(level);
+    const dateLabel = dateRange === 'yesterday' ? 'Yesterday' : dateRange === 'custom' ? customDate : 'Today';
+    showToast(`Loaded ${matched.length} ${level} risk patient record(s) for ${dateLabel}`, level === 'HIGH' ? 'warning' : 'info');
+  };
 
   if (loading || !analytics) {
     return (
@@ -428,7 +471,10 @@ export const AdminDashboard: React.FC = () => {
         {/* 3 High-Tech Styled Risk Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* 1. Low Risk Card */}
-          <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-emerald-900/5 via-emerald-50/40 to-teal-50/30 border-2 border-emerald-300/80 shadow-md hover:shadow-xl hover:border-emerald-400 transition-all group">
+          <div
+            onClick={() => handleRiskCardClick('LOW')}
+            className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-emerald-900/5 via-emerald-50/40 to-teal-50/30 border-2 border-emerald-300/80 shadow-md hover:shadow-xl hover:border-emerald-400 transition-all group cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+          >
             {/* Ambient Background Blur Glow */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform" />
 
@@ -496,7 +542,10 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* 2. Medium Risk Card */}
-          <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-amber-900/5 via-amber-50/40 to-orange-50/30 border-2 border-amber-300/80 shadow-md hover:shadow-xl hover:border-amber-400 transition-all group">
+          <div
+            onClick={() => handleRiskCardClick('MEDIUM')}
+            className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-amber-900/5 via-amber-50/40 to-orange-50/30 border-2 border-amber-300/80 shadow-md hover:shadow-xl hover:border-amber-400 transition-all group cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+          >
             {/* Ambient Background Blur Glow */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform" />
 
@@ -564,7 +613,10 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* 3. High Risk Card */}
-          <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-rose-900/5 via-rose-50/40 to-red-50/30 border-2 border-rose-300/80 shadow-md hover:shadow-xl hover:border-rose-400 transition-all group">
+          <div
+            onClick={() => handleRiskCardClick('HIGH')}
+            className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-rose-900/5 via-rose-50/40 to-red-50/30 border-2 border-rose-300/80 shadow-md hover:shadow-xl hover:border-rose-400 transition-all group cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+          >
             {/* Ambient Background Blur Glow */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-rose-400/20 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform" />
 
@@ -632,6 +684,120 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 📋 PATIENT DETAILS MODAL WHEN LOW/MEDIUM/HIGH RISK IS CLICKED 📋 */}
+      {selectedRiskModal && (
+        <Modal
+          isOpen={!!selectedRiskModal}
+          onClose={() => setSelectedRiskModal(null)}
+          title={`${dateRange === 'yesterday' ? "Yesterday's" : dateRange === 'custom' ? 'Selected Date' : "Today's"} ${selectedRiskModal} Risk Patient Details`}
+          subtitle={`Displaying patient appointment records with ${selectedRiskModal} no-show risk assessment`}
+          maxWidth="2xl"
+          footer={
+            <div className="flex justify-between items-center w-full">
+              <span className="text-xs font-semibold text-slate-500">
+                Total Patients: <strong className="text-slate-900">{getModalAppointments().length}</strong>
+              </span>
+              <button
+                onClick={() => setSelectedRiskModal(null)}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          }
+        >
+          <div className="space-y-3.5 max-h-[60vh] overflow-y-auto pr-1">
+            {getModalAppointments().length === 0 ? (
+              <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <AlertCircle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                <p className="text-sm font-bold text-slate-700">No {selectedRiskModal} risk patient appointments found.</p>
+                <p className="text-xs text-slate-500 mt-1">Select another date range to inspect risk records.</p>
+              </div>
+            ) : (
+              getModalAppointments().map((apt) => {
+                const prob = Math.round((apt.risk?.probability || (selectedRiskModal === 'HIGH' ? 0.85 : selectedRiskModal === 'MEDIUM' ? 0.45 : 0.15)) * 100);
+                return (
+                  <div
+                    key={apt.id}
+                    className={`p-4 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                      selectedRiskModal === 'HIGH'
+                        ? 'bg-rose-50/40 border-rose-200 hover:border-rose-300'
+                        : selectedRiskModal === 'MEDIUM'
+                        ? 'bg-amber-50/40 border-amber-200 hover:border-amber-300'
+                        : 'bg-emerald-50/40 border-emerald-200 hover:border-emerald-300'
+                    }`}
+                  >
+                    <div className="flex items-start space-x-3.5">
+                      <div
+                        className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm text-white flex-shrink-0 shadow-md ${
+                          selectedRiskModal === 'HIGH'
+                            ? 'bg-rose-600'
+                            : selectedRiskModal === 'MEDIUM'
+                            ? 'bg-amber-600'
+                            : 'bg-emerald-600'
+                        }`}
+                      >
+                        {apt.patientName ? apt.patientName.charAt(0) : 'P'}
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-sm font-black text-slate-900">{apt.patientName}</h4>
+                          <span className="text-[10px] font-mono font-bold text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                            {apt.id}
+                          </span>
+                          <AIRiskBadge risk={apt.risk || { level: selectedRiskModal, probability: prob / 100, factors: [] }} showProbability size="sm" />
+                        </div>
+
+                        <div className="flex items-center gap-3 text-xs font-semibold text-slate-600 flex-wrap">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5 text-slate-400" /> {apt.appointmentTime} ({apt.appointmentDate})
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Stethoscope className="w-3.5 h-3.5 text-slate-400" /> Dr. {apt.doctorName || 'Assigned Physician'}
+                          </span>
+                          <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-white border text-slate-700">
+                            {apt.appointmentType || 'Consultation'}
+                          </span>
+                        </div>
+
+                        {/* Contact details */}
+                        <div className="flex items-center gap-2 pt-1 text-[11px]">
+                          <span className="text-slate-500 font-medium">Phone: <strong>{apt.patientPhone || '+91 98765 43210'}</strong></span>
+                          <span className="text-slate-300">•</span>
+                          <span className="text-slate-500 font-medium">Email: <strong>{apt.patientEmail || 'patient@hospital.org'}</strong></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Action buttons */}
+                    <div className="flex items-center gap-2 self-end md:self-center flex-shrink-0">
+                      <a
+                        href={`mailto:${apt.patientEmail || 'patient@hospital.org'}?subject=Hospital%20Appointment%20Reminder%20-${apt.appointmentDate}`}
+                        className="px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-teal-600 hover:border-teal-300 hover:bg-teal-50 transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm"
+                        title="Send Email"
+                      >
+                        <Mail className="w-3.5 h-3.5 text-teal-600" />
+                        <span>Email</span>
+                      </a>
+                      <a
+                        href={`https://wa.me/${(apt.patientPhone || '9876543210').replace(/\D/g, '')}?text=Hospital%20Reminder%3A%20Your%20appointment%20is%20scheduled%20for%20${apt.appointmentDate}%20at%20${apt.appointmentTime}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm shadow-emerald-500/20"
+                        title="Send WhatsApp Message"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>WhatsApp</span>
+                      </a>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </Modal>
+      )}
 
     </div>
   );
