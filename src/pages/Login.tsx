@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserRole } from '../types';
-import { Lock, Mail, ShieldCheck, UserCheck, AlertCircle, Activity } from 'lucide-react';
+import { Lock, Mail, ShieldCheck, UserCheck, AlertCircle, Activity, Sparkles } from 'lucide-react';
 import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
 import { CarePilotLogo } from '../components/common/CarePilotLogo';
@@ -12,6 +12,11 @@ export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showIntro, setShowIntro] = useState(false);
+  const [introProgress, setIntroProgress] = useState(0);
+  const [introStatusText, setIntroStatusText] = useState('Authenticating Secure Credentials...');
+  const [targetRoute, setTargetRoute] = useState('');
+
   const { login, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -47,20 +52,104 @@ export const Login: React.FC = () => {
 
     const res = await login(role, cleanInput, cleanPass);
     if (res.success) {
-      if (role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/patient/dashboard');
-      }
+      const destination = role === 'admin' ? '/admin/dashboard' : '/patient/dashboard';
+      setTargetRoute(destination);
+      setShowIntro(true);
     } else {
       setError(res.message || 'Invalid credentials. Please check your Patient ID/Email and password.');
     }
   };
 
+  // 3-Second High-Tech Intro Animation Timer
+  useEffect(() => {
+    if (!showIntro) return;
+
+    setIntroProgress(10);
+    setIntroStatusText('🔑 Authenticating Secure Credentials...');
+
+    const step1 = setTimeout(() => {
+      setIntroProgress(45);
+      setIntroStatusText('⚡ Initializing AI Predictive Health Engine...');
+    }, 1000);
+
+    const step2 = setTimeout(() => {
+      setIntroProgress(85);
+      setIntroStatusText('✨ Launching CarePilot Smart Portal...');
+    }, 2000);
+
+    const step3 = setTimeout(() => {
+      setIntroProgress(100);
+      navigate(targetRoute);
+    }, 3000);
+
+    return () => {
+      clearTimeout(step1);
+      clearTimeout(step2);
+      clearTimeout(step3);
+    };
+  }, [showIntro, targetRoute, navigate]);
+
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden selection:bg-teal-500 selection:text-white">
-      {/* Dynamic Animated Cross-Rotating Oval Orbits (Patient Dashboard & Atomic Design) */}
-      {/* Oval Orbit 1 (Tilted -35deg, Rotating Clockwise) */}
+      
+      {/* 3-Second High-Tech Animated Intro Overlay (Triggered on Successful Login) */}
+      {showIntro && (
+        <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center animate-fadeIn">
+          {/* Central High-Tech Cross-Rotating Energy Rings */}
+          <div className="relative w-72 h-72 flex items-center justify-center mb-8">
+            {/* Outer Oval Orbit 1 */}
+            <div className="absolute inset-0 w-full h-full pointer-events-none -rotate-[35deg]">
+              <svg className="w-full h-full animate-spin-slow" viewBox="0 0 300 300">
+                <ellipse cx="150" cy="150" rx="140" ry="70" stroke="url(#intro-grad-1)" strokeWidth="3" strokeDasharray="16 12" fill="none" />
+                <defs>
+                  <linearGradient id="intro-grad-1" x1="0" y1="0" x2="300" y2="300">
+                    <stop offset="0%" stopColor="#f59e0b" />
+                    <stop offset="50%" stopColor="#0d9488" />
+                    <stop offset="100%" stopColor="#8b5cf6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+
+            {/* Inner Oval Orbit 2 */}
+            <div className="absolute inset-0 w-full h-full pointer-events-none rotate-[45deg]">
+              <svg className="w-full h-full animate-spin-reverse" viewBox="0 0 300 300">
+                <ellipse cx="150" cy="150" rx="125" ry="60" stroke="#0d9488" strokeWidth="2.5" strokeDasharray="12 10" fill="none" />
+              </svg>
+            </div>
+
+            {/* Glowing Pulse Ring */}
+            <div className="absolute w-44 h-44 rounded-full bg-teal-500/20 blur-xl animate-pulse" />
+
+            {/* Center CarePilot Brand Logo */}
+            <div className="relative z-10 p-5 rounded-3xl bg-slate-900/80 border border-teal-500/40 shadow-2xl shadow-teal-500/30 flex flex-col items-center justify-center">
+              <CarePilotLogo size="md" textLight={true} />
+            </div>
+          </div>
+
+          {/* Intro Status Messaging */}
+          <div className="max-w-md w-full space-y-4">
+            <div className="flex items-center justify-center gap-2 text-teal-400 font-extrabold text-sm tracking-wider uppercase">
+              <Activity className="w-4 h-4 animate-pulse" />
+              <span>{introStatusText}</span>
+            </div>
+
+            {/* 3-Second Animated Progress Bar */}
+            <div className="w-full bg-slate-800/80 rounded-full h-2.5 p-0.5 border border-slate-700/60 overflow-hidden shadow-inner">
+              <div
+                className="bg-gradient-to-r from-amber-500 via-teal-400 to-purple-500 h-full rounded-full transition-all duration-300 shadow-md shadow-teal-500/50"
+                style={{ width: `${introProgress}%` }}
+              />
+            </div>
+
+            <p className="text-xs text-slate-400 font-semibold tracking-wide">
+              Preparing your personalized healthcare dashboard experience...
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Animated Cross-Rotating Oval Orbits (Patient Dashboard Aesthetic) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[480px] pointer-events-none opacity-45 -rotate-[35deg] animate-oval-glow">
         <svg className="w-full h-full animate-spin-slow" viewBox="0 0 850 480" fill="none">
           <ellipse cx="425" cy="240" rx="400" ry="210" stroke="url(#oval-grad-1)" strokeWidth="2.5" strokeDasharray="18 14" />
@@ -79,7 +168,6 @@ export const Login: React.FC = () => {
         </svg>
       </div>
 
-      {/* Oval Orbit 2 (Crossly Tilted +45deg, Rotating Counter-Clockwise) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[440px] pointer-events-none opacity-40 rotate-[45deg] animate-oval-glow">
         <svg className="w-full h-full animate-spin-reverse" viewBox="0 0 800 440" fill="none">
           <ellipse cx="400" cy="220" rx="370" ry="190" stroke="url(#oval-grad-3)" strokeWidth="2.5" strokeDasharray="22 16" strokeLinecap="round" />
@@ -94,43 +182,28 @@ export const Login: React.FC = () => {
         </svg>
       </div>
 
-      {/* Oval Orbit 3 (Third Cross Angle -75deg, Rotating Clockwise) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[380px] pointer-events-none opacity-30 -rotate-[75deg]">
         <svg className="w-full h-full animate-spin-slow" viewBox="0 0 720 380" fill="none">
           <ellipse cx="360" cy="190" rx="340" ry="160" stroke="#0d9488" strokeWidth="2" strokeDasharray="14 12" />
         </svg>
       </div>
 
-      {/* Background Multi-Color Glow (SNS Design Thinking Framework Palette) */}
+      {/* Background Multi-Color Glow */}
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none animate-circle-pulse" />
       <div className="absolute top-1/3 -right-40 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl pointer-events-none animate-circle-pulse" />
       <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl pointer-events-none animate-circle-pulse" />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 flex flex-col items-center">
-        {/* Brand Header with Patient Dashboard Animated Circular SVG Halo */}
-        <div className="relative mb-3 flex items-center justify-center">
-          <div className="absolute -inset-3 rounded-full bg-gradient-to-r from-amber-500 via-teal-500 to-purple-500 opacity-30 blur-md animate-pulse" />
-          <CarePilotLogo size="lg" textLight={true} />
-        </div>
-      </div>
-
       <div className="mt-4 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
-        {/* White Format Card with Crisp Line Border & Patient Dashboard Styling */}
+        {/* White Format Card with Crisp Line Border */}
         <div className="bg-white/95 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-3xl sm:px-10 border border-slate-200 hover:border-teal-300 transition-all">
           
-          {/* Hospital Header Badge with Animated Pulse Line */}
-          <div className="mb-6 p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-teal-500/10 to-purple-500/10 border border-slate-200 text-center relative overflow-hidden group">
+          {/* Replaced Hospital Badge with CarePilot Logo Header Card (As Requested) */}
+          <div className="mb-6 py-4 px-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-teal-500/10 to-purple-500/10 border border-slate-200/90 text-center flex flex-col items-center justify-center relative overflow-hidden group">
             <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-amber-500 via-teal-500 to-purple-500" />
-            <div className="flex items-center justify-center gap-2">
-              <Activity className="w-4 h-4 text-teal-600 animate-pulse" />
-              <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
-                SNS Medical College & Hospital
-              </h3>
-            </div>
-            <p className="text-[11px] text-teal-700 font-bold mt-0.5">Smart Patient & Clinic Scheduling Portal</p>
+            <CarePilotLogo size="lg" textLight={false} />
           </div>
 
-          {/* Patient Dashboard Style Role Selector with Animated Circular SVG Lines */}
+          {/* Role Selector with Animated Circular SVG Lines */}
           <div className="mb-6">
             <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">
               Select User Role
@@ -146,7 +219,6 @@ export const Login: React.FC = () => {
                     : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600 hover:bg-slate-50'
                 }`}
               >
-                {/* Circular SVG Progress Line (Dashboard Style) */}
                 <div className="relative w-10 h-10 flex items-center justify-center">
                   <svg className="w-10 h-10 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
                     <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-amber-100" fill="transparent" />
@@ -182,7 +254,6 @@ export const Login: React.FC = () => {
                     : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600 hover:bg-slate-50'
                 }`}
               >
-                {/* Circular SVG Progress Line (Dashboard Style) */}
                 <div className="relative w-10 h-10 flex items-center justify-center">
                   <svg className="w-10 h-10 transform -rotate-90 absolute inset-0" viewBox="0 0 48 48">
                     <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" className="text-teal-100" fill="transparent" />
@@ -256,7 +327,7 @@ export const Login: React.FC = () => {
 
         {/* Footer Note */}
         <p className="mt-4 text-center text-xs text-slate-400 font-medium">
-          CarePilot &copy; 2026. SNS Medical College & Hospital.
+          CarePilot &copy; 2026. All rights reserved.
         </p>
       </div>
     </div>
