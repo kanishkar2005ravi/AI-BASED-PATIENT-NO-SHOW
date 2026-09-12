@@ -586,33 +586,20 @@ export const Analytics: React.FC = () => {
       </div>
 
       {/* 🩺 HOSPITAL DOCTORS DIRECTORY & CSV DOWNLOAD SECTION 🩺 */}
-      <div className="rounded-2xl border-2 border-indigo-100/80 bg-gradient-to-br from-white via-indigo-50/20 to-teal-50/30 p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-indigo-100">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-gradient-to-r from-indigo-600 to-teal-600 text-white uppercase tracking-wider shadow-xs">
-                Staff Roster
-              </span>
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">
-                Hospital Doctors & Medical Specialists Directory
-              </h3>
-            </div>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              Complete active roster of hospital medical staff, departments, contact info, and status
-            </p>
-          </div>
-
+      <Card
+        title="Hospital Doctors Directory"
+        action={
           <button
             onClick={() => handleDownloadMetricReport('DOCTORS')}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-teal-600 to-emerald-600 hover:from-indigo-700 hover:via-teal-700 hover:to-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer transform hover:-translate-y-0.5 border border-teal-300/30 shrink-0"
+            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 via-teal-600 to-emerald-600 hover:from-indigo-700 hover:via-teal-700 hover:to-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer transform hover:-translate-y-0.5 border border-teal-300/30 shrink-0"
             title="Download Hospital Doctors Roster CSV"
           >
             <Download className="w-4 h-4 text-emerald-200 animate-pulse" />
             <span>Download Doctors CSV</span>
           </button>
-        </div>
-
-        <div className="overflow-x-auto rounded-xl border border-slate-200/80 shadow-xs bg-white">
+        }
+      >
+        <div className="overflow-x-auto rounded-xl border border-slate-200/80 shadow-xs bg-white mt-1">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-slate-200 font-black uppercase text-[10px] tracking-wider border-b border-slate-800">
@@ -671,7 +658,7 @@ export const Analytics: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
