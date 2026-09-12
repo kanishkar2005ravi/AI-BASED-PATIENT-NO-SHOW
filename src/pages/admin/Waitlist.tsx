@@ -44,21 +44,6 @@ export const Waitlist: React.FC = () => {
       <Header title="Automated Waitlist Recovery System" />
       <BackButton variant="admin" />
 
-      {/* Recovery Information Banner */}
-      <div className="bg-gradient-to-r from-teal-900 via-slate-900 to-teal-950 text-white p-6 rounded-3xl shadow-md">
-        <div className="flex items-start space-x-4">
-          <div className="p-3 bg-teal-500/20 rounded-2xl border border-teal-400/30 text-teal-300">
-            <Sparkles className="w-6 h-6 animate-pulse" />
-          </div>
-          <div>
-            <h3 className="text-lg font-black tracking-tight text-white">Smart Waitlist Auto-Recovery Workflow</h3>
-            <p className="text-xs text-teal-200 mt-1 max-w-2xl leading-relaxed">
-              When an appointment is cancelled, the system automatically scans active waitlisted patients, identifies the highest-priority match based on request date and position, dispatches an instant notification, and re-fills the slot upon patient confirmation.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <Card
         title="Active Waitlist Queue"
         action={
