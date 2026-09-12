@@ -4,7 +4,7 @@ import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { Loading } from '../../components/common/Loading';
 import { callBackend, isDemoMode } from '../../services/api';
-import { Appointment, ModelPerformance } from '../../types';
+import { Appointment, ModelPerformance, Patient, WaitlistItem } from '../../types';
 import { INITIAL_MODEL_PERFORMANCE } from '../../utils/mockData';
 import {
   Brain,
@@ -19,7 +19,9 @@ import {
   RefreshCw,
   XCircle,
   UserCheck,
-  ArrowUpRight
+  ArrowUpRight,
+  Users,
+  Clock
 } from 'lucide-react';
 import {
   BarChart,
@@ -41,10 +43,13 @@ export const Analytics: React.FC = () => {
   const { t } = useLanguage();
   const [modelPerf, setModelPerf] = useState<ModelPerformance | null>(null);
   const [aptMetrics, setAptMetrics] = useState({
+    totalPatients: 200,
     totalAppointments: 24,
     totalAttended: 18,
     totalCancelled: 4,
-    totalRescheduled: 2
+    totalRescheduled: 2,
+    totalMissed: 0,
+    totalWaitlistCount: 0
   });
   const [loading, setLoading] = useState(true);
   const demoActive = isDemoMode();
@@ -55,8 +60,10 @@ export const Analytics: React.FC = () => {
 
     Promise.all([
       callBackend({ action: 'GET_MODEL_PERFORMANCE' }),
-      callBackend({ action: 'GET_APPOINTMENTS', data: {} })
-    ]).then(([perfRes, aptsRes]) => {
+      callBackend({ action: 'GET_APPOINTMENTS', data: {} }),
+      callBackend({ action: 'GET_PATIENTS', data: {} }),
+      callBackend({ action: 'GET_WAITLIST', data: {} })
+    ]).then(([perfRes, aptsRes, patsRes, waitRes]) => {
       if (isMounted) {
         const perfData = (perfRes.success && perfRes.data && typeof perfRes.data.accuracy === 'number') 
           ? perfRes.data 
@@ -64,19 +71,26 @@ export const Analytics: React.FC = () => {
         setModelPerf(perfData);
 
         const aptsList: Appointment[] = (aptsRes.success && Array.isArray(aptsRes.data)) ? aptsRes.data : [];
-        if (aptsList.length > 0) {
-          const totalAppointments = aptsList.length;
-          const totalCancelled = aptsList.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length;
-          const totalRescheduled = aptsList.filter(a => a.status === 'RESCHEDULED').length;
-          const totalAttended = aptsList.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT').length;
+        const patsList: Patient[] = (patsRes.success && Array.isArray(patsRes.data)) ? patsRes.data : [];
+        const waitList: WaitlistItem[] = (waitRes.success && Array.isArray(waitRes.data)) ? waitRes.data : [];
 
-          setAptMetrics({
-            totalAppointments,
-            totalAttended,
-            totalCancelled,
-            totalRescheduled
-          });
-        }
+        const totalPatients = patsList.length > 0 ? patsList.length : 200;
+        const totalAppointments = aptsList.length > 0 ? aptsList.length : 24;
+        const totalCancelled = aptsList.filter(a => a.status === 'CANCELLED').length;
+        const totalRescheduled = aptsList.filter(a => a.status === 'RESCHEDULED').length;
+        const totalMissed = aptsList.filter(a => a.status === 'NO_SHOW').length;
+        const totalAttended = aptsList.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT').length;
+        const totalWaitlistCount = waitList.length;
+
+        setAptMetrics({
+          totalPatients,
+          totalAppointments,
+          totalAttended,
+          totalCancelled,
+          totalRescheduled,
+          totalMissed,
+          totalWaitlistCount
+        });
         setLoading(false);
       }
     });
@@ -132,9 +146,23 @@ export const Analytics: React.FC = () => {
         </div>
       )}
 
-      {/* 📊 TOP ROW: APPOINTMENT OUTCOME CARDS (TOTAL, ATTENDED, CANCELLED, RESCHEDULED) 📊 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* 1. Total Appointments */}
+      {/* 📊 OVERALL HOSPITAL SUMMARY METRICS (TOTAL PATIENTS, APPOINTMENTS, CANCELLED, RESCHEDULED, MISSED, WAITLIST) 📊 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* 1. Total Patients */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group">
+          <div>
+            <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_patients')}</p>
+            <h3 className="text-2xl font-black text-slate-900 mt-1">{aptMetrics.totalPatients}</h3>
+            <span className="inline-flex items-center text-[10px] font-bold text-amber-700 mt-1">
+              <ArrowUpRight className="w-3 h-3 mr-0.5" /> Live Records
+            </span>
+          </div>
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-amber-400/50">
+            <Users className="w-6 h-6" />
+          </div>
+        </div>
+
+        {/* 2. Total Appointments */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex items-center justify-between group">
           <div>
             <p className="text-[11px] font-extrabold text-teal-800 uppercase tracking-wider">{t('metric.total_appointments')}</p>
@@ -143,22 +171,8 @@ export const Analytics: React.FC = () => {
               <ArrowUpRight className="w-3 h-3 mr-0.5" /> Total Bookings
             </span>
           </div>
-          <div className="p-3 bg-teal-50 text-teal-600 rounded-2xl group-hover:scale-110 transition-transform">
+          <div className="p-3 bg-teal-50 text-teal-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-teal-400/50">
             <Calendar className="w-6 h-6" />
-          </div>
-        </div>
-
-        {/* 2. Total Attended */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex items-center justify-between group">
-          <div>
-            <p className="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider">{t('metric.total_attended')}</p>
-            <h3 className="text-2xl font-black text-emerald-600 mt-1">{aptMetrics.totalAttended}</h3>
-            <span className="inline-flex items-center text-[10px] font-bold text-emerald-700 mt-1">
-              Confirmed / Completed
-            </span>
-          </div>
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform">
-            <CheckCircle2 className="w-6 h-6" />
           </div>
         </div>
 
@@ -168,10 +182,10 @@ export const Analytics: React.FC = () => {
             <p className="text-[11px] font-extrabold text-rose-800 uppercase tracking-wider">{t('metric.total_cancelled')}</p>
             <h3 className="text-2xl font-black text-rose-600 mt-1">{aptMetrics.totalCancelled}</h3>
             <span className="inline-flex items-center text-[10px] font-bold text-rose-700 mt-1">
-              Cancelled / No-Show
+              Cancelled Slots
             </span>
           </div>
-          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl group-hover:scale-110 transition-transform">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-rose-400/50">
             <XCircle className="w-6 h-6" />
           </div>
         </div>
@@ -185,8 +199,36 @@ export const Analytics: React.FC = () => {
               Rescheduled Slots
             </span>
           </div>
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-blue-400/50">
             <RefreshCw className="w-6 h-6" />
+          </div>
+        </div>
+
+        {/* 5. Total Missed */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex items-center justify-between group">
+          <div>
+            <p className="text-[11px] font-extrabold text-purple-800 uppercase tracking-wider">{t('metric.total_missed')}</p>
+            <h3 className="text-2xl font-black text-purple-600 mt-1">{aptMetrics.totalMissed}</h3>
+            <span className="inline-flex items-center text-[10px] font-bold text-purple-700 mt-1">
+              No-Show Absences
+            </span>
+          </div>
+          <div className="p-3 bg-purple-50 text-purple-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-purple-400/50">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+        </div>
+
+        {/* 6. Total Waitlist */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex items-center justify-between group col-span-2 sm:col-span-1">
+          <div>
+            <p className="text-[11px] font-extrabold text-amber-800 uppercase tracking-wider">{t('metric.total_waitlist')}</p>
+            <h3 className="text-2xl font-black text-amber-600 mt-1">{aptMetrics.totalWaitlistCount}</h3>
+            <span className="inline-flex items-center text-[10px] font-bold text-amber-700 mt-1">
+              Entire Queue
+            </span>
+          </div>
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-full group-hover:scale-110 transition-transform animate-pulse ring-2 ring-amber-400/50">
+            <Clock className="w-6 h-6" />
           </div>
         </div>
       </div>
