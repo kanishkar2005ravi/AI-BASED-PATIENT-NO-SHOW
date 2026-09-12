@@ -541,6 +541,18 @@ export const PatientDashboard: React.FC = () => {
                 </p>
               </div>
             </div>
+
+            {/* Click for Full Features Overview Banner */}
+            <div
+              onClick={() => setShowFeaturesModal(true)}
+              className="p-3 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white font-extrabold text-xs flex items-center justify-between shadow-md hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer mt-3"
+            >
+              <div className="flex items-center space-x-2">
+                <Sparkles className="w-4 h-4 text-amber-200 animate-pulse" />
+                <span>Click here for Full System Features & Capabilities Details</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-white" />
+            </div>
           </div>
         </Card>
       </div>
