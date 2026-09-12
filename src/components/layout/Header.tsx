@@ -74,8 +74,19 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Center Title: Login CarePilot Logo Icon + SNS Medical College & Hospital (Circle-Square Squircle Border Badge) */}
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
+      {/* Center Title: Page Title Message FIRST, with SNS Medical College & Hospital Badge BELOW IT */}
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-2 space-y-1">
+        <p className="text-base md:text-lg font-black text-slate-900 leading-tight tracking-tight">
+          {title === 'Patient Dashboard' ? t('nav.dashboard') :
+           title === 'Admin Dashboard' || title === 'Admin Hospital Dashboard' || title === 'Hospital Overview & AI Intelligence' ? t('nav.dashboard') :
+           title === 'Book Consultation' || title === 'Book Appointment' ? t('nav.book_appointment') :
+           title === 'Patient Directory' || title === 'Patients' ? t('nav.patients') :
+           title === 'Physician Directory' || title === 'Doctors' ? t('nav.doctors') :
+           title === 'Appointments Schedule' || title === 'Appointments' || title === 'My Appointments' ? t('nav.appointments') :
+           title === 'Waitlist Queue' || title === 'Waitlist' ? t('nav.waitlist') :
+           title === 'Notifications' ? t('nav.notifications') :
+           title}
+        </p>
         <div className="p-0.5 rounded-[22px] bg-gradient-to-r from-amber-400 via-rose-500 via-purple-500 via-teal-400 to-emerald-400 shadow-lg shadow-teal-500/15 hover:shadow-teal-500/30 transition-all hover:scale-105">
           <button
             onClick={() => setShowAddressModal(true)}
@@ -89,17 +100,6 @@ export const Header: React.FC<HeaderProps> = ({
             <MapPin className="w-3.5 h-3.5 text-amber-400 group-hover:animate-bounce" />
           </button>
         </div>
-        <p className="text-base font-black text-slate-900 leading-tight mt-1.5">
-          {title === 'Patient Dashboard' ? t('nav.dashboard') :
-           title === 'Admin Dashboard' || title === 'Admin Hospital Dashboard' || title === 'Hospital Overview & AI Intelligence' ? t('nav.dashboard') :
-           title === 'Book Consultation' || title === 'Book Appointment' ? t('nav.book_appointment') :
-           title === 'Patient Directory' || title === 'Patients' ? t('nav.patients') :
-           title === 'Physician Directory' || title === 'Doctors' ? t('nav.doctors') :
-           title === 'Appointments Schedule' || title === 'Appointments' || title === 'My Appointments' ? t('nav.appointments') :
-           title === 'Waitlist Queue' || title === 'Waitlist' ? t('nav.waitlist') :
-           title === 'Notifications' ? t('nav.notifications') :
-           title}
-        </p>
       </div>
 
 
