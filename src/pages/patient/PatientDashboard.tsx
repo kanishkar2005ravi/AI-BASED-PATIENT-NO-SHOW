@@ -187,42 +187,6 @@ export const PatientDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ⚡ QUICK NAVIGATION ACTION BOXES ⚡ */}
-      <div className="grid grid-cols-3 gap-3">
-        {/* Book Appointment Box */}
-        <div
-          onClick={() => navigate('/patient/book')}
-          className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[96px] cursor-pointer group"
-        >
-          <div className="p-2 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 group-hover:scale-110 transition-transform">
-            <CalendarPlus className="w-4 h-4" />
-          </div>
-          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">{t('nav.book_appointment')}</p>
-        </div>
-
-        {/* My Appointments Box */}
-        <div
-          onClick={() => navigate('/patient/appointments')}
-          className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[96px] cursor-pointer group"
-        >
-          <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 group-hover:scale-110 transition-transform">
-            <CalendarCheck className="w-4 h-4" />
-          </div>
-          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">{t('nav.my_appointments')}</p>
-        </div>
-
-        {/* Waitlist Box */}
-        <div
-          onClick={() => navigate('/patient/waitlist')}
-          className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-pink-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[96px] cursor-pointer group"
-        >
-          <div className="p-2 rounded-lg bg-pink-50 text-pink-600 border border-pink-100 group-hover:scale-110 transition-transform">
-            <Clock className="w-4 h-4" />
-          </div>
-          <p className="text-[11px] font-extrabold text-slate-800 tracking-tight leading-tight">{t('nav.waitlist')}</p>
-        </div>
-      </div>
-
       {/* 🎟️ HERO FEATURED MEDICAL BOARDING PASS (NEXT APPOINTMENT) 🎟️ */}
       {nextAppointment ? (
         <div className="relative rounded-3xl p-6 md:p-8 bg-gradient-to-r from-teal-900 via-slate-900 to-indigo-950 text-white border-2 border-teal-400/40 shadow-xl overflow-hidden">
@@ -291,167 +255,115 @@ export const PatientDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* 🩺 SPECIALIST PHYSICIANS CAROUSEL / FAST BOOKING 🩺 */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-black text-slate-900">{t('dashboard.available_doctors')}</h2>
-            <p className="text-xs text-slate-500 font-medium">{t('dashboard.doctors_subtitle')}</p>
-          </div>
-          <button
-            onClick={() => setShowAllDoctorsModal(true)}
-            className="text-xs font-black text-teal-600 hover:text-teal-700 flex items-center gap-1 cursor-pointer"
+      {/* 📦 SQUARE ACTION BOXES: QUICK ACTIONS & MODAL TRIGGER 📦 */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-black uppercase tracking-wider text-slate-500">{t('nav.patient_portal')} Services</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Box 1: Book Appointment */}
+          <div
+            onClick={() => navigate('/patient/book')}
+            className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col items-center justify-center gap-2.5 text-center min-h-[120px] cursor-pointer group"
           >
-            <span>{t('dashboard.view_all_doctors')}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
+            <div className="p-3 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 group-hover:scale-110 transition-transform">
+              <CalendarPlus className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-slate-900 leading-tight">{t('nav.book_appointment')}</p>
+              <p className="text-[10px] font-bold text-amber-600 mt-0.5">Fast Slot Selection</p>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {doctors.slice(0, 4).map((doc, idx) => {
-            const badgeColors = [
-              'bg-amber-100 text-amber-900 border-amber-300',
-              'bg-blue-100 text-blue-900 border-blue-300',
-              'bg-teal-100 text-teal-900 border-teal-300',
-              'bg-purple-100 text-purple-900 border-purple-300'
-            ][idx % 4];
+          {/* Box 2: Available Faculty Physicians (Opens Modal) */}
+          <div
+            onClick={() => setShowAllDoctorsModal(true)}
+            className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center gap-2.5 text-center min-h-[120px] cursor-pointer group"
+          >
+            <div className="p-3 rounded-xl bg-teal-50 text-teal-600 border border-teal-100 group-hover:scale-110 transition-transform">
+              <Stethoscope className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-slate-900 leading-tight">{t('dashboard.available_doctors')}</p>
+              <p className="text-[10px] font-bold text-teal-600 mt-0.5">{doctors.length} Physicians • View All</p>
+            </div>
+          </div>
 
-            return (
-              <div
-                key={doc.id}
-                onClick={() => setShowAllDoctorsModal(true)}
-                className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer space-y-3 hover:border-teal-400 group"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-900 text-teal-300 font-black text-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                    {doc.name.replace('Dr. ', '').charAt(0)}
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-extrabold text-slate-900 group-hover:text-teal-600 transition-colors">{doc.name}</h4>
-                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${badgeColors}`}>
-                      {doc.specialization}
-                    </span>
-                  </div>
-                </div>
+          {/* Box 3: Appointment History & Schedule */}
+          <div
+            onClick={() => navigate('/patient/appointments')}
+            className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 transition-all flex flex-col items-center justify-center gap-2.5 text-center min-h-[120px] cursor-pointer group"
+          >
+            <div className="p-3 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 group-hover:scale-110 transition-transform">
+              <CalendarCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-slate-900 leading-tight">{t('dashboard.history_title')}</p>
+              <p className="text-[10px] font-bold text-indigo-600 mt-0.5">{appointments.length} Total Visits</p>
+            </div>
+          </div>
 
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-                  <span className="font-medium">{doc.experience} {t('dashboard.exp_years')}</span>
-                  <span className="font-bold text-teal-600 group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                    {t('dashboard.book_slot')} <ArrowRight className="w-3 h-3" />
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+          {/* Box 4: Active Waitlist */}
+          <div
+            onClick={() => navigate('/patient/waitlist')}
+            className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col items-center justify-center gap-2.5 text-center min-h-[120px] cursor-pointer group"
+          >
+            <div className="p-3 rounded-xl bg-purple-50 text-purple-600 border border-purple-100 group-hover:scale-110 transition-transform">
+              <Clock className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-slate-900 leading-tight">{t('nav.waitlist')}</p>
+              <p className="text-[10px] font-bold text-purple-600 mt-0.5">{waitlist.length} Active Requests</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 📋 ROW 3: APPOINTMENT HISTORY & NOTIFICATIONS HUB 📋 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Appointments List */}
-        <Card title={t('dashboard.history_title')} className="lg:col-span-2">
-          {appointments.length === 0 ? (
-            <p className="text-xs text-slate-500 text-center py-6">No appointment history found.</p>
+      {/* 🔔 HOSPITAL ALERTS & WAITLIST NOTICES 🔔 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card title="Hospital Alerts & Notices">
+          {notifications.length === 0 ? (
+            <p className="text-xs text-slate-500 text-center py-4">No new notifications.</p>
           ) : (
             <div className="space-y-3">
-              {appointments.slice(0, 5).map(apt => (
-                <div
-                  key={apt.id}
-                  className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/60 flex items-center justify-between hover:bg-white hover:border-slate-300 transition-all shadow-2xs"
-                >
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-black text-slate-900">{apt.doctorName}</h4>
-                    <div className="flex items-center space-x-3 text-xs text-slate-500 font-medium">
-                      <span>📅 {apt.appointmentDate}</span>
-                      <span>⏰ {formatTime(apt.appointmentTime)}</span>
-                      <span className="bg-slate-200 px-2 py-0.5 rounded text-slate-700 font-bold text-[10px]">{apt.appointmentType}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Badge variant={apt.status === 'CONFIRMED' ? 'info' : apt.status === 'COMPLETED' ? 'success' : 'danger'} size="sm">
-                      {apt.status}
-                    </Badge>
-                    <button
-                      onClick={() => navigate(`/patient/appointments/${apt.id}`)}
-                      className="p-2 rounded-xl text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition-all"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  </div>
+              {notifications.map(n => (
+                <div key={n.id} className="p-3.5 rounded-2xl bg-teal-50/50 border border-teal-200/80 text-xs space-y-1">
+                  <p className="font-bold text-teal-950 flex items-center gap-1.5">
+                    <Bell className="w-3.5 h-3.5 text-teal-600" /> {n.title}
+                  </p>
+                  <p className="text-teal-800 font-medium leading-relaxed">{n.message}</p>
                 </div>
               ))}
             </div>
           )}
         </Card>
 
-        {/* Right Column: Hospital Notices & Square Action Boxes */}
-        <div className="space-y-6">
-          {/* 📦 SQUARE ACTION BOXES: VIEW ALL DOCTORS & APPOINTMENT HISTORY 📦 */}
-          <div className="grid grid-cols-2 gap-3">
-            {/* Box 1: View All Doctors */}
-            <div
-              onClick={() => setShowAllDoctorsModal(true)}
-              className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[110px] cursor-pointer group"
-            >
-              <div className="p-2.5 rounded-xl bg-teal-50 text-teal-600 border border-teal-100 group-hover:scale-110 transition-transform">
-                <Stethoscope className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-black text-slate-900 leading-tight">{t('dashboard.available_doctors')}</p>
-                <p className="text-[10px] font-bold text-teal-600 mt-0.5">{doctors.length} Physicians</p>
-              </div>
-            </div>
-
-            {/* Box 2: Appointment History */}
-            <div
-              onClick={() => navigate('/patient/appointments')}
-              className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[110px] cursor-pointer group"
-            >
-              <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 group-hover:scale-110 transition-transform">
-                <Calendar className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-black text-slate-900 leading-tight">{t('dashboard.history_title')}</p>
-                <p className="text-[10px] font-bold text-indigo-600 mt-0.5">{appointments.length} Total Visits</p>
-              </div>
-            </div>
-          </div>
-
-          <Card title="Hospital Alerts & Notices">
-            {notifications.length === 0 ? (
-              <p className="text-xs text-slate-500 text-center py-4">No new notifications.</p>
-            ) : (
-              <div className="space-y-3">
-                {notifications.map(n => (
-                  <div key={n.id} className="p-3.5 rounded-2xl bg-teal-50/50 border border-teal-200/80 text-xs space-y-1">
-                    <p className="font-bold text-teal-950 flex items-center gap-1.5">
-                      <Bell className="w-3.5 h-3.5 text-teal-600" /> {n.title}
-                    </p>
-                    <p className="text-teal-800 font-medium leading-relaxed">{n.message}</p>
+        {waitlist.length > 0 ? (
+          <Card title="Active Waitlist Position">
+            <div className="space-y-2">
+              {waitlist.map(w => (
+                <div key={w.id} className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-xs flex justify-between items-center">
+                  <div>
+                    <p className="font-extrabold text-purple-950">{w.doctorName}</p>
+                    <p className="text-purple-700 font-medium">{w.requestedDate}</p>
                   </div>
-                ))}
-              </div>
-            )}
+                  <Badge variant="purple" size="md">
+                    Pos #{w.position}
+                  </Badge>
+                </div>
+              ))}
+            </div>
           </Card>
-
-          {waitlist.length > 0 && (
-            <Card title="Active Waitlist Position">
-              <div className="space-y-2">
-                {waitlist.map(w => (
-                  <div key={w.id} className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-xs flex justify-between items-center">
-                    <div>
-                      <p className="font-extrabold text-purple-950">{w.doctorName}</p>
-                      <p className="text-purple-700 font-medium">{w.requestedDate}</p>
-                    </div>
-                    <Badge variant="purple" size="md">
-                      Pos #{w.position}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-        </div>
+        ) : (
+          <Card title="SNS Healthcare Services">
+            <div className="p-2 text-xs text-slate-600 space-y-2">
+              <p className="font-bold text-slate-800 flex items-center gap-2">
+                <Hospital className="w-4 h-4 text-teal-600" /> 24/7 Outpatient & Emergency Support
+              </p>
+              <p className="text-slate-500 font-medium leading-relaxed">
+                Book appointments or join waitlists anytime. Use the square action cards above to view all faculty doctors or review past appointment details.
+              </p>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* 🩺 ALL FACULTY PHYSICIANS MODAL 🩺 */}
