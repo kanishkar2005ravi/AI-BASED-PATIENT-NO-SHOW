@@ -31,7 +31,8 @@ import {
   ArrowRight,
   CheckCircle2,
   AlertTriangle,
-  FileText
+  FileText,
+  X
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { WelcomeSplashScreen } from '../../components/common/WelcomeSplashScreen';
@@ -48,6 +49,7 @@ export const PatientDashboard: React.FC = () => {
   const [waitlist, setWaitlist] = useState<WaitlistItem[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [showAllDoctorsModal, setShowAllDoctorsModal] = useState(false);
   const [showWelcomeSplash, setShowWelcomeSplash] = useState<boolean>(() => {
     return !sessionStorage.getItem('carepilot_patient_splash_shown');
   });
@@ -297,8 +299,8 @@ export const PatientDashboard: React.FC = () => {
             <p className="text-xs text-slate-500 font-medium">{t('dashboard.doctors_subtitle')}</p>
           </div>
           <button
-            onClick={() => navigate('/patient/book')}
-            className="text-xs font-black text-teal-600 hover:text-teal-700 flex items-center gap-1"
+            onClick={() => setShowAllDoctorsModal(true)}
+            className="text-xs font-black text-teal-600 hover:text-teal-700 flex items-center gap-1 cursor-pointer"
           >
             <span>{t('dashboard.view_all_doctors')}</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -317,7 +319,7 @@ export const PatientDashboard: React.FC = () => {
             return (
               <div
                 key={doc.id}
-                onClick={() => navigate('/patient/book')}
+                onClick={() => setShowAllDoctorsModal(true)}
                 className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer space-y-3 hover:border-teal-400 group"
               >
                 <div className="flex items-center space-x-3">
@@ -382,8 +384,38 @@ export const PatientDashboard: React.FC = () => {
           )}
         </Card>
 
-        {/* Right Column: Hospital Notices & Waitlist */}
+        {/* Right Column: Hospital Notices & Square Action Boxes */}
         <div className="space-y-6">
+          {/* 📦 SQUARE ACTION BOXES: VIEW ALL DOCTORS & APPOINTMENT HISTORY 📦 */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Box 1: View All Doctors */}
+            <div
+              onClick={() => setShowAllDoctorsModal(true)}
+              className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-teal-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[110px] cursor-pointer group"
+            >
+              <div className="p-2.5 rounded-xl bg-teal-50 text-teal-600 border border-teal-100 group-hover:scale-110 transition-transform">
+                <Stethoscope className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-slate-900 leading-tight">{t('dashboard.available_doctors')}</p>
+                <p className="text-[10px] font-bold text-teal-600 mt-0.5">{doctors.length} Physicians</p>
+              </div>
+            </div>
+
+            {/* Box 2: Appointment History */}
+            <div
+              onClick={() => navigate('/patient/appointments')}
+              className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-400 transition-all flex flex-col items-center justify-center gap-2 text-center min-h-[110px] cursor-pointer group"
+            >
+              <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 group-hover:scale-110 transition-transform">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-slate-900 leading-tight">{t('dashboard.history_title')}</p>
+                <p className="text-[10px] font-bold text-indigo-600 mt-0.5">{appointments.length} Total Visits</p>
+              </div>
+            </div>
+          </div>
 
           <Card title="Hospital Alerts & Notices">
             {notifications.length === 0 ? (
@@ -421,6 +453,78 @@ export const PatientDashboard: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* 🩺 ALL FACULTY PHYSICIANS MODAL 🩺 */}
+      {showAllDoctorsModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
+          onClick={() => setShowAllDoctorsModal(false)}
+        >
+          <div
+            className="w-full max-w-4xl bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-5 max-h-[90vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl font-black text-slate-900">{t('dashboard.available_doctors')}</h3>
+                <p className="text-xs text-slate-500 font-medium">{t('dashboard.doctors_subtitle')}</p>
+              </div>
+              <button
+                onClick={() => setShowAllDoctorsModal(false)}
+                className="p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {doctors.map((doc, idx) => {
+                const badgeColors = [
+                  'bg-amber-100 text-amber-900 border-amber-300',
+                  'bg-blue-100 text-blue-900 border-blue-300',
+                  'bg-teal-100 text-teal-900 border-teal-300',
+                  'bg-purple-100 text-purple-900 border-purple-300'
+                ][idx % 4];
+
+                return (
+                  <div
+                    key={doc.id}
+                    className="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-teal-400 transition-all flex flex-col justify-between space-y-4 shadow-xs"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-900 text-teal-300 font-black text-xl flex items-center justify-center shadow-md flex-shrink-0">
+                        {doc.name.replace('Dr. ', '').charAt(0)}
+                      </div>
+                      <div>
+                        <h4 className="text-base font-black text-slate-900">{doc.name}</h4>
+                        <span className={`inline-block text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border mt-1 ${badgeColors}`}>
+                          {doc.specialization}
+                        </span>
+                        <p className="text-xs text-slate-500 font-medium mt-1">{doc.department} &bull; {doc.experience} {t('dashboard.exp_years')}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-200/80">
+                      <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /> Available Today
+                      </span>
+                      <button
+                        onClick={() => {
+                          setShowAllDoctorsModal(false);
+                          navigate('/patient/book');
+                        }}
+                        className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs transition-all shadow-sm"
+                      >
+                        {t('dashboard.book_slot')}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
