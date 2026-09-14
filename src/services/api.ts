@@ -56,12 +56,12 @@ function mergeListsById<T extends { id?: string }>(listA: T[], listB: T[]): T[] 
 function normalizePatient(p: any): Patient {
   if (!p) {
     return {
-      id: `PAT-${Date.now()}`,
-      name: 'New Patient',
-      email: 'patient@example.com',
-      password: 'password',
-      phone: '9876543210',
-      dateOfBirth: '1995-05-15',
+      id: '',
+      name: 'Unknown',
+      email: '',
+      password: '',
+      phone: '',
+      dateOfBirth: '',
       gender: 'Male',
       address: '',
       status: 'Active',
@@ -75,11 +75,11 @@ function normalizePatient(p: any): Patient {
     };
   }
 
-  const id = p.id || p.patient_id || p.patientId || `PAT-${Math.floor(100 + Math.random() * 900)}`;
-  const name = p.name || p.patient_name || p.patientName || p.full_name || p.fullName || 'Patient Record';
-  const email = p.email || p.patient_email || p.patientEmail || `${id.toLowerCase()}@example.com`;
-  const phone = p.phone || p.phone_number || p.phoneNumber || '9876543210';
-  const dateOfBirth = p.dateOfBirth || p.date_of_birth || p.dob || '1995-05-15';
+  const id = p.id || p.patient_id || p.patientId || '';
+  const name = p.name || p.patient_name || p.patientName || p.full_name || p.fullName || '';
+  const email = p.email || p.patient_email || p.patientEmail || '';
+  const phone = p.phone || p.phone_number || p.phoneNumber || '';
+  const dateOfBirth = p.dateOfBirth || p.date_of_birth || p.dob || '';
   const gender = p.gender || 'Male';
   const address = p.address || p.home_address || '';
   const status = p.status === 'Inactive' || p.is_active === false ? 'Inactive' : 'Active';
@@ -91,10 +91,11 @@ function normalizePatient(p: any): Patient {
   const noShowRate = Number(p.noShowRate ?? p.noshow_rate ?? (totalAppointments > 0 ? Math.round((noShowAppointments / totalAppointments) * 100) : 0));
 
   return {
+    ...p,
     id,
     name,
     email,
-    password: p.password || 'password',
+    password: p.password || '',
     phone,
     dateOfBirth,
     gender,
@@ -107,7 +108,7 @@ function normalizePatient(p: any): Patient {
     rescheduledAppointments,
     noShowRate,
     createdAt: p.createdAt || p.created_at || new Date().toISOString().split('T')[0]
-  };
+  } as Patient;
 }
 
 export const isDemoMode = (): boolean => IS_DEMO_MODE;
@@ -345,15 +346,17 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           ...(typeof rawNewPat === 'object' ? rawNewPat : {})
         });
 
-        // Sync with local memory & storage so UI updates immediately
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient);
-        const existingIdx = localPats.findIndex(p => p.id === newPat.id || (newPat.email && p.email === newPat.email));
-        if (existingIdx >= 0) {
-          localPats[existingIdx] = newPat;
-        } else {
-          localPats.unshift(newPat);
+        // Sync with local memory & storage only in demo mode
+        if (IS_DEMO_MODE) {
+          const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient);
+          const existingIdx = localPats.findIndex(p => p.id === newPat.id || (newPat.email && p.email === newPat.email));
+          if (existingIdx >= 0) {
+            localPats[existingIdx] = newPat;
+          } else {
+            localPats.unshift(newPat);
+          }
+          setLocalData(STORAGE_KEYS.PATIENTS, localPats);
         }
-        setLocalData(STORAGE_KEYS.PATIENTS, localPats);
 
         return {
           success: isSuccess,
@@ -365,30 +368,72 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle GET_PATIENTS Action Specifically
       if (payload.action === 'GET_PATIENTS') {
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient);
-        const remoteRaw = Array.isArray(resData.data) ? resData.data : Array.isArray(resData.patients) ? resData.patients : [];
-        const remotePats = remoteRaw.map(normalizePatient);
-        const combined = mergeListsById(localPats, remotePats).map(normalizePatient);
+        let remoteRaw: any[] = [];
+        
+        // Robust unwrapping for various backend response formats
+        if (Array.isArray(resData)) {
+          remoteRaw = resData;
+        } else if (resData && typeof resData === 'object') {
+          if (Array.isArray(resData.data)) {
+            remoteRaw = resData.data;
+          } else if (Array.isArray(resData.patients)) {
+            remoteRaw = resData.patients;
+          } else if (resData.items && Array.isArray(resData.items)) {
+            remoteRaw = resData.items;
+          } else if (resData.data?.items && Array.isArray(resData.data.items)) {
+            remoteRaw = resData.data.items;
+          } else if (resData.data && typeof resData.data === 'object' && !Array.isArray(resData.data)) {
+            remoteRaw = [resData.data];
+          }
+        }
+
+        // Unwrap .json if wrapped by n8n nodes
+        remoteRaw = remoteRaw.map(item => (item && item.json) ? item.json : item);
+        
+        // Deep unwrapping (e.g. items[0].json.data.items[0].json)
+        remoteRaw = remoteRaw.flatMap(item => {
+          if (item && item.data && Array.isArray(item.data)) return item.data;
+          if (item && item.items && Array.isArray(item.items)) return item.items;
+          if (item && item.data?.items && Array.isArray(item.data.items)) return item.data.items;
+          return [item];
+        }).map(item => (item && item.json) ? item.json : item);
+
+        // Map directly from unwrapped data
+        const remotePats = remoteRaw.map(normalizePatient).filter(p => p.id); // Filter out empty IDs
+
+        // Do NOT merge local storage with remote data in production mode
+        const finalPats = IS_DEMO_MODE 
+          ? mergeListsById(getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient), remotePats)
+          : remotePats;
+
         return {
           success: true,
           message: 'Patients retrieved successfully.',
-          data: combined as any
+          data: finalPats as any
         };
       }
 
       // Handle GET_PATIENT Action Specifically
       if (payload.action === 'GET_PATIENT') {
         const pId = payload.data?.patientId || payload.data?.id;
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-        const found = (resData.patient && resData.patient.name)
-          ? resData.patient
-          : (resData.data && resData.data.name)
-          ? resData.data
-          : (localPats.find(p => p.id === pId || p.email === pId) || localPats[0]);
+        
+        let found = null;
+        if (resData.patient && resData.patient.name) {
+          found = resData.patient;
+        } else if (resData.data && resData.data.name) {
+          found = resData.data;
+        } else if (resData.data?.items && Array.isArray(resData.data.items) && resData.data.items[0]?.json?.name) {
+          found = resData.data.items[0].json;
+        }
+        
+        if (!found && IS_DEMO_MODE) {
+          const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+          found = localPats.find(p => p.id === pId || p.email === pId) || localPats[0];
+        }
 
         return {
-          success: true,
-          message: 'Patient retrieved successfully.',
+          success: found ? true : false,
+          message: found ? 'Patient retrieved successfully.' : 'Patient not found.',
           patient: found,
           data: found as any
         };

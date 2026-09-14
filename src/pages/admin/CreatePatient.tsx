@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
@@ -13,9 +13,11 @@ export const CreatePatient: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [loadingId, setLoadingId] = useState(true);
+  const [idError, setIdError] = useState('');
 
   const [formData, setFormData] = useState({
-    patientId: `PAT-${Math.floor(100 + Math.random() * 900)}`,
+    patientId: '',
     name: '',
     email: '',
     phone: '',
@@ -26,22 +28,83 @@ export const CreatePatient: React.FC = () => {
     role: 'patient'
   });
 
+  const fetchNextId = async () => {
+    setLoadingId(true);
+    setIdError('');
+    try {
+      const res = await callBackend({ action: 'GET_PATIENTS' });
+      if (res.success && Array.isArray(res.data)) {
+        let max = 0;
+        res.data.forEach((p: any) => {
+          if (p.id && typeof p.id === 'string' && p.id.startsWith('PAT-')) {
+            const numPart = p.id.split('-')[1];
+            if (numPart && /^\d+$/.test(numPart)) {
+              const num = parseInt(numPart, 10);
+              if (num > max) max = num;
+            }
+          }
+        });
+        const nextId = `PAT-${max + 1}`;
+        setFormData(prev => ({ ...prev, patientId: nextId }));
+      } else {
+        setIdError('Failed to retrieve current database state.');
+      }
+    } catch (e) {
+      setIdError('Network error while calculating patient ID.');
+    } finally {
+      setLoadingId(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNextId();
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (idError || !formData.patientId) {
+      showToast('Cannot create patient without a valid auto-generated ID. Please refresh.', 'error');
+      return;
+    }
     if (!formData.name || !formData.email || !formData.password) {
       showToast('Please fill in all required patient fields.', 'error');
       return;
     }
 
     setLoading(true);
-    const res = await callBackend({
+    let res = await callBackend({
       action: 'CREATE_PATIENT',
       data: formData
     });
+
+    // Handle race condition conflict by recalculating and retrying once
+    if (!res.success && (res.message?.toLowerCase().includes('conflict') || res.message?.toLowerCase().includes('duplicate') || res.error?.toLowerCase().includes('duplicate') || res.error?.toLowerCase().includes('conflict'))) {
+      showToast('ID conflict detected. Recalculating next ID and retrying...', 'warning');
+      
+      const freshRes = await callBackend({ action: 'GET_PATIENTS' });
+      if (freshRes.success && Array.isArray(freshRes.data)) {
+        let max = 0;
+        freshRes.data.forEach((p: any) => {
+          if (p.id && typeof p.id === 'string' && p.id.startsWith('PAT-')) {
+            const numPart = p.id.split('-')[1];
+            if (numPart && /^\d+$/.test(numPart)) {
+              const num = parseInt(numPart, 10);
+              if (num > max) max = num;
+            }
+          }
+        });
+        const nextId = `PAT-${max + 1}`;
+        
+        res = await callBackend({
+          action: 'CREATE_PATIENT',
+          data: { ...formData, patientId: nextId }
+        });
+      }
+    }
 
     setLoading(false);
     if (res.success) {
@@ -78,10 +141,11 @@ export const CreatePatient: React.FC = () => {
             <Input
               label="Patient ID"
               name="patientId"
-              value={formData.patientId}
+              value={loadingId ? 'Generating...' : formData.patientId}
               onChange={handleChange}
-              helperText="Auto-generated unique patient record ID"
+              helperText={idError || "Auto-calculated based on current database state"}
               required
+              disabled={loadingId}
             />
 
             <Input
