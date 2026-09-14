@@ -41,13 +41,13 @@ export const CarePilotLogo: React.FC<CarePilotLogoProps> = ({
         <div className="leading-tight select-none">
           <div className="flex items-center gap-1.5">
             <span className={`${textSize} font-black tracking-tight ${textLight ? 'text-white' : 'text-slate-900'}`}>
-              Care<span className={textLight ? 'text-amber-400 font-black' : 'text-teal-600'}>Pilot</span>
+              Care<span className={textLight ? 'text-amber-400 font-black' : 'text-amber-500 font-black'}>Pilot</span>
             </span>
             <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-gradient-to-r from-amber-500 via-rose-500 to-teal-500 text-white tracking-widest shadow-sm">
               SNS
             </span>
           </div>
-          <span className={`text-[10px] font-extrabold tracking-wider uppercase ${textLight ? 'text-amber-400' : 'text-teal-700'} block font-sans mt-0.5`}>
+          <span className={`text-[10px] font-extrabold tracking-wider uppercase ${textLight ? 'text-amber-400' : 'text-amber-600'} block font-sans mt-0.5`}>
             SNS Medical College & Hospital
           </span>
         </div>
