@@ -135,19 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center justify-end space-x-3 w-1/4">
-        {/* Notifications Icon */}
-        <button
-          onClick={handleNotificationClick}
-          className="relative p-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-          title="Notifications"
-        >
-          <Bell className="w-5 h-5" />
-          {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white font-extrabold text-[10px] rounded-full flex items-center justify-center border-2 border-white">
-              {unreadCount}
-            </span>
-          )}
-        </button>
+
 
 
         {/* User Profile Quick Link - Sleek Single-Line Pill Next to Notification */}

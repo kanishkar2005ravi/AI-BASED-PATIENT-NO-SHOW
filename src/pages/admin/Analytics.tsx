@@ -48,11 +48,11 @@ export const Analytics: React.FC = () => {
   const [modelPerf, setModelPerf] = useState<ModelPerformance | null>(null);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [aptMetrics, setAptMetrics] = useState({
-    totalPatients: 1000,
-    totalAppointments: 24,
-    totalAttended: 18,
-    totalCancelled: 4,
-    totalRescheduled: 2,
+    totalPatients: 0,
+    totalAppointments: 0,
+    totalAttended: 0,
+    totalCancelled: 0,
+    totalRescheduled: 0,
     totalMissed: 0,
     totalWaitlistCount: 0
   });
@@ -228,55 +228,71 @@ export const Analytics: React.FC = () => {
     showToast(`${riskLevel} Risk Patients CSV report downloaded successfully!`, 'success');
   };
 
+  const fetchAnalytics = async (isMounted: { current: boolean }, showLoader = false) => {
+    if (showLoader) setLoading(true);
+    try {
+      const [perfRes, aptsRes, patsRes, waitRes, docsRes] = await Promise.all([
+        callBackend({ action: 'GET_MODEL_PERFORMANCE' }),
+        callBackend({ action: 'GET_APPOINTMENTS', data: {} }),
+        callBackend({ action: 'GET_PATIENTS', data: {} }),
+        callBackend({ action: 'GET_WAITLIST', data: {} }),
+        callBackend({ action: 'GET_DOCTORS', data: {} })
+      ]);
+
+      if (!isMounted.current) return;
+
+      const perfData = (perfRes.success && perfRes.data && typeof perfRes.data.accuracy === 'number')
+        ? perfRes.data
+        : INITIAL_MODEL_PERFORMANCE;
+      setModelPerf(perfData);
+
+      const aptsList: Appointment[] = (aptsRes.success && Array.isArray(aptsRes.data)) ? aptsRes.data : [];
+      const patsList: Patient[] = (patsRes.success && Array.isArray(patsRes.data)) ? patsRes.data : [];
+      const waitList: WaitlistItem[] = (waitRes.success && Array.isArray(waitRes.data)) ? waitRes.data : [];
+      const docsList: Doctor[] = (docsRes.success && Array.isArray(docsRes.data) && docsRes.data.length > 0) ? docsRes.data : INITIAL_DOCTORS;
+
+      setDoctors(docsList);
+
+      setAptMetrics({
+        totalPatients: patsList.length,
+        totalAppointments: aptsList.length,
+        totalAttended: aptsList.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT').length,
+        totalCancelled: aptsList.filter(a => a.status === 'CANCELLED').length,
+        totalRescheduled: aptsList.filter(a => a.status === 'RESCHEDULED').length,
+        totalMissed: aptsList.filter(a => a.status === 'NO_SHOW').length,
+        totalWaitlistCount: waitList.length
+      });
+    } finally {
+      if (isMounted.current) setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
+    const isMounted = { current: true };
 
-    Promise.all([
-      callBackend({ action: 'GET_MODEL_PERFORMANCE' }),
-      callBackend({ action: 'GET_APPOINTMENTS', data: {} }),
-      callBackend({ action: 'GET_PATIENTS', data: {} }),
-      callBackend({ action: 'GET_WAITLIST', data: {} }),
-      callBackend({ action: 'GET_DOCTORS', data: {} })
-    ]).then(([perfRes, aptsRes, patsRes, waitRes, docsRes]) => {
-      if (isMounted) {
-        const perfData = (perfRes.success && perfRes.data && typeof perfRes.data.accuracy === 'number') 
-          ? perfRes.data 
-          : INITIAL_MODEL_PERFORMANCE;
-        setModelPerf(perfData);
+    // Initial load
+    fetchAnalytics(isMounted, true);
 
-        const aptsList: Appointment[] = (aptsRes.success && Array.isArray(aptsRes.data)) ? aptsRes.data : [];
-        const patsList: Patient[] = (patsRes.success && Array.isArray(patsRes.data)) ? patsRes.data : [];
-        const waitList: WaitlistItem[] = (waitRes.success && Array.isArray(waitRes.data)) ? waitRes.data : [];
-        const docsList: Doctor[] = (docsRes.success && Array.isArray(docsRes.data) && docsRes.data.length > 0) ? docsRes.data : INITIAL_DOCTORS;
+    // 🔄 Auto-refresh every 30 seconds — picks up new bookings, cancellations, check-ins live
+    const interval = setInterval(() => {
+      fetchAnalytics(isMounted, false);
+    }, 30000);
 
-        setDoctors(docsList);
-
-        const totalPatients = patsList.length > 0 ? patsList.length : 1000;
-        const totalAppointments = aptsList.length > 0 ? aptsList.length : 24;
-        const totalCancelled = aptsList.filter(a => a.status === 'CANCELLED').length;
-        const totalRescheduled = aptsList.filter(a => a.status === 'RESCHEDULED').length;
-        const totalMissed = aptsList.filter(a => a.status === 'NO_SHOW').length;
-        const totalAttended = aptsList.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT').length;
-        const totalWaitlistCount = waitList.length;
-
-        setAptMetrics({
-          totalPatients,
-          totalAppointments,
-          totalAttended,
-          totalCancelled,
-          totalRescheduled,
-          totalMissed,
-          totalWaitlistCount
-        });
-        setLoading(false);
+    // 🔄 Refresh when user switches back to this tab
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchAnalytics(isMounted, false);
       }
-    });
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
-      isMounted = false;
+      isMounted.current = false;
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, []);
+
 
   if (loading || !modelPerf) {
     return (

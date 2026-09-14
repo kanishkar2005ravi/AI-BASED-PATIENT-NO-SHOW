@@ -117,15 +117,15 @@ export const AdminDashboard: React.FC = () => {
         const fallbackAttended = Math.max(0, dateFilteredApts.length - dateFilteredApts.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length);
 
         const calculatedMetrics = {
-          totalPatients: patsList.length > 0 ? patsList.length : 200,
-          totalAppointments: aptsList.length > 0 ? aptsList.length : 24,
+          totalPatients: patsList.length,
+          totalAppointments: aptsList.length,
           totalCancelled: aptsList.filter(a => a.status === 'CANCELLED').length,
           totalRescheduled: aptsList.filter(a => a.status === 'RESCHEDULED').length,
           totalMissed: aptsList.filter(a => a.status === 'NO_SHOW').length,
           totalWaitlistCount: waitList.length,
           activeDoctors: workingDocsCount > 0 ? workingDocsCount : activeDocsCount,
           todayAppointments: dateFilteredApts.length,
-          todayAttended: dateAttendedCount > 0 ? dateAttendedCount : (dateFilteredApts.length > 0 ? fallbackAttended : 18),
+          todayAttended: dateAttendedCount,
           todayCancelled: dateFilteredApts.filter(a => a.status === 'CANCELLED').length,
           todayRescheduled: dateFilteredApts.filter(a => a.status === 'RESCHEDULED').length,
           todayMissed: dateFilteredApts.filter(a => a.status === 'NO_SHOW').length,
@@ -134,20 +134,6 @@ export const AdminDashboard: React.FC = () => {
         };
 
         setMetrics(calculatedMetrics);
-
-        const baseAnalytics = analyticsRes.data || {
-          totalPatients: calculatedMetrics.totalPatients,
-          totalDoctors: calculatedMetrics.activeDoctors,
-          totalAppointments: calculatedMetrics.totalAppointments,
-          todayAppointments: calculatedMetrics.todayAppointments,
-          attendanceRate: 84.5,
-          noShowRate: 9.2,
-          cancellationRate: 6.3,
-          waitlistRecoveryRate: 78.4,
-          highRiskCount: 3,
-          mediumRiskCount: 6,
-          lowRiskCount: 18
-        };
 
         const filteredLowCount = dateFilteredApts.filter(a => !a.risk || a.risk.level === 'LOW').length;
         const filteredMedCount = dateFilteredApts.filter(a => a.risk && a.risk.level === 'MEDIUM').length;
@@ -158,14 +144,23 @@ export const AdminDashboard: React.FC = () => {
         const highCount = aptsList.filter(a => a.risk && a.risk.level === 'HIGH').length;
 
         const liveAnalytics: AnalyticsData = {
-          ...baseAnalytics,
           totalPatients: calculatedMetrics.totalPatients,
           totalDoctors: calculatedMetrics.activeDoctors,
           totalAppointments: calculatedMetrics.totalAppointments,
           todayAppointments: calculatedMetrics.todayAppointments,
-          lowRiskCount: dateFilteredApts.length > 0 ? filteredLowCount : (aptsList.length > 0 ? lowCount : (baseAnalytics.lowRiskCount || 18)),
-          mediumRiskCount: dateFilteredApts.length > 0 ? filteredMedCount : (aptsList.length > 0 ? medCount : (baseAnalytics.mediumRiskCount || 6)),
-          highRiskCount: dateFilteredApts.length > 0 ? filteredHighCount : (aptsList.length > 0 ? highCount : (baseAnalytics.highRiskCount || 3))
+          attendanceRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => a.status === 'COMPLETED' || a.status === 'CHECKED_IN').length / aptsList.length) * 100).toFixed(1)) : 0,
+          noShowRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => a.status === 'NO_SHOW').length / aptsList.length) * 100).toFixed(1)) : 0,
+          cancellationRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => a.status === 'CANCELLED').length / aptsList.length) * 100).toFixed(1)) : 0,
+          waitlistRecoveryRate: waitList.length > 0 ? parseFloat(((waitList.filter(w => w.status === 'ACCEPTED').length / waitList.length) * 100).toFixed(1)) : 0,
+          highRiskCount: dateFilteredApts.length > 0 ? filteredHighCount : highCount,
+          mediumRiskCount: dateFilteredApts.length > 0 ? filteredMedCount : medCount,
+          lowRiskCount: dateFilteredApts.length > 0 ? filteredLowCount : lowCount,
+          doctorUtilization: 0,
+          appointmentTrends: [],
+          attendanceVsNoShow: [],
+          noShowTrends: [],
+          doctorUtilizationData: [],
+          waitlistRecoveryData: []
         };
 
         setAnalytics(liveAnalytics);
