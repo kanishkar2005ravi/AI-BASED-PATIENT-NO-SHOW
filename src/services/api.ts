@@ -496,10 +496,11 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_DOCTOR_AVAILABILITY Action Specifically
       if (payload.action === 'GET_DOCTOR_AVAILABILITY') {
         const docId = payload.data?.doctorId || payload.data?.doctor_id || 'DOC-001';
-        const availMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, INITIAL_AVAILABILITY);
+        const availMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, {});
         const docSchedule = (resData.data && resData.data.weeklySchedule)
           ? resData.data
-          : (availMap[docId] || INITIAL_AVAILABILITY[docId] || INITIAL_AVAILABILITY['DOC-001']);
+          : (availMap[docId] || null);
+
 
         return {
           success: true,
@@ -585,7 +586,8 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       if (payload.action === 'UPDATE_DOCTOR_AVAILABILITY') {
         const dId = payload.data?.doctorId || 'DOC-001';
         const newSched = payload.data?.weeklySchedule || [];
-        const availMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, INITIAL_AVAILABILITY);
+        const availMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, {});
+
         
         availMap[dId] = { doctorId: dId, weeklySchedule: newSched };
         setLocalData(STORAGE_KEYS.AVAILABILITY, availMap);
@@ -769,7 +771,8 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
   const { action, data } = payload;
   let patients = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
   let doctors = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-  let availabilityMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, INITIAL_AVAILABILITY);
+  let availabilityMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, {});
+
   let appointments = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
   let waitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
   let notifications = getLocalData<NotificationItem[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS);

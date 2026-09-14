@@ -40,11 +40,11 @@ export const INITIAL_ANALYTICS: AnalyticsData = {
   lowRiskCount: 0,
   doctorUtilization: 0,
   appointmentTrends: [],
-  attendanceVsNoShow: [],
   noShowTrends: [],
   doctorUtilizationData: [],
   waitlistRecoveryData: []
 };
+
 
 export const INITIAL_MODEL_PERFORMANCE: ModelPerformance = {
   accuracy: 0,

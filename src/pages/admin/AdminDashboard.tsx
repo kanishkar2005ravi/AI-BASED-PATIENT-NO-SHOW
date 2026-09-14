@@ -157,11 +157,11 @@ export const AdminDashboard: React.FC = () => {
           lowRiskCount: dateFilteredApts.length > 0 ? filteredLowCount : lowCount,
           doctorUtilization: 0,
           appointmentTrends: [],
-          attendanceVsNoShow: [],
           noShowTrends: [],
           doctorUtilizationData: [],
           waitlistRecoveryData: []
         };
+
 
         setAnalytics(liveAnalytics);
         setAllAppointmentsList(aptsList);
