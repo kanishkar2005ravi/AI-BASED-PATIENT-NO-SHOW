@@ -108,10 +108,13 @@ export const CreatePatient: React.FC = () => {
 
     setLoading(false);
     if (res.success) {
-      showToast(res.message || 'Patient created successfully!', 'success');
+      const actualId = res.patient?.id || res.data?.id || formData.patientId;
+      showToast(`Patient ${actualId} created successfully!`, 'success');
+      // Refresh GET_PATIENTS before navigating, per requirements
+      await callBackend({ action: 'GET_PATIENTS' });
       navigate('/admin/patients');
     } else {
-      showToast(res.message || 'Failed to create patient.', 'error');
+      showToast(res.error || res.message || 'Failed to create patient.', 'error');
     }
   };
 

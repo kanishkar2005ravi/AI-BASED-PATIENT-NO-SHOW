@@ -152,22 +152,18 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         };
 
       } else if (payload.action === 'CREATE_PATIENT') {
+        const pId = payload.data?.patientId || payload.data?.id;
         requestBody = {
           action: 'CREATE_PATIENT',
-          patientId: payload.data?.patientId || payload.data?.id,
-          patient_id: payload.data?.patientId || payload.data?.id,
-          name: payload.data?.name,
-          email: payload.data?.email,
-          phone: payload.data?.phone,
-          dateOfBirth: payload.data?.dateOfBirth,
-          date_of_birth: payload.data?.dateOfBirth,
-          gender: payload.data?.gender,
-          address: payload.data?.address,
           data: {
-            ...payload.data,
-            patientId: payload.data?.patientId || payload.data?.id,
-            patient_id: payload.data?.patientId || payload.data?.id,
-            date_of_birth: payload.data?.dateOfBirth
+            id: pId,
+            patientId: pId,
+            name: payload.data?.name || '',
+            email: payload.data?.email || '',
+            phone: payload.data?.phone || '',
+            dateOfBirth: payload.data?.dateOfBirth || '',
+            gender: payload.data?.gender || 'Male',
+            address: payload.data?.address || ''
           }
         };
       } else if (payload.action === 'CREATE_DOCTOR') {
@@ -200,6 +196,10 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         };
       }
 
+      if (payload.action === 'CREATE_PATIENT') {
+        console.log('[CREATE_PATIENT] Outgoing API Request Body:', JSON.stringify(requestBody, null, 2));
+      }
+
       const response = await fetch(BACKEND_URL, {
         method: 'POST',
         headers: {
@@ -214,6 +214,10 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         resData = await response.json();
       } catch (e) {
         resData = {};
+      }
+
+      if (payload.action === 'CREATE_PATIENT') {
+        console.log('[CREATE_PATIENT] Backend API Response:', JSON.stringify({ httpStatus: response.status, ok: response.ok, data: resData }, null, 2));
       }
 
       if (!response.ok) {
