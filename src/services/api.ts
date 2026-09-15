@@ -265,7 +265,31 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             data: userObj as any
           };
         } else {
-          // Patient Login validation against registered patients
+          // Check if n8n returned the user directly from the LOGIN webhook branch
+          let rawBackendUser = null;
+          if (Array.isArray(resData) && resData.length > 0) rawBackendUser = resData[0];
+          else if (resData.data && Array.isArray(resData.data) && resData.data.length > 0) rawBackendUser = resData.data[0];
+          else if (resData.user) rawBackendUser = resData.user;
+          else if (resData.patient) rawBackendUser = resData.patient;
+          
+          if (rawBackendUser && rawBackendUser.json) rawBackendUser = rawBackendUser.json; // Unwrap n8n json format
+
+          if (rawBackendUser && (rawBackendUser.email?.toLowerCase() === inputIdentifier.toLowerCase() || rawBackendUser.id?.toLowerCase() === inputIdentifier.toLowerCase() || rawBackendUser.patient_id?.toLowerCase() === inputIdentifier.toLowerCase())) {
+            const userObj: User = {
+              id: rawBackendUser.id || rawBackendUser.patient_id || 'PAT-001',
+              name: rawBackendUser.name || rawBackendUser.patient_name || rawBackendUser.full_name || 'Patient',
+              email: rawBackendUser.email,
+              role: 'patient'
+            };
+            return {
+              success: true,
+              message: 'Patient login successful',
+              user: userObj,
+              data: userObj as any
+            };
+          }
+
+          // Patient Login validation against registered patients (Fallback)
           let localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
           let foundPatient = localPats.find(p => 
             p.id.toLowerCase() === inputIdentifier.toLowerCase() || 
