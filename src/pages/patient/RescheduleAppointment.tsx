@@ -10,6 +10,7 @@ import { callBackend } from '../../services/api';
 import { Appointment, TimeSlot } from '../../types';
 import { ArrowLeft, Calendar, Clock, RefreshCw } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 import { formatTime } from '../../utils/helpers';
 
 export const RescheduleAppointment: React.FC = () => {
@@ -17,6 +18,7 @@ export const RescheduleAppointment: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [newDate, setNewDate] = useState<string>(new Date().toISOString().split('T')[0]);
