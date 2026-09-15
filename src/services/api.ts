@@ -163,7 +163,8 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             phone: payload.data?.phone || '',
             dateOfBirth: payload.data?.dateOfBirth || '',
             gender: payload.data?.gender || 'Male',
-            address: payload.data?.address || ''
+            address: payload.data?.address || '',
+            password: payload.data?.password || 'password123'
           }
         };
       } else if (payload.action === 'CREATE_DOCTOR') {
@@ -180,12 +181,14 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           room_number: payload.data?.roomNumber,
           experience: payload.data?.experience,
           experience_years: payload.data?.experience,
+          password: payload.data?.password || 'password123',
           data: {
             ...payload.data,
             doctorId: payload.data?.doctorId || payload.data?.id,
             doctor_id: payload.data?.doctorId || payload.data?.id,
             room_number: payload.data?.roomNumber,
-            experience_years: payload.data?.experience
+            experience_years: payload.data?.experience,
+            password: payload.data?.password || 'password123'
           }
         };
       } else {
