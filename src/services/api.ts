@@ -137,7 +137,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
     if (payload.action === 'GET_APPOINTMENTS') {
       let combined = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
       if (payload.data?.patientId) {
-        combined = combined.filter((a: Appointment) => a.patientId === payload.data.patientId);
+        combined = combined.filter((a: Appointment) => String(a.patientId) === String(payload.data.patientId));
       }
       return {
         success: true,
