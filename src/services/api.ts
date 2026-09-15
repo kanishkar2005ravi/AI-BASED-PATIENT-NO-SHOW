@@ -594,7 +594,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_APPOINTMENTS Action Specifically
       if (payload.action === 'GET_APPOINTMENTS') {
         const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
-        const remoteApts = Array.isArray(resData.data) ? resData.data : [];
+        const remoteApts = Array.isArray(resData.data) ? resData.data : Array.isArray(resData) ? resData : [];
         let combined = mergeListsById(localApts, remoteApts);
         if (payload.data?.patientId) {
           combined = combined.filter((a: Appointment) => a.patientId === payload.data.patientId);
