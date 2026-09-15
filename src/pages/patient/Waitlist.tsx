@@ -29,6 +29,7 @@ export const Waitlist: React.FC = () => {
   const today = new Date().toISOString().split('T')[0];
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [requestedDate, setRequestedDate] = useState(today);
+  const [requestedTimeSlot, setRequestedTimeSlot] = useState('Morning');
   const [joining, setJoining] = useState(false);
 
   const fetchData = () => {
@@ -71,7 +72,7 @@ export const Waitlist: React.FC = () => {
         doctorId: doc.id,
         doctorName: doc.name,
         requestedDate,
-        requestedTimeSlot: 'Morning'
+        requestedTimeSlot
       }
     });
 
@@ -148,6 +149,18 @@ export const Waitlist: React.FC = () => {
               min={today}
               onChange={e => setRequestedDate(e.target.value)}
               required
+            />
+
+            <Select
+              label="Preferred Slot"
+              value={requestedTimeSlot}
+              onChange={e => setRequestedTimeSlot(e.target.value)}
+              options={[
+                { value: 'Morning', label: 'Morning' },
+                { value: 'Afternoon', label: 'Afternoon' },
+                { value: 'Evening', label: 'Evening' },
+                { value: 'Any Time', label: 'Any Time' }
+              ]}
             />
 
             <Button variant="primary" type="submit" className="w-full" isLoading={joining} icon={<Plus className="w-4 h-4" />}>
