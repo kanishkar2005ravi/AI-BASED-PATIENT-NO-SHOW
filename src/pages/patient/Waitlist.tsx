@@ -207,14 +207,14 @@ export const Waitlist: React.FC = () => {
                       {item.status}
                     </Badge>
 
-                    {item.status === 'NOTIFIED' && (
+                    {(item.status === 'NOTIFIED' || item.status === 'WAITING') && (
                       <Button
                         size="sm"
                         variant="success"
                         onClick={() => handleAccept(item.id)}
                         icon={<CheckCircle2 className="w-3.5 h-3.5" />}
                       >
-                        {t('waitlist.claim_button')}
+                        Accept Slot
                       </Button>
                     )}
 
