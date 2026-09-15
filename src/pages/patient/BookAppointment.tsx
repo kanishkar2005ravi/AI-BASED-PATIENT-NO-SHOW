@@ -121,6 +121,8 @@ export const BookAppointment: React.FC = () => {
         patientId: user?.id || 'PAT-1001',
         doctor_id: selectedDoctorId,
         doctorId: selectedDoctorId,
+        doctorName: selectedDoctor?.name || '',
+        doctor_name: selectedDoctor?.name || '',
         appointment_date: selectedDate,
         appointmentDate: selectedDate,
         appointment_time: selectedTimeSlot,

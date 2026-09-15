@@ -287,6 +287,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
               id: rawBackendUser.id || rawBackendUser.patient_id || 'PAT-001',
               name: rawBackendUser.name || rawBackendUser.patient_name || rawBackendUser.full_name || 'Patient',
               email: rawBackendUser.email,
+              phone: rawBackendUser.phone || rawBackendUser.patient_phone || '',
               role: 'patient'
             };
             return {
@@ -365,6 +366,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             id: foundPatient.id,
             name: foundPatient.name,
             email: foundPatient.email,
+            phone: foundPatient.phone || '',
             role: 'patient'
           };
 
