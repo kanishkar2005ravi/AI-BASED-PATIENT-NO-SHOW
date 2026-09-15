@@ -164,7 +164,10 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Build body matching exact SNS Agent Workbench Webhook requirements
       let requestBody: any;
       if (payload.action === 'BOOK_APPOINTMENT') {
+        const generatedId = payload.data?.id || payload.data?.appointment_id || `APT-${Date.now()}`;
         requestBody = {
+          appointment_id: generatedId,
+          id: generatedId,
           patient_id: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
           patientId: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
           doctor_id: payload.data?.doctorId || payload.data?.doctor_id || 'DOC-101',
@@ -428,7 +431,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         const currentPat = localPats.find(p => p.id === requestBody.patient_id) || { name: 'Patient', email: 'patient@example.com' };
 
         const appointmentObj: Appointment = resData.appointment || {
-          id: resData.id || resData.appointment_id || `APT-${Date.now()}`,
+          id: requestBody.appointment_id,
           patientId: requestBody.patient_id,
           patientName: currentPat.name,
           patientEmail: currentPat.email,
@@ -953,7 +956,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       if (payload.action === 'BOOK_APPOINTMENT') {
         console.warn('Network error intercepted for BOOK_APPOINTMENT. Assuming success due to n8n Wait node bug.');
         const appointmentObj: Appointment = {
-          id: `APT-${Date.now()}`,
+          id: requestBody.appointment_id,
           patientId: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
           patientName: payload.data?.patientName || payload.data?.patient_name || 'Patient',
           patientEmail: payload.data?.email || payload.data?.patientEmail || 'patient@example.com',
