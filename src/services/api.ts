@@ -266,11 +266,40 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           };
         } else {
           // Patient Login validation against registered patients
-          const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-          const foundPatient = localPats.find(p => 
+          let localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+          let foundPatient = localPats.find(p => 
             p.id.toLowerCase() === inputIdentifier.toLowerCase() || 
             (p.email && p.email.toLowerCase() === inputIdentifier.toLowerCase())
           );
+
+          // If not found locally, attempt to fetch from Supabase (Webhook) so new CSV uploads can log in!
+          if (!foundPatient && WEBHOOK_URL) {
+            try {
+              const pRes = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'GET_PATIENTS', data: {} })
+              });
+              const pData = await pRes.json();
+              let remoteRaw: any[] = [];
+              if (Array.isArray(pData)) remoteRaw = pData;
+              else if (pData?.data && Array.isArray(pData.data)) remoteRaw = pData.data;
+              else if (pData?.[0]?.data) remoteRaw = pData[0].data;
+              
+              if (remoteRaw.length > 0) {
+                const remotePats = remoteRaw.map(normalizePatient).filter(p => p.id);
+                localPats = mergeListsById(localPats, remotePats);
+                setLocalData(STORAGE_KEYS.PATIENTS, localPats); // Save to local storage
+                
+                foundPatient = localPats.find(p => 
+                  p.id.toLowerCase() === inputIdentifier.toLowerCase() || 
+                  (p.email && p.email.toLowerCase() === inputIdentifier.toLowerCase())
+                );
+              }
+            } catch (e) {
+              console.error('Failed to sync patients during login:', e);
+            }
+          }
 
           if (!foundPatient) {
             return {
