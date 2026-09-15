@@ -141,6 +141,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           patientId: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
           doctor_id: payload.data?.doctorId || payload.data?.doctor_id || 'DOC-101',
           doctorId: payload.data?.doctorId || payload.data?.doctor_id || 'DOC-101',
+          doctor_name: payload.data?.doctorName || payload.data?.doctor_name || 'Doctor',
           appointment_date: payload.data?.appointmentDate || payload.data?.appointment_date,
           appointment_time: payload.data?.appointmentTime || payload.data?.appointment_time,
           reason: payload.data?.appointmentType || payload.data?.reason || 'Routine Checkup',
