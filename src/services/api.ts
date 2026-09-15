@@ -924,6 +924,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           appointmentTime: payload.data?.appointmentTime || payload.data?.appointment_time || '',
           appointmentType: payload.data?.appointmentType || payload.data?.reason || 'Routine Checkup',
           status: 'CONFIRMED',
+          confirmedByPatient: true,
           risk: { level: 'LOW', probability: 0.1, factors: [] },
           createdAt: new Date().toISOString()
         };
