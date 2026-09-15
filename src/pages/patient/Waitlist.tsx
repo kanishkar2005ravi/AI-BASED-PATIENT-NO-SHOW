@@ -86,7 +86,14 @@ export const Waitlist: React.FC = () => {
   };
 
   const handleAccept = async (waitlistId: string) => {
-    const res = await callBackend({ action: 'ACCEPT_WAITLIST_SLOT', data: { waitlistId } });
+    const res = await callBackend({ 
+      action: 'ACCEPT_WAITLIST_SLOT', 
+      data: { 
+        waitlistId,
+        email: user?.email,
+        phone: user?.phone 
+      } 
+    });
     if (res.success) {
       showToast('Slot confirmed! Your appointment has been booked.', 'success');
       fetchData();

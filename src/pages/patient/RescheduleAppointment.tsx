@@ -80,7 +80,9 @@ export const RescheduleAppointment: React.FC = () => {
       data: {
         appointmentId: id,
         newDate,
-        newTime: selectedTime
+        newTime: selectedTime,
+        email: user?.email,
+        phone: user?.phone
       }
     });
 
