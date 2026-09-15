@@ -267,7 +267,12 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         } else {
           // Check if n8n returned the user directly from the LOGIN webhook branch
           let rawBackendUser = null;
-          if (Array.isArray(resData) && resData.length > 0) rawBackendUser = resData[0];
+          
+          // Deep unwrap for n8n's raw nested webhook formats
+          if (resData._responseData?.data?.items?.[0]?.json) rawBackendUser = resData._responseData.data.items[0].json;
+          else if (resData.items?.[0]?.json?.data?.items?.[0]?.json) rawBackendUser = resData.items[0].json.data.items[0].json;
+          else if (resData.items?.[0]?.json) rawBackendUser = resData.items[0].json;
+          else if (Array.isArray(resData) && resData.length > 0) rawBackendUser = resData[0];
           else if (resData.data && Array.isArray(resData.data) && resData.data.length > 0) rawBackendUser = resData.data[0];
           else if (resData.user) rawBackendUser = resData.user;
           else if (resData.patient) rawBackendUser = resData.patient;
