@@ -195,13 +195,6 @@ export const AdminDashboard: React.FC = () => {
       return a.risk && a.risk.level === targetLevel;
     });
 
-    if (matched.length === 0) {
-      matched = allAppointmentsList.filter(a => {
-        if (targetLevel === 'LOW') return !a.risk || a.risk.level === 'LOW';
-        return a.risk && a.risk.level === targetLevel;
-      });
-    }
-
     return matched;
   };
 
@@ -217,7 +210,7 @@ export const AdminDashboard: React.FC = () => {
     }
 
     const dateFiltered = allAppointmentsList.filter(a => a.appointmentDate === targetDateStr);
-    const listToFilter = dateFiltered.length > 0 ? dateFiltered : allAppointmentsList;
+    const listToFilter = dateFiltered;
 
     if (key === 'LOW_RISK' || key === 'MEDIUM_RISK' || key === 'HIGH_RISK') {
       const targetLevel = key === 'LOW_RISK' ? 'LOW' : key === 'MEDIUM_RISK' ? 'MEDIUM' : 'HIGH';
@@ -225,47 +218,22 @@ export const AdminDashboard: React.FC = () => {
     }
 
     if (key === 'attended') {
-      const matched = listToFilter.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT');
-      if (matched.length > 0) return matched;
-      return [
-        { id: 'APT-1001', patientId: 'PAT-001', patientName: 'John Doe', patientEmail: 'john@example.com', doctorId: 'DOC-001', doctorName: 'Dr. Sarah Jenkins', doctorSpecialization: 'Cardiology', appointmentTime: '09:00 AM', appointmentType: 'Consultation', status: 'CONFIRMED', appointmentDate: targetDateStr, confirmedByPatient: true, createdAt: targetDateStr, risk: { level: 'LOW', probability: 0.12, factors: [{ factor: 'Regular visitor', impact: 'positive', description: 'Consistently attends appointments' }] } },
-        { id: 'APT-1004', patientId: 'PAT-004', patientName: 'Emily Davis', patientEmail: 'emily@example.com', doctorId: 'DOC-003', doctorName: 'Dr. Priya Patel', doctorSpecialization: 'Pediatrics', appointmentTime: '10:30 AM', appointmentType: 'Follow-up', status: 'COMPLETED', appointmentDate: targetDateStr, confirmedByPatient: true, createdAt: targetDateStr, risk: { level: 'LOW', probability: 0.08, factors: [{ factor: 'High compliance', impact: 'positive', description: 'Responds quickly to reminders' }] } },
-        { id: 'APT-1007', patientId: 'PAT-007', patientName: 'Michael Brown', patientEmail: 'michael@example.com', doctorId: 'DOC-004', doctorName: 'Dr. David Kim', doctorSpecialization: 'Orthopedics', appointmentTime: '01:15 PM', appointmentType: 'Consultation', status: 'CHECKED_IN', appointmentDate: targetDateStr, confirmedByPatient: true, createdAt: targetDateStr, risk: { level: 'MEDIUM', probability: 0.35, factors: [{ factor: 'Traffic delay', impact: 'neutral', description: 'Moderate travel distance' }] } },
-        { id: 'APT-1010', patientId: 'PAT-010', patientName: 'Sophia Martinez', patientEmail: 'sophia@example.com', doctorId: 'DOC-002', doctorName: 'Dr. Michael Chen', doctorSpecialization: 'Neurology', appointmentTime: '03:00 PM', appointmentType: 'Routine Checkup', status: 'CONFIRMED', appointmentDate: targetDateStr, confirmedByPatient: true, createdAt: targetDateStr, risk: { level: 'LOW', probability: 0.15, factors: [{ factor: 'Confirmed via SMS', impact: 'positive', description: 'SMS confirmation received' }] } }
-      ];
+      return listToFilter.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT');
     }
 
     if (key === 'cancelled') {
-      const matched = listToFilter.filter(a => a.status === 'CANCELLED');
-      if (matched.length > 0) return matched;
-      return [
-        { id: 'APT-1002', patientId: 'PAT-002', patientName: 'Jane Smith', patientEmail: 'jane@example.com', doctorId: 'DOC-002', doctorName: 'Dr. Michael Chen', doctorSpecialization: 'Neurology', appointmentTime: '11:00 AM', appointmentType: 'Consultation', status: 'CANCELLED', appointmentDate: targetDateStr, confirmedByPatient: false, createdAt: targetDateStr, risk: { level: 'HIGH', probability: 0.82, factors: [{ factor: 'Prior no-shows', impact: 'negative', description: 'History of missed sessions' }] } },
-        { id: 'APT-1008', patientId: 'PAT-008', patientName: 'Jessica Taylor', patientEmail: 'jessica@example.com', doctorId: 'DOC-001', doctorName: 'Dr. Sarah Jenkins', doctorSpecialization: 'Cardiology', appointmentTime: '02:30 PM', appointmentType: 'Specialist Assessment', status: 'CANCELLED', appointmentDate: targetDateStr, confirmedByPatient: false, createdAt: targetDateStr, risk: { level: 'MEDIUM', probability: 0.58, factors: [{ factor: 'Work conflict', impact: 'negative', description: 'Schedule collision' }] } }
-      ];
+      return listToFilter.filter(a => a.status === 'CANCELLED');
     }
 
     if (key === 'rescheduled') {
-      const matched = listToFilter.filter(a => a.status === 'RESCHEDULED');
-      if (matched.length > 0) return matched;
-      return [
-        { id: 'APT-1003', patientId: 'PAT-003', patientName: 'Robert Taylor', patientEmail: 'robert@example.com', doctorId: 'DOC-003', doctorName: 'Dr. Priya Patel', doctorSpecialization: 'Orthopedics', appointmentTime: '02:00 PM', appointmentType: 'Follow-up', status: 'RESCHEDULED', appointmentDate: targetDateStr, confirmedByPatient: true, createdAt: targetDateStr, risk: { level: 'MEDIUM', probability: 0.44, factors: [{ factor: 'Rescheduled slot', impact: 'neutral', description: 'Slot changed upon request' }] } }
-      ];
+      return listToFilter.filter(a => a.status === 'RESCHEDULED');
     }
 
     if (key === 'missed') {
-      const matched = listToFilter.filter(a => a.status === 'NO_SHOW');
-      if (matched.length > 0) return matched;
-      return [
-        { id: 'APT-1005', patientId: 'PAT-005', patientName: 'William Wilson', patientEmail: 'william@example.com', doctorId: 'DOC-005', doctorName: 'Dr. David Kim', doctorSpecialization: 'Dermatology', appointmentTime: '04:00 PM', appointmentType: 'Routine Checkup', status: 'NO_SHOW', appointmentDate: targetDateStr, confirmedByPatient: false, createdAt: targetDateStr, risk: { level: 'HIGH', probability: 0.89, factors: [{ factor: 'No response', impact: 'negative', description: 'Unresponsive to automated calls' }] } }
-      ];
+      return listToFilter.filter(a => a.status === 'NO_SHOW');
     }
 
-    if (listToFilter.length > 0) return listToFilter;
-    return [
-      { id: 'APT-1001', patientId: 'PAT-001', patientName: 'John Doe', patientEmail: 'john@example.com', doctorId: 'DOC-001', doctorName: 'Dr. Sarah Jenkins', doctorSpecialization: 'Cardiology', appointmentTime: '09:00 AM', appointmentType: 'Consultation', status: 'CONFIRMED', appointmentDate: targetDateStr, confirmedByPatient: true, createdAt: targetDateStr, risk: { level: 'LOW', probability: 0.12, factors: [] } },
-      { id: 'APT-1002', patientId: 'PAT-002', patientName: 'Jane Smith', patientEmail: 'jane@example.com', doctorId: 'DOC-002', doctorName: 'Dr. Michael Chen', doctorSpecialization: 'Neurology', appointmentTime: '11:00 AM', appointmentType: 'Consultation', status: 'CANCELLED', appointmentDate: targetDateStr, confirmedByPatient: false, createdAt: targetDateStr, risk: { level: 'HIGH', probability: 0.82, factors: [] } },
-      { id: 'APT-1004', patientId: 'PAT-004', patientName: 'Emily Davis', patientEmail: 'emily@example.com', doctorId: 'DOC-003', doctorName: 'Dr. Priya Patel', doctorSpecialization: 'Pediatrics', appointmentTime: '10:30 AM', appointmentType: 'Follow-up', status: 'COMPLETED', appointmentDate: targetDateStr, confirmedByPatient: true, createdAt: targetDateStr, risk: { level: 'LOW', probability: 0.08, factors: [] } }
-    ];
+    return listToFilter;
   };
 
   if (loading || !analytics) {
