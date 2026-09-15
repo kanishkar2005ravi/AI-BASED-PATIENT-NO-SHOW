@@ -27,7 +27,8 @@ export const BookAppointment: React.FC = () => {
 
   // Form State
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
-  const [selectedDate, setSelectedDate] = useState<string>('2026-09-10');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
@@ -271,6 +272,7 @@ export const BookAppointment: React.FC = () => {
                 label={t('book.preferred_date')}
                 type="date"
                 value={selectedDate}
+                min={todayStr}
                 onChange={e => setSelectedDate(e.target.value)}
                 required
               />
