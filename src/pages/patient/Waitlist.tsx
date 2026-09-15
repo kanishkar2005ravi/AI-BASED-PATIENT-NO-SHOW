@@ -26,8 +26,9 @@ export const Waitlist: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   // Form State to join waitlist
+  const today = new Date().toISOString().split('T')[0];
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
-  const [requestedDate, setRequestedDate] = useState('2026-09-10');
+  const [requestedDate, setRequestedDate] = useState(today);
   const [joining, setJoining] = useState(false);
 
   const fetchData = () => {
@@ -144,6 +145,7 @@ export const Waitlist: React.FC = () => {
               label={t('waitlist.req_date')}
               type="date"
               value={requestedDate}
+              min={today}
               onChange={e => setRequestedDate(e.target.value)}
               required
             />
