@@ -132,22 +132,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       };
     }
 
-    // SHORT-CIRCUIT: Prevent GET_APPOINTMENTS from hitting n8n because the user's webhook
-    // only has routes for booking/canceling, and throws HTTP 500 otherwise, which clears localStorage.
-    if (payload.action === 'GET_APPOINTMENTS') {
-      let combined = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
-      
-      const targetId = payload.data?.patientId || payload.data?.userId || payload.data?.patient_id;
-      if (targetId) {
-        combined = combined.filter((a: Appointment) => String(a.patientId).toLowerCase() === String(targetId).toLowerCase());
-      }
-      
-      return {
-        success: true,
-        message: 'Appointments retrieved successfully (Local)',
-        data: combined as any
-      };
-    }
+
 
     if (payload.action === 'GET_DOCTOR_AVAILABILITY') {
       const docId = payload.data?.doctorId || payload.data?.doctor_id || 'DOC-001';
