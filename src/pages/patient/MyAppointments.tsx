@@ -49,10 +49,23 @@ export const MyAppointments: React.FC = () => {
       return;
     }
 
+    const aptToCancel = appointments.find(a => a.id === aptId);
+
     // Optimistically update state so card moves to Cancelled tab instantly
     setAppointments(prev => prev.map(a => a.id === aptId ? { ...a, status: 'CANCELLED' as const } : a));
 
-    const res = await callBackend({ action: 'CANCEL_APPOINTMENT', data: { appointmentId: aptId } });
+    const res = await callBackend({ 
+      action: 'CANCEL_APPOINTMENT', 
+      data: { 
+        appointmentId: aptId,
+        patient_name: aptToCancel?.patientName || user?.name,
+        patient_email: aptToCancel?.patientEmail || user?.email,
+        patient_phone: aptToCancel?.patientPhone || user?.phone,
+        doctor_name: aptToCancel?.doctorName,
+        appointment_date: aptToCancel?.appointmentDate,
+        appointment_time: aptToCancel?.appointmentTime
+      } 
+    });
     if (res.success) {
       showToast(res.message || 'Appointment cancelled successfully!', 'success');
       fetchAppointments();

@@ -140,7 +140,19 @@ export const PatientDashboard: React.FC = () => {
 
   const handleCancel = async (aptId: string) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
-    const res = await callBackend({ action: 'CANCEL_APPOINTMENT', data: { appointmentId: aptId } });
+    const aptToCancel = appointments.find(a => a.id === aptId);
+    const res = await callBackend({ 
+      action: 'CANCEL_APPOINTMENT', 
+      data: { 
+        appointmentId: aptId,
+        patient_name: aptToCancel?.patientName || user?.name,
+        patient_email: aptToCancel?.patientEmail || user?.email,
+        patient_phone: aptToCancel?.patientPhone || user?.phone,
+        doctor_name: aptToCancel?.doctorName,
+        appointment_date: aptToCancel?.appointmentDate,
+        appointment_time: aptToCancel?.appointmentTime
+      } 
+    });
     if (res.success) {
       showToast(res.message, 'success');
       fetchData();

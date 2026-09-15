@@ -37,7 +37,18 @@ export const AppointmentDetails: React.FC = () => {
 
   const handleCancel = async () => {
     if (!appointment) return;
-    const res = await callBackend({ action: 'CANCEL_APPOINTMENT', data: { appointmentId: appointment.id } });
+    const res = await callBackend({ 
+      action: 'CANCEL_APPOINTMENT', 
+      data: { 
+        appointmentId: appointment.id,
+        patient_name: appointment.patientName,
+        patient_email: appointment.patientEmail,
+        patient_phone: appointment.patientPhone,
+        doctor_name: appointment.doctorName,
+        appointment_date: appointment.appointmentDate,
+        appointment_time: appointment.appointmentTime
+      } 
+    });
     if (res.success) {
       showToast(res.message, 'success');
       setAppointment({ ...appointment, status: 'CANCELLED' });
