@@ -311,12 +311,25 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
               });
               const pData = await pRes.json();
               let remoteRaw: any[] = [];
+              
               if (Array.isArray(pData)) remoteRaw = pData;
               else if (pData?.data && Array.isArray(pData.data)) remoteRaw = pData.data;
-              else if (pData?.[0]?.data) remoteRaw = pData[0].data;
+              else if (pData?.patients && Array.isArray(pData.patients)) remoteRaw = pData.patients;
+              else if (pData?.items && Array.isArray(pData.items)) remoteRaw = pData.items;
+              else if (pData?._responseData?.data?.items && Array.isArray(pData._responseData.data.items)) remoteRaw = pData._responseData.data.items;
+              else if (pData?.data?.items && Array.isArray(pData.data.items)) remoteRaw = pData.data.items;
+
+              // Unwrap n8n json
+              remoteRaw = remoteRaw.map((item: any) => (item && item.json) ? item.json : item);
+              remoteRaw = remoteRaw.flatMap((item: any) => {
+                if (item?.data && Array.isArray(item.data)) return item.data;
+                if (item?.items && Array.isArray(item.items)) return item.items;
+                if (item?.data?.items && Array.isArray(item.data.items)) return item.data.items;
+                return [item];
+              }).map((item: any) => (item && item.json) ? item.json : item);
               
               if (remoteRaw.length > 0) {
-                const remotePats = remoteRaw.map(normalizePatient).filter(p => p.id);
+                const remotePats = remoteRaw.map(normalizePatient).filter((p: Patient) => p.id);
                 localPats = mergeListsById(localPats, remotePats);
                 setLocalData(STORAGE_KEYS.PATIENTS, localPats); // Save to local storage
                 
