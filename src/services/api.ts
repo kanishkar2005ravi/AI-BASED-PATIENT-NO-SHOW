@@ -192,6 +192,14 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             password: payload.data?.password || ''
           }
         };
+      } else if (payload.action === 'CANCEL_APPOINTMENT') {
+        requestBody = {
+          action: 'CANCEL_APPOINTMENT',
+          appointment_id: payload.data?.appointmentId || payload.data?.id || payload.data?.appointment_id,
+          appointmentId: payload.data?.appointmentId || payload.data?.id || payload.data?.appointment_id,
+          data: payload.data,
+          ...payload.data
+        };
       } else {
         requestBody = {
           action: payload.action,
