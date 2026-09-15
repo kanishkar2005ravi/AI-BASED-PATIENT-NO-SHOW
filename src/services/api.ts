@@ -662,8 +662,37 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_DOCTORS Action Specifically
       if (payload.action === 'GET_DOCTORS') {
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-        const remoteDocs = Array.isArray(resData.data) ? resData.data : [];
-        const combined = mergeListsById(localDocs, remoteDocs);
+        let remoteRaw: any[] = [];
+        
+        // Robust unwrapping for various backend response formats
+        if (Array.isArray(resData)) remoteRaw = resData;
+        else if (resData?.data && Array.isArray(resData.data)) remoteRaw = resData.data;
+        else if (resData?.doctors && Array.isArray(resData.doctors)) remoteRaw = resData.doctors;
+        else if (resData?.items && Array.isArray(resData.items)) remoteRaw = resData.items;
+        else if (resData?._responseData?.data?.items && Array.isArray(resData._responseData.data.items)) remoteRaw = resData._responseData.data.items;
+        else if (resData?.data?.items && Array.isArray(resData.data.items)) remoteRaw = resData.data.items;
+        else if (resData?.data && typeof resData.data === 'object') remoteRaw = [resData.data];
+
+        // Unwrap n8n .json wrappers
+        remoteRaw = remoteRaw.map(item => (item && item.json) ? item.json : item);
+        
+        // Deep unwrapping
+        remoteRaw = remoteRaw.flatMap(item => {
+          if (item?.data && Array.isArray(item.data)) return item.data;
+          if (item?.items && Array.isArray(item.items)) return item.items;
+          if (item?.data?.items && Array.isArray(item.data.items)) return item.data.items;
+          return [item];
+        }).map(item => (item && item.json) ? item.json : item);
+
+        // Normalize (ensure id vs doctor_id)
+        const remoteDocs = remoteRaw.map(d => ({
+          ...d,
+          id: d.id || d.doctor_id || `DOC-${Math.random().toString(36).substr(2, 9)}`,
+          name: d.name || d.doctor_name || 'Unknown Doctor'
+        })).filter(d => d.name !== 'Unknown Doctor');
+
+        const combined = IS_DEMO_MODE ? mergeListsById(localDocs, remoteDocs) : remoteDocs;
+        
         return {
           success: true,
           message: 'Doctors retrieved successfully.',
