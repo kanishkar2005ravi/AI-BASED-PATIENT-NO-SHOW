@@ -146,7 +146,9 @@ export const PatientDashboard: React.FC = () => {
       data: { 
         appointmentId: aptId,
         patient_name: aptToCancel?.patientName || user?.name,
+        email: aptToCancel?.patientEmail || user?.email,
         patient_email: aptToCancel?.patientEmail || user?.email,
+        phone: aptToCancel?.patientPhone || user?.phone,
         patient_phone: aptToCancel?.patientPhone || user?.phone,
         doctor_name: aptToCancel?.doctorName,
         appointment_date: aptToCancel?.appointmentDate,

@@ -42,7 +42,9 @@ export const AppointmentDetails: React.FC = () => {
       data: { 
         appointmentId: appointment.id,
         patient_name: appointment.patientName,
+        email: appointment.patientEmail,
         patient_email: appointment.patientEmail,
+        phone: appointment.patientPhone,
         patient_phone: appointment.patientPhone,
         doctor_name: appointment.doctorName,
         appointment_date: appointment.appointmentDate,

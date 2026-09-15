@@ -225,6 +225,10 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           action: 'CANCEL_APPOINTMENT',
           appointment_id: payload.data?.appointmentId || payload.data?.id || payload.data?.appointment_id,
           appointmentId: payload.data?.appointmentId || payload.data?.id || payload.data?.appointment_id,
+          email: payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email,
+          phone: payload.data?.phone || payload.data?.patientPhone || payload.data?.patient_phone,
+          patient_name: payload.data?.patientName || payload.data?.patient_name || payload.data?.name,
+          doctor_name: payload.data?.doctorName || payload.data?.doctor_name,
           data: payload.data,
           ...payload.data
         };
