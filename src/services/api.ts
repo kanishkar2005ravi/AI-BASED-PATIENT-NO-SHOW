@@ -956,7 +956,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       if (payload.action === 'BOOK_APPOINTMENT') {
         console.warn('Network error intercepted for BOOK_APPOINTMENT. Assuming success due to n8n Wait node bug.');
         const appointmentObj: Appointment = {
-          id: requestBody.appointment_id,
+          id: payload.data?.id || payload.data?.appointment_id || `APT-${Date.now()}`,
           patientId: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
           patientName: payload.data?.patientName || payload.data?.patient_name || 'Patient',
           patientEmail: payload.data?.email || payload.data?.patientEmail || 'patient@example.com',
