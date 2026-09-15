@@ -132,6 +132,20 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       };
     }
 
+    // SHORT-CIRCUIT: Prevent GET_APPOINTMENTS from hitting n8n because the user's webhook
+    // only has routes for booking/canceling, and throws HTTP 500 otherwise, which clears localStorage.
+    if (payload.action === 'GET_APPOINTMENTS') {
+      let combined = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
+      if (payload.data?.patientId) {
+        combined = combined.filter((a: Appointment) => a.patientId === payload.data.patientId);
+      }
+      return {
+        success: true,
+        message: 'Appointments retrieved successfully (Local)',
+        data: combined as any
+      };
+    }
+
     try {
       // Build body matching exact SNS Agent Workbench Webhook requirements
       let requestBody: any;
