@@ -149,6 +149,17 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       };
     }
 
+    if (payload.action === 'GET_DOCTOR_AVAILABILITY') {
+      const docId = payload.data?.doctorId || payload.data?.doctor_id || 'DOC-001';
+      const availMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, {});
+      const docSchedule = availMap[docId] || { doctorId: docId, weeklySchedule: [] };
+      return {
+        success: true,
+        message: 'Doctor availability retrieved successfully (Local)',
+        data: docSchedule as any
+      };
+    }
+
     try {
       // Build body matching exact SNS Agent Workbench Webhook requirements
       let requestBody: any;

@@ -19,12 +19,20 @@ export const RescheduleAppointment: React.FC = () => {
   const { showToast } = useToast();
 
   const [appointment, setAppointment] = useState<Appointment | null>(null);
-  const [newDate, setNewDate] = useState<string>('2026-09-12');
-  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [newDate, setNewDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const ALL_25_SLOTS = [
+    '09:00', '09:20', '09:40', '10:00', '10:20',
+    '11:00', '11:20', '11:40',
+    '14:00', '14:20', '14:40', '15:00', '15:20', '15:40',
+    '16:20', '16:40', '17:00', '17:20', '17:40', '18:00', '18:20', '18:40', '19:00', '19:20', '19:40'
+  ];
+
+  // Fetch the appointment on mount
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -32,25 +40,32 @@ export const RescheduleAppointment: React.FC = () => {
       if (isMounted && res.success && Array.isArray(res.data)) {
         const found = res.data.find((a: Appointment) => a.id === id);
         setAppointment(found || null);
+        setLoading(false);
+      }
+    });
+    return () => { isMounted = false; };
+  }, [id]);
 
-        if (found) {
-          callBackend({ action: 'GET_DOCTOR_AVAILABILITY', data: { doctorId: found.doctorId } }).then(availRes => {
-            if (isMounted && availRes.success && availRes.data) {
-              const free = (availRes.data.weeklySchedule || []).filter((s: TimeSlot) => s.status === 'Available');
-              setAvailableSlots(free);
-              if (free.length > 0) setSelectedTime(free[0].startTime);
-            }
-            setLoading(false);
-          });
-        } else {
-          setLoading(false);
+  // When date or appointment changes, calculate available slots
+  useEffect(() => {
+    if (!appointment) return;
+    let isMounted = true;
+    callBackend({ action: 'GET_APPOINTMENTS', data: {} }).then(res => {
+      if (isMounted && res.success && Array.isArray(res.data)) {
+        // Find all appointments for the same doctor on the selected new date
+        const booked = res.data
+          .filter((a: Appointment) => a.doctorId === appointment.doctorId && a.appointmentDate === newDate && a.id !== appointment.id && (a.status === 'CONFIRMED' || a.status === 'RESCHEDULED'))
+          .map((a: Appointment) => a.appointmentTime);
+        
+        const freeSlots = ALL_25_SLOTS.filter(s => !booked.includes(s));
+        setAvailableSlots(freeSlots);
+        if (freeSlots.length > 0 && !freeSlots.includes(selectedTime)) {
+          setSelectedTime(freeSlots[0]);
         }
       }
     });
-    return () => {
-      isMounted = false;
-    };
-  }, [id]);
+    return () => { isMounted = false; };
+  }, [newDate, appointment]);
 
   const handleConfirmReschedule = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,6 +139,7 @@ export const RescheduleAppointment: React.FC = () => {
             type="date"
             value={newDate}
             onChange={e => setNewDate(e.target.value)}
+            min={new Date().toISOString().split('T')[0]}
             required
           />
 
@@ -139,16 +155,16 @@ export const RescheduleAppointment: React.FC = () => {
                 {availableSlots.map(slot => (
                   <button
                     type="button"
-                    key={slot.id}
-                    onClick={() => setSelectedTime(slot.startTime)}
+                    key={slot}
+                    onClick={() => setSelectedTime(slot)}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
-                      selectedTime === slot.startTime
+                      selectedTime === slot
                         ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
                         : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                     }`}
                   >
                     <Clock className="w-3.5 h-3.5" />
-                    <span>{formatTime(slot.startTime)}</span>
+                    <span>{formatTime(slot)}</span>
                   </button>
                 ))}
               </div>
