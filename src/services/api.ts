@@ -297,9 +297,9 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           );
 
           // If not found locally, attempt to fetch from Supabase (Webhook) so new CSV uploads can log in!
-          if (!foundPatient && WEBHOOK_URL) {
+          if (!foundPatient && BACKEND_URL) {
             try {
-              const pRes = await fetch(WEBHOOK_URL, {
+              const pRes = await fetch(BACKEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'GET_PATIENTS', data: {} })
