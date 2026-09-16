@@ -289,7 +289,7 @@ export const Appointments: React.FC = () => {
               { value: 'ALL', label: t('appointments.all_statuses') },
               { value: 'CONFIRMED', label: t('status.confirmed') },
               { value: 'CHECKED_IN', label: 'Checked In' },
-              { value: 'CHECKED_OUT', label: 'Checked Out' },
+
               { value: 'COMPLETED', label: t('status.completed') },
               { value: 'NO_SHOW', label: t('status.not_attended') },
               { value: 'CANCELLED', label: t('status.cancelled') },
@@ -368,7 +368,7 @@ export const Appointments: React.FC = () => {
                         >
                           <option value="CONFIRMED">Confirmed</option>
                           <option value="CHECKED_IN">Checked In</option>
-                          <option value="CHECKED_OUT">Checked Out</option>
+
                           <option value="COMPLETED">Completed</option>
                           <option value="NO_SHOW">Not Attended (No-Show)</option>
                           <option value="CANCELLED">Cancelled</option>
