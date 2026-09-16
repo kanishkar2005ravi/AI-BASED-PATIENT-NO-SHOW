@@ -102,7 +102,9 @@ export const Appointments: React.FC = () => {
         patient_email: apt.patientEmail,
         phone: apt.patientPhone || '+918300096676',
         patientPhone: apt.patientPhone || '+918300096676',
-        patient_phone: apt.patientPhone || '+918300096676'
+        patient_phone: apt.patientPhone || '+918300096676',
+        doctorName: apt.doctorName,
+        doctor_name: apt.doctorName
       }
     });
     
