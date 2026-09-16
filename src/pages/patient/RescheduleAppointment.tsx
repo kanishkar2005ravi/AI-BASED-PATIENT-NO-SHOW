@@ -77,16 +77,24 @@ export const RescheduleAppointment: React.FC = () => {
     }
 
     setSaving(true);
-    const res = await callBackend({
-      action: 'RESCHEDULE_APPOINTMENT',
-      data: {
-        appointmentId: id,
-        newDate,
-        newTime: selectedTime,
-        email: user?.email,
-        phone: user?.phone
-      }
-    });
+      const res = await callBackend({
+        action: 'RESCHEDULE_APPOINTMENT',
+        data: {
+          appointmentId: id,
+          newDate,
+          newTime: selectedTime,
+          email: user?.email || appointment?.patientEmail,
+          patientEmail: user?.email || appointment?.patientEmail,
+          patient_email: user?.email || appointment?.patientEmail,
+          phone: user?.phone || appointment?.patientPhone || '8300096676',
+          patientPhone: user?.phone || appointment?.patientPhone || '8300096676',
+          patient_phone: user?.phone || appointment?.patientPhone || '8300096676',
+          patientName: user?.name || appointment?.patientName,
+          patient_name: user?.name || appointment?.patientName,
+          doctorName: appointment?.doctorName,
+          doctor_name: appointment?.doctorName
+        }
+      });
 
     setSaving(false);
     if (res.success) {
