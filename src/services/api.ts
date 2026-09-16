@@ -613,6 +613,17 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
         const updatedApts = localApts.map(a => a.id === aptId ? { ...a, status: 'CANCELLED' as const } : a);
         setLocalData(STORAGE_KEYS.APPOINTMENTS, updatedApts);
+        
+        // Also simulate the auto-recovery locally so the UI updates instantly
+        const cancelledApt = localApts.find(a => a.id === aptId);
+        if (cancelledApt) {
+          const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+          const matchingIdx = localWaitlist.findIndex(w => w.doctorId === cancelledApt.doctorId && w.status === 'WAITING');
+          if (matchingIdx !== -1) {
+            localWaitlist[matchingIdx].status = 'NOTIFIED';
+            setLocalData(STORAGE_KEYS.WAITLIST, localWaitlist);
+          }
+        }
 
         return {
           success: true,
