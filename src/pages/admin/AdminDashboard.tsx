@@ -252,66 +252,6 @@ export const AdminDashboard: React.FC = () => {
     <div className="space-y-6 pb-12">
       <Header title={t('nav.dashboard')} />
 
-      {/* 🚨 VERY TOP SECTION: BLINKING URGENT EMERGENCY REQUESTS BANNER 🚨 */}
-      <div
-        onClick={() => navigate('/admin/waitlist')}
-        className={`rounded-3xl p-5 md:p-6 border-2 transition-all cursor-pointer group shadow-xl relative overflow-hidden ${
-          metrics.waitlistCount > 0
-            ? 'bg-gradient-to-r from-rose-950 via-slate-900 to-red-950 text-white border-rose-500 ring-4 ring-rose-500/30 animate-pulse shadow-rose-950/60'
-            : 'bg-gradient-to-r from-slate-900 via-rose-950 to-slate-950 text-white border-rose-600/40 shadow-slate-950/40'
-        }`}
-      >
-        {/* Blinking Ambient Glow */}
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-rose-600/30 rounded-full blur-3xl pointer-events-none animate-ping" />
-
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative z-10">
-          <div className="flex items-center space-x-4">
-            {/* Blinking Siren Icon */}
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-600 via-red-600 to-amber-600 text-white border-2 border-rose-300 shadow-lg flex items-center justify-center flex-shrink-0 animate-bounce">
-              <AlertTriangle className="w-7 h-7 text-white animate-pulse" />
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Blinking Emergency Badge */}
-                <span className="bg-rose-600 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full border border-rose-300 tracking-wider shadow-md animate-pulse flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-white animate-ping" /> 🚨 EMERGENCY ALERT: IMMEDIATE ACTION REQUIRED
-                </span>
-                <span className="text-xs font-black text-rose-300 tracking-wide uppercase">
-                  {t('metric.urgent_requests')}
-                </span>
-              </div>
-              
-              <h3 className="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-3">
-                <span>{metrics.waitlistCount} Urgent Requests Pending</span>
-                {metrics.waitlistCount > 0 && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-500/30 text-rose-300 border border-rose-400/40 animate-pulse">
-                    ⚡ {metrics.waitlistCount} Patient(s) Waiting
-                  </span>
-                )}
-              </h3>
-
-              <p className="text-xs text-rose-200/90 font-semibold">
-                Real-time patient emergency consultation requests requiring hospital administrator verification & slot allocation.
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate('/admin/waitlist');
-            }}
-            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 via-red-600 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-black text-xs transition-all shadow-lg shadow-rose-600/40 hover:scale-105 flex items-center gap-2 flex-shrink-0 cursor-pointer border border-rose-300/50 group/btn"
-          >
-            <span>Assign Emergency Slots Now</span>
-            <ArrowUpRight className="w-4 h-4 text-white group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-          </button>
-        </div>
-      </div>
-
-
-
       {/* 🏥 HOSPITAL OVERVIEW & PATIENT STATS HEADER BAR 🏥 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div>
@@ -1114,5 +1054,6 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
+
 
 
