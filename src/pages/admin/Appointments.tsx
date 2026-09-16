@@ -85,13 +85,19 @@ export const Appointments: React.FC = () => {
   const medRiskAppointments = doctorAppointments.filter(a => a.risk?.level === 'MEDIUM');
   const highRiskAppointments = doctorAppointments.filter(a => a.risk?.level === 'HIGH');
 
-  const handleUpdateStatus = async (aptId: string, newStatus: AppointmentStatus) => {
+  const handleUpdateStatus = async (apt: Appointment, newStatus: AppointmentStatus) => {
     const res = await callBackend({
       action: 'UPDATE_APPOINTMENT_STATUS',
-      data: { appointmentId: aptId, status: newStatus }
+      data: { 
+        appointmentId: apt.id, 
+        status: newStatus,
+        patientName: apt.patientName,
+        email: apt.patientEmail,
+        phone: apt.patientPhone || '+918300096676' // Fallback for testing
+      }
     });
     if (res.success) {
-      showToast(`Appointment ${aptId} status updated to ${newStatus}.`, 'success');
+      showToast(`Appointment ${apt.id} status updated to ${newStatus}.`, 'success');
       fetchAppointments();
     } else {
       showToast(res.message || 'Failed to update status.', 'error');
@@ -344,7 +350,7 @@ export const Appointments: React.FC = () => {
                         {/* Status Updater Select for Admin */}
                         <select
                           value={apt.status}
-                          onChange={e => handleUpdateStatus(apt.id, e.target.value as AppointmentStatus)}
+                          onChange={e => handleUpdateStatus(apt, e.target.value as AppointmentStatus)}
                           className="text-xs border border-slate-300 rounded-lg px-2 py-1 bg-white font-semibold text-slate-800 focus:ring-2 focus:ring-teal-500"
                         >
                           <option value="CONFIRMED">Confirmed</option>
