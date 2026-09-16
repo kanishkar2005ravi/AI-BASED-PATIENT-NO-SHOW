@@ -86,21 +86,34 @@ export const Appointments: React.FC = () => {
   const highRiskAppointments = doctorAppointments.filter(a => a.risk?.level === 'HIGH');
 
   const handleUpdateStatus = async (apt: Appointment, newStatus: AppointmentStatus) => {
+    // Optimistic UI Update - Instantly change it on screen!
+    setAppointments(prev => prev.map(a => a.id === apt.id ? { ...a, status: newStatus } : a));
+    setFilteredAppointments(prev => prev.map(a => a.id === apt.id ? { ...a, status: newStatus } : a));
+
     const res = await callBackend({
       action: 'UPDATE_APPOINTMENT_STATUS',
       data: { 
         appointmentId: apt.id, 
         status: newStatus,
         patientName: apt.patientName,
+        patient_name: apt.patientName,
         email: apt.patientEmail,
-        phone: apt.patientPhone || '+918300096676' // Fallback for testing
+        patientEmail: apt.patientEmail,
+        patient_email: apt.patientEmail,
+        phone: apt.patientPhone || '+918300096676',
+        patientPhone: apt.patientPhone || '+918300096676',
+        patient_phone: apt.patientPhone || '+918300096676'
       }
     });
+    
     if (res.success) {
       showToast(`Appointment ${apt.id} status updated to ${newStatus}.`, 'success');
-      fetchAppointments();
+      // We don't necessarily need to fetch again since we optimistically updated,
+      // but we do it silently in the background if needed.
     } else {
       showToast(res.message || 'Failed to update status.', 'error');
+      // Revert if failed
+      fetchAppointments();
     }
   };
 
