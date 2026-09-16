@@ -100,9 +100,9 @@ export const Appointments: React.FC = () => {
         email: apt.patientEmail,
         patientEmail: apt.patientEmail,
         patient_email: apt.patientEmail,
-        phone: apt.patientPhone || '+918300096676',
-        patientPhone: apt.patientPhone || '+918300096676',
-        patient_phone: apt.patientPhone || '+918300096676',
+        phone: apt.patientPhone || '8300096676',
+        patientPhone: apt.patientPhone || '8300096676',
+        patient_phone: apt.patientPhone || '8300096676',
         doctorName: apt.doctorName,
         doctor_name: apt.doctorName
       }
