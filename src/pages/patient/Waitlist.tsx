@@ -208,7 +208,7 @@ export const Waitlist: React.FC = () => {
                       {item.status}
                     </Badge>
 
-                    {(item.status === 'NOTIFIED' || item.status === 'WAITING') && (
+                    {item.status === 'NOTIFIED' && (
                       <Button
                         size="sm"
                         variant="success"
