@@ -3,7 +3,7 @@ import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { callBackend } from '../../services/api';
-import { downloadCSV } from '../../utils/helpers';
+import { downloadCSV, getLocalDateString } from '../../utils/helpers';
 import { FileText, Download, Printer, CheckCircle, BarChart2, Calendar, Users, Stethoscope, Clock, Brain } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { BackButton } from '../../components/common/BackButton';
@@ -72,7 +72,7 @@ export const Reports: React.FC = () => {
         AIRiskProbability: `${Math.round((apt.risk?.probability || 0.2) * 100)}%`
       }));
 
-      downloadCSV(`${title.replace(/ /g, '_')}_${new Date().toISOString().split('T')[0]}.csv`, exportData);
+      downloadCSV(`${title.replace(/ /g, '_')}_${getLocalDateString()}.csv`, exportData);
       showToast(`${title} exported successfully!`, 'success');
     } else {
       showToast('Failed to generate report export.', 'error');

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
+import { getLocalDateString } from '../../utils/helpers';
 import { Badge } from '../../components/common/Badge';
 import { Loading } from '../../components/common/Loading';
 import { callBackend } from '../../services/api';
@@ -35,7 +36,7 @@ import { useToast } from '../../context/ToastContext';
 
 export const AdminDashboard: React.FC = () => {
   const [dateRange, setDateRange] = useState<'today' | 'yesterday' | 'custom'>('today');
-  const [customDate, setCustomDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [customDate, setCustomDate] = useState<string>(getLocalDateString());
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,13 +98,13 @@ export const AdminDashboard: React.FC = () => {
         const docsList: Doctor[] = (docsRes.success && Array.isArray(docsRes.data)) ? docsRes.data : [];
         const waitList: WaitlistItem[] = (waitRes.success && Array.isArray(waitRes.data)) ? waitRes.data : [];
 
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getLocalDateString();
         let targetDateStr = todayStr;
 
         if (dateRange === 'yesterday') {
           const y = new Date();
           y.setDate(y.getDate() - 1);
-          targetDateStr = y.toISOString().split('T')[0];
+          targetDateStr = getLocalDateString(y);
         } else if (dateRange === 'custom') {
           targetDateStr = customDate;
         }
@@ -179,12 +180,12 @@ export const AdminDashboard: React.FC = () => {
     const targetLevel = level || 'LOW';
     if (!targetLevel) return [];
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalDateString();
     let targetDateStr = todayStr;
     if (dateRange === 'yesterday') {
       const y = new Date();
       y.setDate(y.getDate() - 1);
-      targetDateStr = y.toISOString().split('T')[0];
+      targetDateStr = getLocalDateString(y);
     } else if (dateRange === 'custom') {
       targetDateStr = customDate;
     }
@@ -199,12 +200,12 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const getPatientsForMetricKey = (key: string): Appointment[] => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalDateString();
     let targetDateStr = todayStr;
     if (dateRange === 'yesterday') {
       const y = new Date();
       y.setDate(y.getDate() - 1);
-      targetDateStr = y.toISOString().split('T')[0];
+      targetDateStr = getLocalDateString(y);
     } else if (dateRange === 'custom') {
       targetDateStr = customDate;
     }

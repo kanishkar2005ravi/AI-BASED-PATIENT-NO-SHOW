@@ -12,7 +12,7 @@ import { Doctor, TimeSlot, Appointment } from '../../types';
 import { Calendar, Clock, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { formatTime } from '../../utils/helpers';
+import { formatTime, getLocalDateString } from '../../utils/helpers';
 
 export const BookAppointment: React.FC = () => {
   const { user } = useAuth();
@@ -27,7 +27,7 @@ export const BookAppointment: React.FC = () => {
 
   // Form State
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);

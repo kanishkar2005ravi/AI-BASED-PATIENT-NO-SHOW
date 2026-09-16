@@ -11,6 +11,7 @@ import {
   INITIAL_USERS
 } from '../utils/mockData';
 import { calculateAIRisk } from '../utils/aiPredictor';
+import { getLocalDateString } from '../utils/helpers';
 
 const DEFAULT_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/a2918487-c8b3-45ba-aed2-2b725e35b286';
 const BACKEND_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_WEBHOOK_URL || DEFAULT_WEBHOOK_URL;
@@ -71,7 +72,7 @@ function normalizePatient(p: any): Patient {
       cancelledAppointments: 0,
       rescheduledAppointments: 0,
       noShowRate: 0,
-      createdAt: new Date().toISOString().split('T')[0]
+      createdAt: getLocalDateString()
     };
   }
 
@@ -107,7 +108,7 @@ function normalizePatient(p: any): Patient {
     cancelledAppointments,
     rescheduledAppointments,
     noShowRate,
-    createdAt: p.createdAt || p.created_at || new Date().toISOString().split('T')[0]
+    createdAt: p.createdAt || p.created_at || getLocalDateString()
   } as Patient;
 }
 
@@ -429,7 +430,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           status: 'CONFIRMED',
           risk: resData.risk || { level: 'LOW', probability: 0.15, factors: [] },
           confirmedByPatient: true,
-          createdAt: new Date().toISOString().split('T')[0]
+          createdAt: getLocalDateString()
         };
 
         // Sync with local memory & storage so UI updates immediately
@@ -802,11 +803,11 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           patientName: selPat.name || payload.data?.patientName || 'Patient',
           doctorId: dId,
           doctorName: selDoc.name || payload.data?.doctorName || 'Doctor',
-          requestedDate: payload.data?.requestedDate || new Date().toISOString().split('T')[0],
+          requestedDate: payload.data?.requestedDate || getLocalDateString(),
           requestedTimeSlot: reasonStr,
           position: localWaitlist.filter(w => w.doctorId === dId && w.status === 'WAITING').length + 1,
           status: 'WAITING',
-          createdAt: new Date().toISOString().split('T')[0]
+          createdAt: getLocalDateString()
         };
 
         localWaitlist.unshift(newItem);
@@ -869,7 +870,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             status: 'CONFIRMED',
             risk: { level: 'LOW', probability: 0.1, factors: [] },
             confirmedByPatient: true,
-            createdAt: new Date().toISOString().split('T')[0]
+            createdAt: getLocalDateString()
           };
           localApts.unshift(newApt);
           setLocalData(STORAGE_KEYS.APPOINTMENTS, localApts);
@@ -1091,7 +1092,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         cancelledAppointments: 0,
         rescheduledAppointments: 0,
         noShowRate: 0.0,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: getLocalDateString()
       };
 
       patients.unshift(newPatient);
@@ -1297,7 +1298,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         status: 'CONFIRMED',
         risk,
         confirmedByPatient: false,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: getLocalDateString()
       };
 
       appointments.unshift(newApt);
@@ -1484,7 +1485,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         requestedTimeSlot: requestedTimeSlot || 'Morning',
         position: waitlist.filter(w => w.doctorId === doctorId && w.status === 'WAITING').length + 1,
         status: 'WAITING',
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: getLocalDateString()
       };
       waitlist.push(newEntry);
       setLocalData(STORAGE_KEYS.WAITLIST, waitlist);
@@ -1524,7 +1525,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         status: 'CONFIRMED',
         risk: { level: 'LOW', probability: 0.1, factors: [] },
         confirmedByPatient: true,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: getLocalDateString()
       };
 
       appointments.unshift(newApt);
@@ -1565,7 +1566,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       const realApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
       const realWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
 
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = getLocalDateString();
       const todayAptsCount = realApts.filter(a => a.appointmentDate === todayStr).length;
 
       const totalAptsCount = realApts.length;

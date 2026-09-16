@@ -43,7 +43,7 @@ import {
 import { useToast } from '../../context/ToastContext';
 import { WelcomeSplashScreen } from '../../components/common/WelcomeSplashScreen';
 import { AppFeaturesModal } from '../../components/common/AppFeaturesModal';
-import { formatTime } from '../../utils/helpers';
+import { formatTime, getLocalDateString } from '../../utils/helpers';
 
 export const PatientDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -61,7 +61,7 @@ export const PatientDashboard: React.FC = () => {
   const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const [showGuideNote, setShowGuideNote] = useState(false);
   const [selectedEmergencyDoctorId, setSelectedEmergencyDoctorId] = useState<string>('');
-  const [emergencyDate, setEmergencyDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [emergencyDate, setEmergencyDate] = useState<string>(() => getLocalDateString());
   const [emergencyReason, setEmergencyReason] = useState<string>('');
   const [priorityLevel, setPriorityLevel] = useState<'EMERGENCY' | 'HIGH' | 'STANDARD'>('HIGH');
   const [isSubmittingEmergency, setIsSubmittingEmergency] = useState(false);
@@ -875,7 +875,7 @@ export const PatientDashboard: React.FC = () => {
                   </label>
                   <input
                     type="date"
-                    min={new Date().toISOString().split('T')[0]}
+                    min={getLocalDateString()}
                     value={emergencyDate}
                     onChange={e => setEmergencyDate(e.target.value)}
                     className="w-full px-4 py-3 rounded-2xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-900 font-bold text-sm bg-slate-50/50"

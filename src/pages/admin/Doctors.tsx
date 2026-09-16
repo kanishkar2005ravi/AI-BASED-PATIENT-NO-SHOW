@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
+import { getLocalDateString } from '../../utils/helpers';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { Loading } from '../../components/common/Loading';
@@ -150,7 +151,7 @@ export const Doctors: React.FC = () => {
                         doctorName: doc.name,
                         email: doc.email,
                         phone: doc.phone || '+919876543210',
-                        date: new Date().toISOString().split('T')[0]
+                        date: getLocalDateString()
                       }
                     });
                     if (res.success) {

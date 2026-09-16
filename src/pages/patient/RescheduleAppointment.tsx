@@ -11,7 +11,7 @@ import { Appointment, TimeSlot } from '../../types';
 import { ArrowLeft, Calendar, Clock, RefreshCw } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
-import { formatTime } from '../../utils/helpers';
+import { formatTime, getLocalDateString } from '../../utils/helpers';
 
 export const RescheduleAppointment: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +21,7 @@ export const RescheduleAppointment: React.FC = () => {
   const { user } = useAuth();
 
   const [appointment, setAppointment] = useState<Appointment | null>(null);
-  const [newDate, setNewDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [newDate, setNewDate] = useState<string>(getLocalDateString());
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -143,7 +143,7 @@ export const RescheduleAppointment: React.FC = () => {
             type="date"
             value={newDate}
             onChange={e => setNewDate(e.target.value)}
-            min={new Date().toISOString().split('T')[0]}
+            min={getLocalDateString()}
             required
           />
 

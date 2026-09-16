@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
+import { getLocalDateString } from '../../utils/helpers';
 import { Badge } from '../../components/common/Badge';
 import { Loading } from '../../components/common/Loading';
 import { callBackend, isDemoMode } from '../../services/api';
@@ -60,7 +61,7 @@ export const Analytics: React.FC = () => {
   const demoActive = isDemoMode();
 
   const handleDownloadMetricReport = async (type: 'PATIENTS' | 'APPOINTMENTS' | 'ATTENDED' | 'CANCELLED' | 'RESCHEDULED' | 'MISSED' | 'WAITLIST' | 'DOCTORS') => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalDateString();
     
     if (type === 'PATIENTS') {
       const res = await callBackend({ action: 'GET_PATIENTS' });
@@ -201,7 +202,7 @@ export const Analytics: React.FC = () => {
   };
 
   const handleDownloadRiskReport = async (riskLevel: 'LOW' | 'MEDIUM' | 'HIGH') => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalDateString();
     const res = await callBackend({ action: 'GET_APPOINTMENTS' });
     const aptsList: Appointment[] = (res.success && Array.isArray(res.data)) ? res.data : [];
     

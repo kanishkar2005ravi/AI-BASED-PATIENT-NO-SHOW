@@ -14,6 +14,7 @@ import { callBackend } from '../../services/api';
 import { Doctor, WaitlistItem } from '../../types';
 import { Clock, Plus, Trash2, CheckCircle2, Sparkles, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { getLocalDateString } from '../../utils/helpers';
 
 export const Waitlist: React.FC = () => {
   const { user } = useAuth();
@@ -26,7 +27,7 @@ export const Waitlist: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   // Form State to join waitlist
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [requestedDate, setRequestedDate] = useState(today);
   const [requestedTimeSlot, setRequestedTimeSlot] = useState('Morning');
