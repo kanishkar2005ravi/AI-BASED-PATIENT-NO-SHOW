@@ -66,7 +66,7 @@ export function unwrapN8nData(raw: any): any[] {
   if (Array.isArray(raw.patients)) return raw.patients;
   if (Array.isArray(raw.doctors)) return raw.doctors;
   if (Array.isArray(raw.appointments)) return raw.appointments;
-  if (raw.id || raw.patient_id || raw.doctor_id || raw.appointment_id || raw.name) return [raw];
+  if (raw.id || raw.patient_id || raw.patientId || raw.doctor_id || raw.doctorId || raw.appointment_id || raw.appointmentId || raw.name) return [raw];
   return [];
 }
 
