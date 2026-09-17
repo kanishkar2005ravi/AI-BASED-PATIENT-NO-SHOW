@@ -317,25 +317,22 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Build body matching exact SNS Agent Workbench Webhook requirements
       let requestBody: any;
       if (payload.action === 'BOOK_APPOINTMENT') {
-        const generatedId = payload.data?.id || payload.data?.appointment_id || `APT-${Date.now()}`;
         requestBody = {
-          appointment_id: generatedId,
-          id: generatedId,
-          patient_id: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
-          patientId: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
+          patient_id: payload.data?.patientId || payload.data?.patient_id || 'PAT-1',
+          patientId: payload.data?.patientId || payload.data?.patient_id || 'PAT-1',
           doctor_id: payload.data?.doctorId || payload.data?.doctor_id || 'DOC-101',
           doctorId: payload.data?.doctorId || payload.data?.doctor_id || 'DOC-101',
           doctor_name: payload.data?.doctorName || payload.data?.doctor_name || 'Doctor',
           appointment_date: payload.data?.appointmentDate || payload.data?.appointment_date,
           appointment_time: payload.data?.appointmentTime || payload.data?.appointment_time,
           reason: payload.data?.appointmentType || payload.data?.reason || 'Routine Checkup',
+          appointment_type: payload.data?.appointmentType || payload.data?.reason || 'Routine Checkup',
           email: payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email,
           phone: payload.data?.phone || payload.data?.patientPhone || payload.data?.patient_phone,
           patient_name: payload.data?.patientName || payload.data?.patient_name || payload.data?.name,
           action: 'BOOK_APPOINTMENT',
           data: payload.data
         };
-
       } else if (payload.action === 'CREATE_PATIENT') {
         const pId = payload.data?.patientId || payload.data?.id;
         requestBody = {

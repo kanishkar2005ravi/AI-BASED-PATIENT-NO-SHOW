@@ -7,7 +7,7 @@ import { Select } from '../../components/common/Select';
 import { Input } from '../../components/common/Input';
 import { Loading } from '../../components/common/Loading';
 import { useAuth } from '../../context/AuthContext';
-import { callBackend } from '../../services/api';
+import { callBackend, normalizeAppointment } from '../../services/api';
 import { Doctor, TimeSlot, Appointment } from '../../types';
 import { Calendar, Clock, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
@@ -161,27 +161,12 @@ export const BookAppointment: React.FC = () => {
 
     if (isSuccess) {
       const respApt = res.appointment || res.data || (res.id ? res : null);
-      const confirmedAppointment: Appointment = {
-        id: respApt?.id || respApt?.appointment_id || `APT-${Date.now()}`,
-        patientId: respApt?.patientId || respApt?.patient_id || user?.id || 'PAT-1',
-        patientName: respApt?.patientName || respApt?.patient_name || user?.name || 'Patient',
-        patientEmail: respApt?.patientEmail || respApt?.email || user?.email || '',
-        doctorId: respApt?.doctorId || respApt?.doctor_id || selectedDoctorId,
-        doctorName: respApt?.doctorName || respApt?.doctor_name || selectedDoctor?.name || 'Doctor',
-        doctorSpecialization: respApt?.doctorSpecialization || respApt?.doctor_specialization || selectedDoctor?.specialization || 'Specialist',
-        appointmentDate: respApt?.appointmentDate || respApt?.appointment_date || selectedDate,
-        appointmentTime: respApt?.appointmentTime || respApt?.appointment_time || selectedTimeSlot,
-        appointmentType: respApt?.appointmentType || respApt?.reason || appointmentType,
-        status: ((respApt?.status || 'CONFIRMED') as string).toUpperCase() as any,
-        risk: respApt?.risk || {
-          score: 15,
-          level: 'LOW',
-          probability: 0.15,
-          factors: []
-        },
-        confirmedByPatient: true,
-        createdAt: respApt?.createdAt || respApt?.created_at || new Date().toISOString()
-      };
+      const confirmedAppointment: Appointment = normalizeAppointment({
+        ...bookingPayload,
+        ...(respApt || {}),
+        doctorName: selectedDoctor?.name || respApt?.doctorName,
+        doctorSpecialization: selectedDoctor?.specialization || respApt?.doctorSpecialization
+      });
 
       console.log('[BOOK_APPOINTMENT] normalized result:', confirmedAppointment);
       console.log('[BOOK_APPOINTMENT] moving to confirmation');
