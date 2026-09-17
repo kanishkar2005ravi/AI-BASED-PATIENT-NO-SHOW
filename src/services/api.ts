@@ -60,9 +60,22 @@ export function unwrapN8nData(raw: any): any[] {
   if (raw._responseData) return unwrapN8nData(raw._responseData);
   if (raw.result && typeof raw.result === 'object') return unwrapN8nData(raw.result);
   if (raw.body && typeof raw.body === 'object') return unwrapN8nData(raw.body);
-  if (raw.json && typeof raw.json === 'object') return [raw.json];
   if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8nData);
-  if (raw.data && typeof raw.data === 'object') return unwrapN8nData(raw.data);
+  if (raw.json && typeof raw.json === 'object') {
+    if (raw.json.data || raw.json.items || raw.json.result || raw.json._responseData) {
+      return unwrapN8nData(raw.json);
+    }
+    return [raw.json];
+  }
+  if (raw.data && typeof raw.data === 'object') {
+    if (raw.data.items || raw.data.data || raw.data.result || Array.isArray(raw.data)) {
+      return unwrapN8nData(raw.data);
+    }
+    if (raw.data.id || raw.data.appointment_id || raw.data.appointmentId || raw.data.patient_id || raw.data.patientId || raw.data.doctor_id || raw.data.doctorId) {
+      return [raw.data];
+    }
+    return unwrapN8nData(raw.data);
+  }
   if (Array.isArray(raw.patients)) return raw.patients;
   if (Array.isArray(raw.doctors)) return raw.doctors;
   if (Array.isArray(raw.appointments)) return raw.appointments;
@@ -166,8 +179,9 @@ function normalizePatient(p: any): Patient {
   } as Patient;
 }
 
-export function normalizeAppointment(apt: any): Appointment {
-  if (!apt || typeof apt !== 'object') {
+export function normalizeAppointment(inputApt: any): Appointment {
+  let a = inputApt;
+  if (!a || typeof a !== 'object') {
     return {
       id: '',
       patientId: '',
@@ -175,8 +189,8 @@ export function normalizeAppointment(apt: any): Appointment {
       patientEmail: '',
       patientPhone: '',
       doctorId: '',
-      doctorName: 'Doctor',
-      doctorSpecialization: 'General Physician',
+      doctorName: '',
+      doctorSpecialization: '',
       appointmentDate: '',
       appointmentTime: '',
       appointmentType: 'Routine Checkup' as any,
@@ -187,7 +201,22 @@ export function normalizeAppointment(apt: any): Appointment {
     };
   }
 
-  const rawStatus = (apt.status || 'CONFIRMED').toString().trim().toUpperCase();
+  // Deep unwrap if an outer container/wrapper was passed
+  while (a) {
+    if (a.json && typeof a.json === 'object') {
+      a = a.json;
+    } else if (a.data && typeof a.data === 'object' && !a.id && !a.appointment_id && !a.appointmentId) {
+      a = a.data;
+    } else if (a.appointment && typeof a.appointment === 'object') {
+      a = a.appointment;
+    } else if (Array.isArray(a.items) && a.items.length > 0 && typeof a.items[0] === 'object') {
+      a = a.items[0];
+    } else {
+      break;
+    }
+  }
+
+  const rawStatus = (a.status || 'CONFIRMED').toString().trim().toUpperCase();
   let normStatus: AppointmentStatus = 'CONFIRMED';
   if (rawStatus === 'CANCELLED' || rawStatus === 'CANCELED') {
     normStatus = 'CANCELLED';
@@ -205,28 +234,46 @@ export function normalizeAppointment(apt: any): Appointment {
     normStatus = 'CONFIRMED';
   }
 
-  const isHighRisk = apt.risk_level === 'HIGH' || (apt.risk && apt.risk.level === 'HIGH');
-  const isMedRisk = apt.risk_level === 'MEDIUM' || (apt.risk && apt.risk.level === 'MEDIUM');
+  const isHighRisk = a.risk_level === 'HIGH' || (a.risk && a.risk.level === 'HIGH');
+  const isMedRisk = a.risk_level === 'MEDIUM' || (a.risk && a.risk.level === 'MEDIUM');
 
   return {
-    ...apt,
-    id: String(apt.appointment_id || apt.id || apt.appointmentId || ''),
-    patientId: String(apt.patient_id || apt.patientId || ''),
-    patientName: apt.patient_name || apt.patientName || apt.name || 'Valued Patient',
-    patientEmail: apt.patient_email || apt.patientEmail || apt.email || '',
-    patientPhone: apt.patient_phone || apt.patientPhone || apt.phone || '',
-    doctorId: String(apt.doctor_id || apt.doctorId || ''),
-    doctorName: apt.doctor_name || apt.doctorName || 'Doctor',
-    doctorSpecialization: apt.doctor_specialization || apt.doctorSpecialization || apt.specialization || apt.specialty || 'General Physician',
-    appointmentDate: apt.appointment_date || apt.appointmentDate || apt.date || '',
-    appointmentTime: apt.appointment_time || apt.appointmentTime || apt.time || '',
-    appointmentType: (apt.appointment_type || apt.appointmentType || apt.reason || 'Routine Checkup') as any,
+    ...a,
+    id: a.id || a.appointment_id || a.appointmentId || '',
+    patientId: a.patientId || a.patient_id || '',
+    patientName: a.patientName || a.patient_name || a.name || 'Valued Patient',
+    patientEmail: a.patientEmail || a.patient_email || a.email || '',
+    patientPhone: a.patientPhone || a.patient_phone || a.phone || '',
+    doctorId: a.doctorId || a.doctor_id || '',
+    doctorName: a.doctorName || a.doctor_name || '',
+    doctorSpecialization:
+      a.doctorSpecialization ||
+      a.doctor_specialization ||
+      a.specialization ||
+      a.specialty ||
+      '',
+    appointmentDate:
+      a.appointmentDate ||
+      a.appointment_date ||
+      a.date ||
+      '',
+    appointmentTime:
+      a.appointmentTime ||
+      a.appointment_time ||
+      a.time ||
+      '',
+    appointmentType: (
+      a.appointmentType ||
+      a.appointment_type ||
+      a.reason ||
+      'Routine Checkup'
+    ) as any,
     status: normStatus,
     confirmedByPatient: true,
-    createdAt: apt.created_at || apt.createdAt || getLocalDateString(),
-    risk: apt.risk || {
+    createdAt: a.created_at || a.createdAt || getLocalDateString(),
+    risk: a.risk || {
       level: (isHighRisk ? 'HIGH' : isMedRisk ? 'MEDIUM' : 'LOW') as 'HIGH' | 'MEDIUM' | 'LOW',
-      probability: Number(apt.no_show_probability || (isHighRisk ? 0.85 : isMedRisk ? 0.45 : 0.15)),
+      probability: Number(a.no_show_probability || (isHighRisk ? 0.85 : isMedRisk ? 0.45 : 0.15)),
       factors: []
     }
   };

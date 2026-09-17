@@ -51,6 +51,7 @@ export const MyAppointments: React.FC = () => {
           : normalized;
 
         console.log('[GET_APPOINTMENTS] patient-matched appointments:', patientMatched);
+        console.log('[GET_APPOINTMENTS] FINAL appointment objects:', patientMatched);
         setAppointments(patientMatched);
       } else {
         console.log('[GET_APPOINTMENTS] normalized appointments: []');
