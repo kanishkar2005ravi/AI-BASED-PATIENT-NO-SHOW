@@ -739,7 +739,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       if (payload.action === 'GET_DOCTORS') {
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
 
-        // Same recursive unwrapper as GET_PATIENTS - handles all n8n response formats
+        // Same recursive unwrapper - handles all n8n/Postgres response formats
         const unwrapN8n = (raw: any): any[] => {
           if (!raw) return [];
           if (Array.isArray(raw)) return raw.flatMap(unwrapN8n);
@@ -750,14 +750,24 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           return [raw];
         };
 
-        const remoteRaw = unwrapN8n(resData).filter((d: any) => d && (d.id || d.doctor_id));
+        const remoteRaw = unwrapN8n(resData);
 
-        // Normalize (ensure id vs doctor_id)
-        const remoteDocs = remoteRaw.map(d => ({
-          ...d,
-          id: d.id || d.doctor_id,
-          name: d.name || d.doctor_name || 'Unknown Doctor'
-        })).filter(d => d.id);
+        // Full doctor normalizer - maps ALL Supabase column name variants to frontend interface
+        const normalizeDoctor = (d: any): Doctor => ({
+          id: d.id || d.doctor_id || '',
+          name: d.name || d.doctor_name || 'Unknown Doctor',
+          specialization: d.specialization || d.specialty || 'General Medicine',
+          department: d.department || d.specialization || 'General Medicine',
+          email: d.email || d.doctor_email || '',
+          phone: d.phone || d.doctor_phone || '',
+          experience: Number(d.experience || d.experience_years || d.years_of_experience || 0),
+          status: (d.status === 'Active' || d.status === 'Inactive') ? d.status : 'Active',
+          avatar: d.avatar || undefined
+        });
+
+        const remoteDocs = remoteRaw
+          .map(normalizeDoctor)
+          .filter(d => d.id); // remove any rows with no ID
 
         const combined = IS_DEMO_MODE
           ? mergeListsById(localDocs, remoteDocs)
