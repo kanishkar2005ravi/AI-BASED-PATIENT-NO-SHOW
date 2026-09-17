@@ -371,15 +371,10 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             };
           }
 
-          // Patient Login validation against registered patients (Fallback)
-          let localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-          let foundPatient = localPats.find(p => 
-            p.id.toLowerCase() === inputIdentifier.toLowerCase() || 
-            (p.email && p.email.toLowerCase() === inputIdentifier.toLowerCase())
-          );
-
-          // If not found locally, attempt to fetch from Supabase (Webhook) so new CSV uploads can log in!
-          if (!foundPatient && BACKEND_URL) {
+          // Patient Login: Query Supabase in real-time to authenticate on ANY device
+          let foundPatient: Patient | null = null;
+          
+          if (BACKEND_URL) {
             try {
               const pRes = await fetch(BACKEND_URL, {
                 method: 'POST',
@@ -387,43 +382,22 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
                 body: JSON.stringify({ action: 'GET_PATIENTS', data: {} })
               });
               const pData = await pRes.json();
-              let remoteRaw: any[] = [];
+              const remoteRaw = unwrapN8nData(pData).filter((p: any) => p && (p.id || p.patient_id));
+              const remotePats = remoteRaw.map(normalizePatient).filter((p: Patient) => p.id);
               
-              if (Array.isArray(pData)) remoteRaw = pData;
-              else if (pData?.data && Array.isArray(pData.data)) remoteRaw = pData.data;
-              else if (pData?.patients && Array.isArray(pData.patients)) remoteRaw = pData.patients;
-              else if (pData?.items && Array.isArray(pData.items)) remoteRaw = pData.items;
-              else if (pData?._responseData?.data?.items && Array.isArray(pData._responseData.data.items)) remoteRaw = pData._responseData.data.items;
-              else if (pData?.data?.items && Array.isArray(pData.data.items)) remoteRaw = pData.data.items;
-
-              // Unwrap n8n json
-              remoteRaw = remoteRaw.map((item: any) => (item && item.json) ? item.json : item);
-              remoteRaw = remoteRaw.flatMap((item: any) => {
-                if (item?.data && Array.isArray(item.data)) return item.data;
-                if (item?.items && Array.isArray(item.items)) return item.items;
-                if (item?.data?.items && Array.isArray(item.data.items)) return item.data.items;
-                return [item];
-              }).map((item: any) => (item && item.json) ? item.json : item);
-              
-              if (remoteRaw.length > 0) {
-                const remotePats = remoteRaw.map(normalizePatient).filter((p: Patient) => p.id);
-                localPats = mergeListsById(localPats, remotePats);
-                setLocalData(STORAGE_KEYS.PATIENTS, localPats); // Save to local storage
-                
-                foundPatient = localPats.find(p => 
-                  p.id.toLowerCase() === inputIdentifier.toLowerCase() || 
-                  (p.email && p.email.toLowerCase() === inputIdentifier.toLowerCase())
-                );
-              }
+              foundPatient = remotePats.find(p => 
+                p.id.toLowerCase() === inputIdentifier.toLowerCase() || 
+                (p.email && p.email.toLowerCase() === inputIdentifier.toLowerCase())
+              ) || null;
             } catch (e) {
-              console.error('Failed to sync patients during login:', e);
+              console.error('Failed to sync patients from Supabase during login:', e);
             }
           }
 
           if (!foundPatient) {
             return {
               success: false,
-              message: 'Invalid Patient ID or Email. Access denied.'
+              message: 'Invalid Patient ID or Email. Please check your credentials.'
             };
           }
 
