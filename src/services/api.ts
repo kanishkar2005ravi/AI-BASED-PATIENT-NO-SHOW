@@ -478,43 +478,27 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle GET_PATIENTS Action Specifically
       if (payload.action === 'GET_PATIENTS') {
-        let remoteRaw: any[] = [];
-        
-        // Robust unwrapping for various backend response formats
-        if (Array.isArray(resData)) {
-          remoteRaw = resData;
-        } else if (resData && typeof resData === 'object') {
-          if (Array.isArray(resData.data)) {
-            remoteRaw = resData.data;
-          } else if (Array.isArray(resData.patients)) {
-            remoteRaw = resData.patients;
-          } else if (resData.items && Array.isArray(resData.items)) {
-            remoteRaw = resData.items;
-          } else if (resData.data?.items && Array.isArray(resData.data.items)) {
-            remoteRaw = resData.data.items;
-          } else if (resData.data && typeof resData.data === 'object' && !Array.isArray(resData.data)) {
-            remoteRaw = [resData.data];
-          }
-        }
+        // n8n Postgres node wraps data like: { data: { items: [{json: {...}}] } }
+        // This single helper unwraps ALL n8n formats in one go
+        const unwrapN8n = (raw: any): any[] => {
+          if (!raw) return [];
+          if (Array.isArray(raw)) return raw.flatMap(unwrapN8n);
+          if (raw.json) return [raw.json];           // {json: {...}}
+          if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8n); // {items: [...]}
+          if (raw.data) return unwrapN8n(raw.data);  // {data: ...}
+          if (Array.isArray(raw.patients)) return raw.patients;
+          return [raw];
+        };
 
-        // Unwrap .json if wrapped by n8n nodes
-        remoteRaw = remoteRaw.map(item => (item && item.json) ? item.json : item);
-        
-        // Deep unwrapping (e.g. items[0].json.data.items[0].json)
-        remoteRaw = remoteRaw.flatMap(item => {
-          if (item && item.data && Array.isArray(item.data)) return item.data;
-          if (item && item.items && Array.isArray(item.items)) return item.items;
-          if (item && item.data?.items && Array.isArray(item.data.items)) return item.data.items;
-          return [item];
-        }).map(item => (item && item.json) ? item.json : item);
+        const remoteRaw = unwrapN8n(resData).filter((p: any) => p && (p.id || p.patient_id));
 
         // Map directly from unwrapped data
-        const remotePats = remoteRaw.map(normalizePatient).filter(p => p.id); // Filter out empty IDs
+        const remotePats = remoteRaw.map(normalizePatient).filter(p => p.id);
 
         // Do NOT merge local storage with remote data in production mode
         const finalPats = IS_DEMO_MODE 
           ? mergeListsById(getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient), remotePats)
-          : remotePats;
+          : remotePats.length > 0 ? remotePats : getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient);
 
         return {
           success: true,
@@ -754,36 +738,30 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_DOCTORS Action Specifically
       if (payload.action === 'GET_DOCTORS') {
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-        let remoteRaw: any[] = [];
-        
-        // Robust unwrapping for various backend response formats
-        if (Array.isArray(resData)) remoteRaw = resData;
-        else if (resData?.data && Array.isArray(resData.data)) remoteRaw = resData.data;
-        else if (resData?.doctors && Array.isArray(resData.doctors)) remoteRaw = resData.doctors;
-        else if (resData?.items && Array.isArray(resData.items)) remoteRaw = resData.items;
-        else if (resData?._responseData?.data?.items && Array.isArray(resData._responseData.data.items)) remoteRaw = resData._responseData.data.items;
-        else if (resData?.data?.items && Array.isArray(resData.data.items)) remoteRaw = resData.data.items;
-        else if (resData?.data && typeof resData.data === 'object') remoteRaw = [resData.data];
 
-        // Unwrap n8n .json wrappers
-        remoteRaw = remoteRaw.map(item => (item && item.json) ? item.json : item);
-        
-        // Deep unwrapping
-        remoteRaw = remoteRaw.flatMap(item => {
-          if (item?.data && Array.isArray(item.data)) return item.data;
-          if (item?.items && Array.isArray(item.items)) return item.items;
-          if (item?.data?.items && Array.isArray(item.data.items)) return item.data.items;
-          return [item];
-        }).map(item => (item && item.json) ? item.json : item);
+        // Same recursive unwrapper as GET_PATIENTS - handles all n8n response formats
+        const unwrapN8n = (raw: any): any[] => {
+          if (!raw) return [];
+          if (Array.isArray(raw)) return raw.flatMap(unwrapN8n);
+          if (raw.json) return [raw.json];
+          if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8n);
+          if (raw.data) return unwrapN8n(raw.data);
+          if (Array.isArray(raw.doctors)) return raw.doctors;
+          return [raw];
+        };
+
+        const remoteRaw = unwrapN8n(resData).filter((d: any) => d && (d.id || d.doctor_id));
 
         // Normalize (ensure id vs doctor_id)
         const remoteDocs = remoteRaw.map(d => ({
           ...d,
-          id: d.id || d.doctor_id || `DOC-${Math.random().toString(36).substr(2, 9)}`,
+          id: d.id || d.doctor_id,
           name: d.name || d.doctor_name || 'Unknown Doctor'
-        })).filter(d => d.name !== 'Unknown Doctor');
+        })).filter(d => d.id);
 
-        const combined = IS_DEMO_MODE ? mergeListsById(localDocs, remoteDocs) : remoteDocs;
+        const combined = IS_DEMO_MODE
+          ? mergeListsById(localDocs, remoteDocs)
+          : remoteDocs.length > 0 ? remoteDocs : localDocs;
         
         return {
           success: true,
