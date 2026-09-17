@@ -98,7 +98,7 @@ export function normalizeDoctor(d: any): Doctor {
 }
 
 function normalizePatient(p: any): Patient {
-  if (!p) {
+  if (!p || typeof p !== 'object') {
     return {
       id: '',
       name: 'Unknown',
@@ -119,38 +119,49 @@ function normalizePatient(p: any): Patient {
     };
   }
 
-  const id = p.id || p.patient_id || p.patientId || '';
-  const name = p.name || p.patient_name || p.patientName || p.full_name || p.fullName || '';
-  const email = p.email || p.patient_email || p.patientEmail || '';
-  const phone = p.phone || p.phone_number || p.phoneNumber || '';
-  const dateOfBirth = p.dateOfBirth || p.date_of_birth || p.dob || '';
-  const gender = p.gender || 'Male';
-  const address = p.address || p.home_address || '';
-  const status = p.status === 'Inactive' || p.is_active === false ? 'Inactive' : 'Active';
-  const totalAppointments = Number(p.totalAppointments ?? p.total_appointments ?? p.appointments_count ?? 0);
-  const attendedAppointments = Number(p.attendedAppointments ?? p.attended_appointments ?? 0);
-  const noShowAppointments = Number(p.noShowAppointments ?? p.no_show_appointments ?? p.no_show_count ?? 0);
-  const cancelledAppointments = Number(p.cancelledAppointments ?? p.cancelled_appointments ?? 0);
-  const rescheduledAppointments = Number(p.rescheduledAppointments ?? p.rescheduled_appointments ?? 0);
-  const noShowRate = Number(p.noShowRate ?? p.noshow_rate ?? (totalAppointments > 0 ? Math.round((noShowAppointments / totalAppointments) * 100) : 0));
-
   return {
     ...p,
-    id,
-    name,
-    email,
+    id: p.id || p.patient_id || p.patientId || '',
+    name: p.name || p.patient_name || p.patientName || '',
+    email: p.email || p.patient_email || p.patientEmail || '',
     password: p.password || '',
-    phone,
-    dateOfBirth,
-    gender,
-    address,
-    status,
-    totalAppointments,
-    attendedAppointments,
-    noShowAppointments,
-    cancelledAppointments,
-    rescheduledAppointments,
-    noShowRate,
+    phone: p.phone || p.phone_number || p.phoneNumber || '',
+    dateOfBirth: p.dateOfBirth || p.date_of_birth || p.dob || '',
+    gender: p.gender || 'Male',
+    address: p.address || p.home_address || '',
+    status: (p.status === 'Inactive' || p.is_active === false) ? 'Inactive' : 'Active',
+    totalAppointments: Number(
+      p.totalAppointments ??
+      p.total_appointments ??
+      p.appointments_count ??
+      0
+    ),
+    attendedAppointments: Number(
+      p.attendedAppointments ??
+      p.attended_appointments ??
+      0
+    ),
+    noShowAppointments: Number(
+      p.noShowAppointments ??
+      p.no_show_appointments ??
+      0
+    ),
+    cancelledAppointments: Number(
+      p.cancelledAppointments ??
+      p.cancelled_appointments ??
+      0
+    ),
+    rescheduledAppointments: Number(
+      p.rescheduledAppointments ??
+      p.rescheduled_appointments ??
+      0
+    ),
+    noShowRate: Number(
+      p.noShowRate ??
+      p.no_show_rate ??
+      p.noshow_rate ??
+      0
+    ),
     createdAt: p.createdAt || p.created_at || getLocalDateString()
   } as Patient;
 }
@@ -496,12 +507,37 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle GET_PATIENTS Action Specifically
       if (payload.action === 'GET_PATIENTS') {
-        const remoteRaw = unwrapN8nData(resData).filter((p: any) => p && (p.id || p.patient_id));
-        const remotePats = remoteRaw.map(normalizePatient).filter(p => p.id);
+        const isAnalyticsObject = (
+          (resData && typeof resData === 'object' && ('total_patients' in resData && !('name' in resData || 'patient_name' in resData))) ||
+          (resData?.data?.items?.[0]?.json && ('total_patients' in resData.data.items[0].json && !('name' in resData.data.items[0].json))) ||
+          (resData?._responseData?.data?.items?.[0]?.json && ('total_patients' in resData._responseData.data.items[0].json && !('name' in resData._responseData.data.items[0].json)))
+        );
+
+        const remoteRaw = unwrapN8nData(resData).filter((p: any) => {
+          if (!p || typeof p !== 'object') return false;
+          if ('total_patients' in p && !('name' in p || 'patient_name' in p || 'patientName' in p || 'email' in p)) return false;
+          return Boolean(p.id || p.patient_id || p.patientId);
+        });
+
+        const patients: Patient[] = remoteRaw.map(normalizePatient).filter(p => p.id);
+
+        console.log('[GET_PATIENTS] request:', requestBody);
+        console.log('[GET_PATIENTS] raw response:', resData);
+        console.log('[GET_PATIENTS] parsed patients:', patients);
+
+        if (isAnalyticsObject && patients.length === 0) {
+          console.error('[GET_PATIENTS] Received an analytics object instead of patient rows:', resData);
+          return {
+            success: false,
+            message: 'SNS GET_PATIENTS workflow returned analytics data instead of patient records. Please verify the n8n route connects to the patients table query.',
+            error: 'Analytics object received instead of patient list',
+            data: [] as any
+          };
+        }
 
         const finalPats = IS_DEMO_MODE 
-          ? mergeListsById(getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient), remotePats)
-          : remotePats;
+          ? mergeListsById(getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient), patients)
+          : patients;
 
         return {
           success: true,
