@@ -754,6 +754,17 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         console.log('[GET_DOCTORS] Raw n8n response:', JSON.stringify(resData, null, 2));
         console.log('[GET_DOCTORS] After unwrap:', remoteRaw.length, 'items', remoteRaw);
 
+        // n8n returned "status: running" meaning it responded BEFORE the Postgres query finished
+        // In this case, fall back to local storage data
+        if (resData?.status === 'running' || resData?.result === null && resData?.executionId) {
+          console.warn('[GET_DOCTORS] n8n responded before query finished (Immediately mode). Using local data.');
+          return {
+            success: true,
+            message: 'Doctors retrieved from local cache.',
+            data: localDocs as any
+          };
+        }
+
         // Full doctor normalizer - maps ALL Supabase column name variants to frontend interface
         const normalizeDoctor = (d: any): Doctor => ({
           id: d.id || d.doctor_id || '',
