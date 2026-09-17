@@ -1068,7 +1068,11 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
   const action = payload.action;
   const data = payload.data || {};
   let patients = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+  if (patients.length === 0) patients = INITIAL_PATIENTS;
+
   let doctors = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
+  if (doctors.length === 0) doctors = INITIAL_DOCTORS;
+
   let availabilityMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, {});
 
   let appointments = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
