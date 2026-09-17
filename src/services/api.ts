@@ -15,7 +15,7 @@ import { getLocalDateString } from '../utils/helpers';
 
 const DEFAULT_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/a2918487-c8b3-45ba-aed2-2b725e35b286';
 const BACKEND_URL = "https://api.agents.snsihub.ai/webhook/a2918487-c8b3-45ba-aed2-2b725e35b286";
-const IS_DEMO_MODE = true; // Forced to true to silence Vercel network errors
+const IS_DEMO_MODE = false;
 
 // Demo Mode Storage Key Management
 const STORAGE_KEYS = {
@@ -622,7 +622,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             : { score: 15, level: 'LOW', probability: apt.no_show_probability || 0.15, factors: apt.risk_factors || [] }
         }));
 
-        let combined = mergeListsById(localApts, remoteApts);
+        let combined = IS_DEMO_MODE ? mergeListsById(localApts, remoteApts) : remoteApts;
         if (payload.data?.patientId) {
           combined = combined.filter((a: Appointment) => a.patientId === payload.data.patientId);
         }
