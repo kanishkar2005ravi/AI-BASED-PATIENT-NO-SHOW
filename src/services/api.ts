@@ -55,31 +55,84 @@ function mergeListsById<T extends { id?: string }>(listA: T[], listB: T[]): T[] 
 }
 
 export function unwrapN8nData(raw: any): any[] {
-  if (!raw || typeof raw !== 'object') return [];
-  if (Array.isArray(raw)) return raw.flatMap(unwrapN8nData);
-  if (raw._responseData) return unwrapN8nData(raw._responseData);
-  if (raw.result && typeof raw.result === 'object') return unwrapN8nData(raw.result);
-  if (raw.body && typeof raw.body === 'object') return unwrapN8nData(raw.body);
-  if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8nData);
+  if (!raw) return [];
+  
+  // If array, recursively unwrap and flatten all elements
+  if (Array.isArray(raw)) {
+    return raw.flatMap(item => unwrapN8nData(item));
+  }
+
+  if (typeof raw !== 'object') return [];
+
+  // Recursively extract all nested containers
+  const nestedResults: any[] = [];
+
+  if (raw._responseData) {
+    nestedResults.push(...unwrapN8nData(raw._responseData));
+  }
+  if (raw.result && typeof raw.result === 'object') {
+    nestedResults.push(...unwrapN8nData(raw.result));
+  }
+  if (raw.body && typeof raw.body === 'object') {
+    nestedResults.push(...unwrapN8nData(raw.body));
+  }
+  if (raw.appointments) {
+    nestedResults.push(...unwrapN8nData(raw.appointments));
+  }
+  if (raw.appointment && typeof raw.appointment === 'object') {
+    nestedResults.push(...unwrapN8nData(raw.appointment));
+  }
+  if (raw.patients) {
+    nestedResults.push(...unwrapN8nData(raw.patients));
+  }
+  if (raw.patient && typeof raw.patient === 'object') {
+    nestedResults.push(...unwrapN8nData(raw.patient));
+  }
+  if (raw.doctors) {
+    nestedResults.push(...unwrapN8nData(raw.doctors));
+  }
+  if (raw.doctor && typeof raw.doctor === 'object') {
+    nestedResults.push(...unwrapN8nData(raw.doctor));
+  }
+  if (raw.items) {
+    nestedResults.push(...unwrapN8nData(raw.items));
+  }
+  if (raw.data) {
+    nestedResults.push(...unwrapN8nData(raw.data));
+  }
   if (raw.json && typeof raw.json === 'object') {
-    if (raw.json.data || raw.json.items || raw.json.result || raw.json._responseData) {
-      return unwrapN8nData(raw.json);
-    }
-    return [raw.json];
+    nestedResults.push(...unwrapN8nData(raw.json));
   }
-  if (raw.data && typeof raw.data === 'object') {
-    if (raw.data.items || raw.data.data || raw.data.result || Array.isArray(raw.data)) {
-      return unwrapN8nData(raw.data);
-    }
-    if (raw.data.id || raw.data.appointment_id || raw.data.appointmentId || raw.data.patient_id || raw.data.patientId || raw.data.doctor_id || raw.data.doctorId) {
-      return [raw.data];
-    }
-    return unwrapN8nData(raw.data);
+
+  // If unwrapping nested containers yielded results, return them
+  if (nestedResults.length > 0) {
+    return nestedResults;
   }
-  if (Array.isArray(raw.patients)) return raw.patients;
-  if (Array.isArray(raw.doctors)) return raw.doctors;
-  if (Array.isArray(raw.appointments)) return raw.appointments;
-  if (raw.id || raw.patient_id || raw.patientId || raw.doctor_id || raw.doctorId || raw.appointment_id || raw.appointmentId || raw.name) return [raw];
+
+  // Check if this object itself is a leaf entity with valid properties
+  const hasAppointmentKeys = Boolean(
+    (raw.id || raw.appointment_id || raw.appointmentId) &&
+    (raw.patient_id || raw.patientId || raw.appointment_date || raw.appointmentDate)
+  );
+
+  const hasEntityKeys = Boolean(
+    raw.id ||
+    raw.appointment_id ||
+    raw.appointmentId ||
+    raw.patient_id ||
+    raw.patientId ||
+    raw.doctor_id ||
+    raw.doctorId ||
+    raw.name ||
+    raw.doctor_name ||
+    raw.patient_name ||
+    raw.email
+  );
+
+  if (hasAppointmentKeys || hasEntityKeys) {
+    return [raw];
+  }
+
   return [];
 }
 
@@ -702,6 +755,8 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           if (isDoctorObj) return false;
           return Boolean(a.id || a.appointment_id || a.appointmentId || a.appointment_date || a.appointmentDate || a.patient_id || a.patientId);
         });
+        console.log('[GET_APPOINTMENTS] EXTRACTED ROW COUNT:', remoteApts.length);
+        console.log('[GET_APPOINTMENTS] EXTRACTED ROWS:', remoteApts);
         console.log('[GET_APPOINTMENTS] Unwrapped appointments count:', remoteApts.length, remoteApts);
 
         // Standardize all appointments through normalizeAppointment
@@ -722,6 +777,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         console.log('[GET_APPOINTMENTS] normalized appointments:', mappedRemote);
         console.log('[GET_APPOINTMENTS] current patient ID:', targetPid);
         console.log('[GET_APPOINTMENTS] patient-matched appointments:', filtered);
+        console.log('[GET_APPOINTMENTS] FINAL COUNT:', filtered.length);
 
         return {
           success: true,
