@@ -87,6 +87,15 @@ export const MyAppointments: React.FC = () => {
         });
 
         console.log('[GET_APPOINTMENTS] normalized appointments:', normalized);
+        console.log('[GET_APPOINTMENTS] FINAL DEBUG:', normalized.map(a => ({
+          id: a.id,
+          patientId: a.patientId,
+          doctorId: a.doctorId,
+          appointmentDate: a.appointmentDate,
+          appointmentTime: a.appointmentTime,
+          appointmentType: a.appointmentType,
+          status: a.status
+        })));
         console.log('[GET_APPOINTMENTS] current patient ID:', user?.id);
 
         const patientMatched = user?.id
