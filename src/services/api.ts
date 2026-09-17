@@ -627,12 +627,15 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         });
 
         // Always merge localStorage (has freshly booked appointments) with Supabase data
-        // This ensures newly booked appointments show immediately without waiting for Supabase refresh
         const combined = mergeListsById(localApts, mappedRemote);
 
-        // Filter by patient if requested
-        const filtered = payload.data?.patientId
-          ? combined.filter((a: Appointment) => a.patientId === payload.data.patientId)
+        // Filter by patient if requested (case-insensitive, accepts patientId or userId or patient_id)
+        const targetPid = (payload.data?.patientId || payload.data?.patient_id || payload.data?.userId || '').trim().toLowerCase();
+        const filtered = (targetPid && payload.data?.role !== 'admin')
+          ? combined.filter((a: Appointment) => {
+              const aPid = (a.patientId || '').trim().toLowerCase();
+              return aPid === targetPid || (payload.data?.email && a.patientEmail && a.patientEmail.toLowerCase() === payload.data.email.toLowerCase());
+            })
           : combined;
 
         return {
