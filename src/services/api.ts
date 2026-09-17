@@ -595,7 +595,31 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_APPOINTMENTS Action Specifically
       if (payload.action === 'GET_APPOINTMENTS') {
         const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
-        const remoteApts = Array.isArray(resData.data) ? resData.data : Array.isArray(resData) ? resData : [];
+        
+        let remoteApts: any[] = [];
+        if (Array.isArray(resData.data)) {
+          remoteApts = resData.data;
+        } else if (resData.data && Array.isArray(resData.data.items)) {
+          // Unpack raw n8n Postgres output
+          remoteApts = resData.data.items.map((i: any) => i.json || i);
+        } else if (Array.isArray(resData)) {
+          remoteApts = resData;
+        }
+
+        // Map Supabase snake_case to Frontend camelCase so the dashboard can read it!
+        remoteApts = remoteApts.map(apt => ({
+          id: apt.appointment_id || apt.id,
+          patientId: apt.patient_id || apt.patientId,
+          patientName: apt.patient_name || apt.patientName || 'Patient',
+          doctorId: apt.doctor_id || apt.doctorId,
+          doctorName: apt.doctor_name || apt.doctorName || 'Doctor',
+          appointmentDate: apt.appointment_date || apt.appointmentDate,
+          appointmentTime: apt.appointment_time || apt.appointmentTime,
+          appointmentType: apt.appointment_type || apt.appointmentType || 'Routine Checkup',
+          status: apt.status || 'CONFIRMED',
+          risk: apt.risk_level === 'HIGH' ? { score: 85, level: 'High', details: [] } : undefined
+        }));
+
         let combined = mergeListsById(localApts, remoteApts);
         if (payload.data?.patientId) {
           combined = combined.filter((a: Appointment) => a.patientId === payload.data.patientId);
