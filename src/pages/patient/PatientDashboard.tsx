@@ -119,6 +119,12 @@ export const PatientDashboard: React.FC = () => {
       callBackend({ action: 'GET_DOCTORS' })
     ]);
 
+    let docList: Doctor[] = [];
+    if (docsRes.success && Array.isArray(docsRes.data)) {
+      docList = docsRes.data;
+      setDoctors(docList.filter((d: Doctor) => d.status === 'Active'));
+    }
+
     if (aptsRes.success && Array.isArray(aptsRes.data)) {
       const userApts = user?.id 
         ? aptsRes.data.filter((a: Appointment) => {
@@ -129,16 +135,23 @@ export const PatientDashboard: React.FC = () => {
             return aPid === uId || (uEmail && aEmail === uEmail);
           })
         : aptsRes.data;
-      setAppointments(userApts);
+
+      const enrichedApts = userApts.map((apt: Appointment) => {
+        const matchedDoc = docList.find(d => d.id === apt.doctorId);
+        return {
+          ...apt,
+          doctorName: apt.doctorName || matchedDoc?.name || (apt.doctorId ? `Doctor (${apt.doctorId})` : 'Doctor'),
+          doctorSpecialization: apt.doctorSpecialization || matchedDoc?.specialization || matchedDoc?.department || ''
+        };
+      });
+
+      setAppointments(enrichedApts);
     }
     if (waitRes.success && Array.isArray(waitRes.data)) {
       setWaitlist(waitRes.data.filter((w: WaitlistItem) => w.patientId === user?.id));
     }
     if (notifRes.success && Array.isArray(notifRes.data)) {
       setNotifications(notifRes.data.slice(0, 3));
-    }
-    if (docsRes.success && Array.isArray(docsRes.data)) {
-      setDoctors(docsRes.data.filter((d: Doctor) => d.status === 'Active'));
     }
     setLoading(false);
   };
@@ -147,27 +160,44 @@ export const PatientDashboard: React.FC = () => {
     fetchData();
   }, [user?.id, user?.email]);
 
-  const isUpcoming = (status?: string) => {
-    const s = (status || '').toUpperCase();
-    return s === 'CONFIRMED' || s === 'SCHEDULED' || s === 'CHECKED_IN' || s === 'RESCHEDULED' || s === 'BOOKED' || s === 'PENDING';
-  };
-
-  const isPast = (status?: string) => {
-    const s = (status || '').toUpperCase();
-    return s === 'COMPLETED' || s === 'CHECKED_OUT' || s === 'NO_SHOW' || s === 'ATTENDED' || s === 'MISSED';
-  };
-
-  const nextAppointment = appointments.find(a => isUpcoming(a.status));
-
-  const attendedCount = appointments.filter(a => {
-    const s = (a.status || '').toUpperCase();
-    return s === 'COMPLETED' || s === 'CHECKED_OUT' || s === 'ATTENDED';
-  }).length;
-  const rescheduledCount = appointments.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED').length;
-  const cancelledCount = appointments.filter(a => {
-    const s = (a.status || '').toUpperCase();
+  const isAppointmentCancelled = (apt: Appointment): boolean => {
+    const s = (apt.status || '').toUpperCase();
     return s === 'CANCELLED' || s === 'CANCELED';
-  }).length;
+  };
+
+  const isAppointmentPast = (apt: Appointment): boolean => {
+    const s = (apt.status || '').toUpperCase();
+    if (s === 'CANCELLED' || s === 'CANCELED') return false;
+    if (s === 'COMPLETED' || s === 'CHECKED_OUT' || s === 'NO_SHOW' || s === 'ATTENDED' || s === 'MISSED') {
+      return true;
+    }
+    if (apt.appointmentDate) {
+      try {
+        const timeStr = apt.appointmentTime && apt.appointmentTime.includes(':')
+          ? (apt.appointmentTime.length === 5 ? `${apt.appointmentTime}:00` : apt.appointmentTime)
+          : '00:00:00';
+        const aptDateTime = new Date(`${apt.appointmentDate}T${timeStr}`);
+        if (!isNaN(aptDateTime.getTime())) {
+          return aptDateTime.getTime() < Date.now();
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+    return false;
+  };
+
+  const isAppointmentUpcoming = (apt: Appointment): boolean => {
+    if (isAppointmentCancelled(apt)) return false;
+    if (isAppointmentPast(apt)) return false;
+    return true;
+  };
+
+  const nextAppointment = appointments.find(a => isAppointmentUpcoming(a));
+
+  const attendedCount = appointments.filter(a => isAppointmentPast(a)).length;
+  const rescheduledCount = appointments.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED').length;
+  const cancelledCount = appointments.filter(a => isAppointmentCancelled(a)).length;
   const missedCount = appointments.filter(a => {
     const s = (a.status || '').toUpperCase();
     return s === 'NO_SHOW' || s === 'MISSED';

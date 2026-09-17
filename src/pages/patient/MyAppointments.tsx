@@ -9,7 +9,7 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { callBackend, normalizeAppointment } from '../../services/api';
-import { Appointment } from '../../types';
+import { Appointment, Doctor } from '../../types';
 import { Calendar, Clock, ChevronRight, XCircle, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
@@ -23,20 +23,69 @@ export const MyAppointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isAppointmentCancelled = (apt: Appointment): boolean => {
+    const s = (apt.status || '').toUpperCase();
+    return s === 'CANCELLED' || s === 'CANCELED';
+  };
+
+  const isAppointmentPast = (apt: Appointment): boolean => {
+    const s = (apt.status || '').toUpperCase();
+    if (s === 'CANCELLED' || s === 'CANCELED') return false;
+    if (s === 'COMPLETED' || s === 'CHECKED_OUT' || s === 'NO_SHOW' || s === 'ATTENDED' || s === 'MISSED') {
+      return true;
+    }
+    if (apt.appointmentDate) {
+      try {
+        const timeStr = apt.appointmentTime && apt.appointmentTime.includes(':')
+          ? (apt.appointmentTime.length === 5 ? `${apt.appointmentTime}:00` : apt.appointmentTime)
+          : '00:00:00';
+        const aptDateTime = new Date(`${apt.appointmentDate}T${timeStr}`);
+        if (!isNaN(aptDateTime.getTime())) {
+          return aptDateTime.getTime() < Date.now();
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+    return false;
+  };
+
+  const isAppointmentUpcoming = (apt: Appointment): boolean => {
+    if (isAppointmentCancelled(apt)) return false;
+    if (isAppointmentPast(apt)) return false;
+    return true;
+  };
+
   const fetchAppointments = () => {
     setLoading(true);
-    callBackend({ 
-      action: 'GET_APPOINTMENTS', 
-      data: { 
-        patientId: user?.id,
-        patient_id: user?.id,
-        userId: user?.id,
-        email: user?.email,
-        role: 'patient'
-      } 
-    }).then(res => {
-      if (res.success && Array.isArray(res.data)) {
-        const normalized = res.data.map(normalizeAppointment);
+    Promise.all([
+      callBackend({ 
+        action: 'GET_APPOINTMENTS', 
+        data: { 
+          patientId: user?.id,
+          patient_id: user?.id,
+          userId: user?.id,
+          email: user?.email,
+          role: 'patient'
+        } 
+      }),
+      callBackend({ action: 'GET_DOCTORS' })
+    ]).then(([aptsRes, docsRes]) => {
+      let docList: Doctor[] = [];
+      if (docsRes.success && Array.isArray(docsRes.data)) {
+        docList = docsRes.data;
+      }
+
+      if (aptsRes.success && Array.isArray(aptsRes.data)) {
+        const normalized = aptsRes.data.map(normalizeAppointment).map(apt => {
+          const matchedDoc = docList.find(d => d.id === apt.doctorId);
+          return {
+            ...apt,
+            doctorName: apt.doctorName || matchedDoc?.name || (apt.doctorId ? `Dr. (${apt.doctorId})` : ''),
+            doctorSpecialization: apt.doctorSpecialization || matchedDoc?.specialization || matchedDoc?.department || ''
+          };
+        });
+
         console.log('[GET_APPOINTMENTS] normalized appointments:', normalized);
         console.log('[GET_APPOINTMENTS] current patient ID:', user?.id);
 
@@ -57,6 +106,7 @@ export const MyAppointments: React.FC = () => {
         console.log('[GET_APPOINTMENTS] normalized appointments: []');
         console.log('[GET_APPOINTMENTS] current patient ID:', user?.id);
         console.log('[GET_APPOINTMENTS] patient-matched appointments: []');
+        console.log('[GET_APPOINTMENTS] FINAL appointment objects: []');
         setAppointments([]);
       }
       setLoading(false);
@@ -67,25 +117,10 @@ export const MyAppointments: React.FC = () => {
     fetchAppointments();
   }, [user?.id, user?.email]);
 
-  const isUpcoming = (status?: string) => {
-    const s = (status || '').toUpperCase();
-    return s === 'CONFIRMED' || s === 'SCHEDULED' || s === 'CHECKED_IN' || s === 'RESCHEDULED' || s === 'BOOKED' || s === 'PENDING';
-  };
-
-  const isPast = (status?: string) => {
-    const s = (status || '').toUpperCase();
-    return s === 'COMPLETED' || s === 'CHECKED_OUT' || s === 'NO_SHOW' || s === 'ATTENDED' || s === 'MISSED';
-  };
-
-  const isCancelled = (status?: string) => {
-    const s = (status || '').toUpperCase();
-    return s === 'CANCELLED' || s === 'CANCELED';
-  };
-
   const filtered = appointments.filter(a => {
-    if (tab === 'UPCOMING') return isUpcoming(a.status);
-    if (tab === 'PAST') return isPast(a.status);
-    if (tab === 'CANCELLED') return isCancelled(a.status);
+    if (tab === 'UPCOMING') return isAppointmentUpcoming(a);
+    if (tab === 'PAST') return isAppointmentPast(a);
+    if (tab === 'CANCELLED') return isAppointmentCancelled(a);
     return true;
   });
 
@@ -155,9 +190,9 @@ export const MyAppointments: React.FC = () => {
         <div className="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 text-xs font-bold">
           {(['UPCOMING', 'PAST', 'CANCELLED'] as const).map(tabKey => {
             const count = appointments.filter(a => {
-              if (tabKey === 'UPCOMING') return isUpcoming(a.status);
-              if (tabKey === 'PAST') return isPast(a.status);
-              if (tabKey === 'CANCELLED') return isCancelled(a.status);
+              if (tabKey === 'UPCOMING') return isAppointmentUpcoming(a);
+              if (tabKey === 'PAST') return isAppointmentPast(a);
+              if (tabKey === 'CANCELLED') return isAppointmentCancelled(a);
               return false;
             }).length;
 
@@ -204,12 +239,16 @@ export const MyAppointments: React.FC = () => {
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center space-x-3">
-                    <h3 className="text-base font-bold text-slate-900">{apt.doctorName}</h3>
-                    <Badge variant={apt.status === 'CONFIRMED' ? 'info' : apt.status === 'COMPLETED' || apt.status === 'CHECKED_OUT' ? 'success' : 'danger'} size="sm">
-                      {apt.status === 'CONFIRMED' ? t('status.confirmed') : apt.status === 'COMPLETED' ? t('status.completed') : apt.status === 'CANCELLED' ? t('status.cancelled') : apt.status}
+                    <h3 className="text-base font-bold text-slate-900">
+                      {apt.doctorName || (apt.doctorId ? `Doctor (${apt.doctorId})` : 'Doctor')}
+                    </h3>
+                    <Badge variant={isAppointmentPast(apt) ? 'success' : isAppointmentCancelled(apt) ? 'danger' : 'info'} size="sm">
+                      {isAppointmentPast(apt) ? (apt.status === 'NO_SHOW' ? 'NO SHOW' : t('status.completed')) : isAppointmentCancelled(apt) ? t('status.cancelled') : t('status.confirmed')}
                     </Badge>
                   </div>
-                  <p className="text-xs font-semibold text-teal-600">{apt.doctorSpecialization}</p>
+                  {apt.doctorSpecialization ? (
+                    <p className="text-xs font-semibold text-teal-600">{apt.doctorSpecialization}</p>
+                  ) : null}
 
                   <div className="flex items-center space-x-4 text-xs font-medium text-slate-600 pt-1">
                     <span className="flex items-center space-x-1">
@@ -225,7 +264,7 @@ export const MyAppointments: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-3 justify-end pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                  {(apt.status === 'CONFIRMED' || apt.status === 'RESCHEDULED' || apt.status === 'CHECKED_IN') && (
+                  {isAppointmentUpcoming(apt) && (
                     <>
                       <Button
                         variant="outline"
