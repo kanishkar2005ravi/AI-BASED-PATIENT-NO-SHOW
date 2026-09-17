@@ -97,6 +97,9 @@ export function unwrapN8nData(raw: any): any[] {
   if (raw.items) {
     nestedResults.push(...unwrapN8nData(raw.items));
   }
+  if (raw.rows) {
+    nestedResults.push(...unwrapN8nData(raw.rows));
+  }
   if (raw.data) {
     nestedResults.push(...unwrapN8nData(raw.data));
   }
@@ -747,37 +750,105 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle GET_APPOINTMENTS Action Specifically
       if (payload.action === 'GET_APPOINTMENTS') {
-        console.log('[GET_APPOINTMENTS] Raw n8n backend response:', resData);
-        const remoteApts: any[] = unwrapN8nData(resData).filter((a: any) => {
-          if (!a || typeof a !== 'object') return false;
-          // Filter out pure doctor objects
-          const isDoctorObj = (a.specialization || a.department || (typeof a.id === 'string' && a.id.startsWith('DOC-'))) && !a.appointment_date && !a.appointmentDate && !a.patient_id && !a.patientId && !a.appointment_type && !a.reason;
-          if (isDoctorObj) return false;
-          return Boolean(a.id || a.appointment_id || a.appointmentId || a.appointment_date || a.appointmentDate || a.patient_id || a.patientId);
-        });
+        console.log('[GET_APPOINTMENTS] RAW RESPONSE:', resData);
+
+        // Dedicated recursive appointment extractor that inspects ALL nested structures (data, items, json, rows, appointments, etc.) and parses nested JSON strings
+        const extractAppointments = (node: any, visited = new Set<any>()): any[] => {
+          if (!node) return [];
+
+          if (typeof node === 'string') {
+            const trimmed = node.trim();
+            if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+              try {
+                const parsed = JSON.parse(trimmed);
+                return extractAppointments(parsed, visited);
+              } catch (e) {
+                return [];
+              }
+            }
+            return [];
+          }
+
+          if (typeof node !== 'object') return [];
+
+          if (visited.has(node)) return [];
+          visited.add(node);
+
+          if (Array.isArray(node)) {
+            return node.flatMap(item => extractAppointments(item, visited));
+          }
+
+          const found: any[] = [];
+
+          // Identify if current object is an appointment row
+          const hasId = Boolean(node.id || node.appointment_id || node.appointmentId);
+          const hasPid = Boolean(node.patient_id || node.patientId);
+          const hasDate = Boolean(node.appointment_date || node.appointmentDate || node.date);
+          const isDoctorRecord = Boolean(
+            (node.specialization || node.department || (typeof node.id === 'string' && node.id.startsWith('DOC-'))) &&
+            !hasPid &&
+            !hasDate
+          );
+
+          if (hasId && hasPid && hasDate && !isDoctorRecord) {
+            found.push(node);
+          }
+
+          // Recursively inspect all properties of the object (rows, data, items, json, appointments, etc.)
+          for (const key of Object.keys(node)) {
+            const val = node[key];
+            if (val && (typeof val === 'object' || typeof val === 'string')) {
+              found.push(...extractAppointments(val, visited));
+            }
+          }
+
+          return found;
+        };
+
+        const allExtracted = extractAppointments(resData);
+
+        // Deduplicate appointments by appointment ID
+        const seenIds = new Set<string>();
+        const remoteApts: any[] = [];
+        for (const apt of allExtracted) {
+          if (!apt || typeof apt !== 'object') continue;
+          const rawId = (apt.id || apt.appointment_id || apt.appointmentId || '').toString().trim().toUpperCase();
+          if (rawId) {
+            if (!seenIds.has(rawId)) {
+              seenIds.add(rawId);
+              remoteApts.push(apt);
+            }
+          } else {
+            remoteApts.push(apt);
+          }
+        }
+
         console.log('[GET_APPOINTMENTS] EXTRACTED ROW COUNT:', remoteApts.length);
         console.log('[GET_APPOINTMENTS] EXTRACTED ROWS:', remoteApts);
-        console.log('[GET_APPOINTMENTS] Unwrapped appointments count:', remoteApts.length, remoteApts);
 
         // Standardize all appointments through normalizeAppointment
         const mappedRemote: Appointment[] = remoteApts.map(normalizeAppointment);
+        console.log('[GET_APPOINTMENTS] NORMALIZED COUNT:', mappedRemote.length);
 
         const targetPid = (payload.data?.patientId || payload.data?.patient_id || payload.data?.userId || '').trim().toLowerCase();
+        console.log('[GET_APPOINTMENTS] PATIENT ID:', targetPid);
+
         const targetEmail = (payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email || '').trim().toLowerCase();
         const isAdmin = payload.data?.role === 'admin';
 
         const filtered: Appointment[] = (targetPid && !isAdmin)
           ? mappedRemote.filter((a: Appointment) => {
-              const aPid = (a.patientId || '').trim().toLowerCase();
-              const aEmail = (a.patientEmail || '').trim().toLowerCase();
-              return aPid === targetPid || (targetEmail && aEmail === targetEmail);
+              const aPid = (a.patientId || (a as any).patient_id || '').trim().toLowerCase();
+              const aEmail = (a.patientEmail || (a as any).email || (a as any).patient_email || '').trim().toLowerCase();
+              if (aPid) {
+                return aPid === targetPid;
+              }
+              return Boolean(targetEmail && aEmail === targetEmail);
             })
           : mappedRemote;
 
-        console.log('[GET_APPOINTMENTS] normalized appointments:', mappedRemote);
-        console.log('[GET_APPOINTMENTS] current patient ID:', targetPid);
-        console.log('[GET_APPOINTMENTS] patient-matched appointments:', filtered);
         console.log('[GET_APPOINTMENTS] FINAL COUNT:', filtered.length);
+        console.log('[GET_APPOINTMENTS] FINAL APPOINTMENTS:', filtered);
 
         return {
           success: true,
