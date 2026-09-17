@@ -8,7 +8,7 @@ import { Loading } from '../../components/common/Loading';
 import { EmptyState } from '../../components/common/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { callBackend, normalizeAppointment } from '../../services/api';
+import { callBackend, normalizeAppointment, normalizeDoctor } from '../../services/api';
 import { Appointment, Doctor } from '../../types';
 import { Calendar, Clock, ChevronRight, XCircle, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
@@ -22,6 +22,8 @@ export const MyAppointments: React.FC = () => {
   const [tab, setTab] = useState<'UPCOMING' | 'PAST' | 'CANCELLED'>('UPCOMING');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const normalizeId = (id: any): string => (id || '').toString().trim().toUpperCase();
 
   const isAppointmentCancelled = (apt: Appointment): boolean => {
     const s = (apt.status || '').toUpperCase();
@@ -71,53 +73,77 @@ export const MyAppointments: React.FC = () => {
       }),
       callBackend({ action: 'GET_DOCTORS' })
     ]).then(([aptsRes, docsRes]) => {
-      let docList: Doctor[] = [];
-      if (docsRes.success && Array.isArray(docsRes.data)) {
-        docList = docsRes.data;
-      }
+      // 1. Process Doctors Independently
+      const rawDoctors = docsRes.success && Array.isArray(docsRes.data) ? docsRes.data : [];
+      const doctors: Doctor[] = rawDoctors
+        .filter((d: any) => d && (d.id?.startsWith?.('DOC-') || d.specialization || d.department || (d.name && !d.appointment_date && !d.appointmentDate)))
+        .map(normalizeDoctor);
 
-      if (aptsRes.success && Array.isArray(aptsRes.data)) {
-        const normalized = aptsRes.data.map(normalizeAppointment).map(apt => {
-          const matchedDoc = docList.find(d => d.id === apt.doctorId);
-          return {
-            ...apt,
-            doctorName: apt.doctorName || matchedDoc?.name || (apt.doctorId ? `Dr. (${apt.doctorId})` : ''),
-            doctorSpecialization: apt.doctorSpecialization || matchedDoc?.specialization || matchedDoc?.department || ''
-          };
-        });
+      console.log('[GET_DOCTORS] DOCTOR DATA ONLY:', doctors.map(d => ({
+        id: d.id,
+        name: d.name,
+        specialization: d.specialization
+      })));
 
-        console.log('[GET_APPOINTMENTS] normalized appointments:', normalized);
-        console.log('[GET_APPOINTMENTS] FINAL DEBUG:', normalized.map(a => ({
-          id: a.id,
-          patientId: a.patientId,
-          doctorId: a.doctorId,
-          appointmentDate: a.appointmentDate,
-          appointmentTime: a.appointmentTime,
-          appointmentType: a.appointmentType,
-          status: a.status
-        })));
-        console.log('[GET_APPOINTMENTS] current patient ID:', user?.id);
+      // 2. Process Appointments Independently
+      const rawAppointments = aptsRes.success && Array.isArray(aptsRes.data) ? aptsRes.data : [];
+      const validAptItems = rawAppointments.filter((a: any) => {
+        if (!a || typeof a !== 'object') return false;
+        // Never allow doctor-only objects to be processed as appointments
+        if (a.specialization && !a.appointmentDate && !a.appointment_date && !a.patientId && !a.patient_id && !a.appointmentType && !a.reason) {
+          return false;
+        }
+        if (typeof a.id === 'string' && a.id.startsWith('DOC-') && !a.appointmentDate && !a.appointment_date && !a.patientId && !a.patient_id) {
+          return false;
+        }
+        return true;
+      });
 
-        const patientMatched = user?.id
-          ? normalized.filter(a => {
-              const aPid = (a.patientId || (a as any).patient_id || '').trim().toLowerCase();
-              const uId = (user.id || '').trim().toLowerCase();
-              const aEmail = (a.patientEmail || (a as any).email || '').trim().toLowerCase();
-              const uEmail = (user.email || '').trim().toLowerCase();
-              return aPid === uId || (uEmail && aEmail === uEmail);
-            })
-          : normalized;
+      const normalizedAppointments: Appointment[] = validAptItems.map(normalizeAppointment);
 
-        console.log('[GET_APPOINTMENTS] patient-matched appointments:', patientMatched);
-        console.log('[GET_APPOINTMENTS] FINAL appointment objects:', patientMatched);
-        setAppointments(patientMatched);
-      } else {
-        console.log('[GET_APPOINTMENTS] normalized appointments: []');
-        console.log('[GET_APPOINTMENTS] current patient ID:', user?.id);
-        console.log('[GET_APPOINTMENTS] patient-matched appointments: []');
-        console.log('[GET_APPOINTMENTS] FINAL appointment objects: []');
-        setAppointments([]);
-      }
+      console.log('[GET_APPOINTMENTS] APPOINTMENT DATA ONLY:', normalizedAppointments.map(a => ({
+        id: a.id,
+        patientId: a.patientId,
+        doctorId: a.doctorId,
+        appointmentDate: a.appointmentDate,
+        appointmentTime: a.appointmentTime,
+        appointmentType: a.appointmentType,
+        status: a.status
+      })));
+
+      // 3. Enrich appointments with doctor metadata without mutating or replacing appointments
+      const enrichedAppointments = normalizedAppointments.map(appointment => {
+        const matchedDoc = doctors.find(
+          d => normalizeId(d.id) === normalizeId(appointment.doctorId)
+        );
+
+        return {
+          ...appointment,
+          doctorName: matchedDoc?.name || appointment.doctorName || (appointment.doctorId ? `Doctor (${appointment.doctorId})` : 'Doctor'),
+          doctorSpecialization: matchedDoc?.specialization || appointment.doctorSpecialization || 'General Physician'
+        };
+      });
+
+      console.log('[GET_APPOINTMENTS] normalized appointments:', enrichedAppointments);
+      console.log('[GET_APPOINTMENTS] current patient ID:', user?.id);
+
+      const patientMatched = user?.id
+        ? enrichedAppointments.filter(a => {
+            const aPid = normalizeId(a.patientId);
+            const uId = normalizeId(user.id);
+            const aEmail = (a.patientEmail || '').trim().toLowerCase();
+            const uEmail = (user.email || '').trim().toLowerCase();
+            return aPid === uId || (uEmail && aEmail === uEmail);
+          })
+        : enrichedAppointments;
+
+      console.log('[GET_APPOINTMENTS] patient-matched appointments:', patientMatched);
+      console.log('[GET_APPOINTMENTS] FINAL appointment objects:', patientMatched);
+      setAppointments(patientMatched);
+      setLoading(false);
+    }).catch(err => {
+      console.error('[GET_APPOINTMENTS] error fetching appointments:', err);
+      setAppointments([]);
       setLoading(false);
     });
   };

@@ -237,21 +237,23 @@ export function normalizeAppointment(inputApt: any): Appointment {
   const isHighRisk = a.risk_level === 'HIGH' || (a.risk && a.risk.level === 'HIGH');
   const isMedRisk = a.risk_level === 'MEDIUM' || (a.risk && a.risk.level === 'MEDIUM');
 
+  // Guard: Ensure doctor fields do not overwrite patient/appointment attributes
+  const isDoctorLike = (a.specialization || a.department || (typeof a.id === 'string' && a.id.startsWith('DOC-'))) && !a.appointment_date && !a.appointmentDate && !a.patient_id && !a.patientId;
+  const patientNameVal = a.patientName || a.patient_name || (!isDoctorLike && a.name ? a.name : 'Valued Patient');
+
   return {
     ...a,
     id: a.id || a.appointment_id || a.appointmentId || '',
     patientId: a.patientId || a.patient_id || '',
-    patientName: a.patientName || a.patient_name || a.name || 'Valued Patient',
-    patientEmail: a.patientEmail || a.patient_email || a.email || '',
-    patientPhone: a.patientPhone || a.patient_phone || a.phone || '',
+    patientName: patientNameVal,
+    patientEmail: a.patientEmail || a.patient_email || (!isDoctorLike && a.email ? a.email : ''),
+    patientPhone: a.patientPhone || a.patient_phone || (!isDoctorLike && a.phone ? a.phone : ''),
     doctorId: a.doctorId || a.doctor_id || '',
     doctorName: a.doctorName || a.doctor_name || '',
     doctorSpecialization:
       a.doctorSpecialization ||
       a.doctor_specialization ||
-      a.specialization ||
-      a.specialty ||
-      '',
+      (!isDoctorLike ? (a.specialization || a.specialty || '') : ''),
     appointmentDate:
       a.appointmentDate ||
       a.appointment_date ||
@@ -693,7 +695,13 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_APPOINTMENTS Action Specifically
       if (payload.action === 'GET_APPOINTMENTS') {
         console.log('[GET_APPOINTMENTS] Raw n8n backend response:', resData);
-        const remoteApts: any[] = unwrapN8nData(resData).filter((a: any) => a && (a.id || a.appointment_id || a.appointmentId));
+        const remoteApts: any[] = unwrapN8nData(resData).filter((a: any) => {
+          if (!a || typeof a !== 'object') return false;
+          // Filter out pure doctor objects
+          const isDoctorObj = (a.specialization || a.department || (typeof a.id === 'string' && a.id.startsWith('DOC-'))) && !a.appointment_date && !a.appointmentDate && !a.patient_id && !a.patientId && !a.appointment_type && !a.reason;
+          if (isDoctorObj) return false;
+          return Boolean(a.id || a.appointment_id || a.appointmentId || a.appointment_date || a.appointmentDate || a.patient_id || a.patientId);
+        });
         console.log('[GET_APPOINTMENTS] Unwrapped appointments count:', remoteApts.length, remoteApts);
 
         // Standardize all appointments through normalizeAppointment
@@ -836,7 +844,13 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_DOCTORS Action Specifically
       if (payload.action === 'GET_DOCTORS') {
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-        const remoteRaw = unwrapN8nData(resData);
+        const remoteRaw = unwrapN8nData(resData).filter((d: any) => {
+          if (!d || typeof d !== 'object') return false;
+          // Discard appointment objects if they were somehow in the doctor response
+          if (typeof d.id === 'string' && d.id.startsWith('APT-')) return false;
+          if (d.appointment_date || d.appointmentDate || d.patient_id || d.patientId) return false;
+          return Boolean(d.id || d.doctor_id || d.doctorId || d.name || d.specialization);
+        });
         console.log('[GET_DOCTORS] Raw n8n response:', JSON.stringify(resData, null, 2));
         console.log('[GET_DOCTORS] After unwrap:', remoteRaw.length, 'items', remoteRaw);
 
