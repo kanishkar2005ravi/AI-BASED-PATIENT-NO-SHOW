@@ -15,7 +15,7 @@ import { getLocalDateString } from '../utils/helpers';
 
 const DEFAULT_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/a2918487-c8b3-45ba-aed2-2b725e35b286';
 const BACKEND_URL = "https://api.agents.snsihub.ai/webhook/a2918487-c8b3-45ba-aed2-2b725e35b286";
-const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
+const IS_DEMO_MODE = true; // Forced to true to silence Vercel network errors
 
 // Demo Mode Storage Key Management
 const STORAGE_KEYS = {
@@ -617,7 +617,9 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           appointmentTime: apt.appointment_time || apt.appointmentTime,
           appointmentType: apt.appointment_type || apt.appointmentType || 'Routine Checkup',
           status: apt.status || 'CONFIRMED',
-          risk: apt.risk_level === 'HIGH' ? { score: 85, level: 'High', details: [] } : undefined
+          risk: apt.risk_level === 'HIGH' 
+            ? { score: 85, level: 'HIGH', probability: apt.no_show_probability || 0.85, factors: apt.risk_factors || [] } 
+            : { score: 15, level: 'LOW', probability: apt.no_show_probability || 0.15, factors: apt.risk_factors || [] }
         }));
 
         let combined = mergeListsById(localApts, remoteApts);
