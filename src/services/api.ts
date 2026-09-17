@@ -554,13 +554,18 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
 
+        console.log('[GET_APPOINTMENTS] Raw n8n backend response:', resData);
         let remoteApts: any[] = unwrapN8nData(resData).filter((a: any) => a && (a.id || a.appointment_id));
+        console.log('[GET_APPOINTMENTS] Unwrapped appointments count:', remoteApts.length, remoteApts);
 
         // Map Supabase snake_case → Frontend camelCase
         const mappedRemote: Appointment[] = remoteApts.map(apt => {
           const matchedPat = localPats.find(p => p.id === (apt.patient_id || apt.patientId));
           const matchedDoc = localDocs.find(d => d.id === (apt.doctor_id || apt.doctorId));
           const isHighRisk = apt.risk_level === 'HIGH' || (apt.risk && apt.risk.level === 'HIGH');
+          const rawStatus = (apt.status || 'CONFIRMED').toString().trim().toUpperCase();
+          const normStatus = (rawStatus === 'CONFIRMED' || rawStatus === 'CANCELLED' || rawStatus === 'COMPLETED' || rawStatus === 'NO_SHOW' || rawStatus === 'RESCHEDULED' || rawStatus === 'CHECKED_IN' || rawStatus === 'CHECKED_OUT') ? rawStatus : 'CONFIRMED';
+          
           return {
             id: apt.appointment_id || apt.id || `APT-${Date.now()}`,
             patientId: apt.patient_id || apt.patientId || '',
@@ -572,7 +577,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             appointmentDate: apt.appointment_date || apt.appointmentDate || '',
             appointmentTime: apt.appointment_time || apt.appointmentTime || '',
             appointmentType: apt.appointment_type || apt.appointmentType || 'Routine Checkup',
-            status: apt.status || 'CONFIRMED',
+            status: normStatus as any,
             confirmedByPatient: true,
             createdAt: apt.created_at || apt.createdAt || '',
             risk: {
