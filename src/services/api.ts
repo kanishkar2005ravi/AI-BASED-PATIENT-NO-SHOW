@@ -751,6 +751,8 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         };
 
         const remoteRaw = unwrapN8n(resData);
+        console.log('[GET_DOCTORS] Raw n8n response:', JSON.stringify(resData, null, 2));
+        console.log('[GET_DOCTORS] After unwrap:', remoteRaw.length, 'items', remoteRaw);
 
         // Full doctor normalizer - maps ALL Supabase column name variants to frontend interface
         const normalizeDoctor = (d: any): Doctor => ({
