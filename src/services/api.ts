@@ -582,46 +582,59 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
         const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-        
-        let remoteApts: any[] = [];
-        if (Array.isArray(resData.data)) {
-          remoteApts = resData.data;
-        } else if (resData.data && Array.isArray(resData.data.items)) {
-          // Unpack raw n8n Postgres output
-          remoteApts = resData.data.items.map((i: any) => i.json || i);
-        } else if (Array.isArray(resData)) {
-          remoteApts = resData;
-        }
 
-        // Map Supabase snake_case to Frontend camelCase so the dashboard can read it!
-        remoteApts = remoteApts.map(apt => {
+        // Same recursive unwrapper - handles ALL n8n/Postgres response formats
+        const unwrapN8n = (raw: any): any[] => {
+          if (!raw) return [];
+          if (Array.isArray(raw)) return raw.flatMap(unwrapN8n);
+          if (raw.json) return [raw.json];
+          if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8n);
+          if (raw.data) return unwrapN8n(raw.data);
+          return [raw];
+        };
+
+        // Skip "running" responses (n8n hasn't finished yet)
+        const isRunning = resData?.status === 'running' || (resData?.result === null && resData?.executionId);
+        
+        let remoteApts: any[] = isRunning ? [] : unwrapN8n(resData).filter((a: any) => a && (a.id || a.appointment_id));
+
+        // Map Supabase snake_case → Frontend camelCase
+        const mappedRemote = remoteApts.map(apt => {
           const matchedPat = localPats.find(p => p.id === (apt.patient_id || apt.patientId));
           const matchedDoc = localDocs.find(d => d.id === (apt.doctor_id || apt.doctorId));
-          
           return {
             id: apt.appointment_id || apt.id,
             patientId: apt.patient_id || apt.patientId,
             patientName: matchedPat?.name || apt.patient_name || apt.patientName || 'Patient',
+            patientEmail: apt.email || apt.patient_email || matchedPat?.email || '',
             doctorId: apt.doctor_id || apt.doctorId,
             doctorName: matchedDoc?.name || apt.doctor_name || apt.doctorName || 'Doctor',
+            doctorSpecialization: matchedDoc?.specialization || apt.specialization || 'Specialist',
             appointmentDate: apt.appointment_date || apt.appointmentDate,
             appointmentTime: apt.appointment_time || apt.appointmentTime,
             appointmentType: apt.appointment_type || apt.appointmentType || 'Routine Checkup',
             status: apt.status || 'CONFIRMED',
-            risk: apt.risk_level === 'HIGH' 
-              ? { score: 85, level: 'HIGH', probability: apt.no_show_probability || 0.85, factors: apt.risk_factors || [] } 
-              : { score: 15, level: 'LOW', probability: apt.no_show_probability || 0.15, factors: apt.risk_factors || [] }
+            confirmedByPatient: true,
+            createdAt: apt.created_at || apt.createdAt || '',
+            risk: apt.risk_level === 'HIGH'
+              ? { score: 85, level: 'HIGH', probability: apt.no_show_probability || 0.85, factors: [] }
+              : { score: 15, level: 'LOW', probability: apt.no_show_probability || 0.15, factors: [] }
           };
         });
 
-        let combined = IS_DEMO_MODE ? mergeListsById(localApts, remoteApts) : remoteApts;
-        if (payload.data?.patientId) {
-          combined = combined.filter((a: Appointment) => a.patientId === payload.data.patientId);
-        }
+        // Always merge localStorage (has freshly booked appointments) with Supabase data
+        // This ensures newly booked appointments show immediately without waiting for Supabase refresh
+        const combined = mergeListsById(localApts, mappedRemote);
+
+        // Filter by patient if requested
+        const filtered = payload.data?.patientId
+          ? combined.filter((a: Appointment) => a.patientId === payload.data.patientId)
+          : combined;
+
         return {
           success: true,
           message: 'Appointments retrieved successfully.',
-          data: combined as any
+          data: filtered as any
         };
       }
 
