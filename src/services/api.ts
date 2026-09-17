@@ -479,27 +479,22 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle GET_PATIENTS Action Specifically
       if (payload.action === 'GET_PATIENTS') {
-        // n8n Postgres node wraps data like: { data: { items: [{json: {...}}] } }
-        // This single helper unwraps ALL n8n formats in one go
         const unwrapN8n = (raw: any): any[] => {
           if (!raw) return [];
           if (Array.isArray(raw)) return raw.flatMap(unwrapN8n);
-          if (raw.json) return [raw.json];           // {json: {...}}
-          if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8n); // {items: [...]}
-          if (raw.data) return unwrapN8n(raw.data);  // {data: ...}
+          if (raw.json) return [raw.json];
+          if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8n);
+          if (raw.data) return unwrapN8n(raw.data);
           if (Array.isArray(raw.patients)) return raw.patients;
           return [raw];
         };
 
         const remoteRaw = unwrapN8n(resData).filter((p: any) => p && (p.id || p.patient_id));
-
-        // Map directly from unwrapped data
         const remotePats = remoteRaw.map(normalizePatient).filter(p => p.id);
 
-        // Do NOT merge local storage with remote data in production mode
         const finalPats = IS_DEMO_MODE 
           ? mergeListsById(getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient), remotePats)
-          : remotePats.length > 0 ? remotePats : getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient);
+          : remotePats;
 
         return {
           success: true,
@@ -520,11 +515,6 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         } else if (resData.data?.items && Array.isArray(resData.data.items) && resData.data.items[0]?.json?.name) {
           found = resData.data.items[0].json;
         }
-        
-        if (!found && IS_DEMO_MODE) {
-          const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-          found = localPats.find(p => p.id === pId || p.email === pId) || localPats[0];
-        }
 
         return {
           success: found ? true : false,
@@ -536,67 +526,38 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle UPDATE_PATIENT Action Specifically
       if (payload.action === 'UPDATE_PATIENT') {
-        const pId = payload.data?.patientId || payload.data?.id;
-        const newPhone = payload.data?.phone;
-        const newAddress = payload.data?.address;
-
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient);
-        const updatedPats = localPats.map(p => {
-          if (p.id === pId || p.email === pId) {
-            return {
-              ...p,
-              phone: newPhone !== undefined ? newPhone : p.phone,
-              address: newAddress !== undefined ? newAddress : p.address
-            };
-          }
-          return p;
-        });
-        setLocalData(STORAGE_KEYS.PATIENTS, updatedPats);
-
-        const updatedPatient = updatedPats.find(p => p.id === pId || p.email === pId) || updatedPats[0];
-
         return {
           success: true,
           message: resData.message || 'Contact details updated successfully.',
-          patient: updatedPatient,
-          data: updatedPatient as any
+          data: payload.data as any
         };
       }
 
       // Handle DELETE_PATIENT Action Specifically
       if (payload.action === 'DELETE_PATIENT' || payload.action === 'REMOVE_PATIENT') {
-        const pId = payload.data?.patientId || payload.data?.id;
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-        const updatedPats = localPats.filter(p => p.id !== pId && p.email !== pId);
-        setLocalData(STORAGE_KEYS.PATIENTS, updatedPats);
-
         return {
           success: true,
           message: resData.message || 'Patient account removed successfully.',
-          data: updatedPats as any
+          data: [] as any
         };
       }
 
       // Handle GET_APPOINTMENTS Action Specifically
       if (payload.action === 'GET_APPOINTMENTS') {
-        const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
         const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
 
-        // Same recursive unwrapper - handles ALL n8n/Postgres response formats
         const unwrapN8n = (raw: any): any[] => {
           if (!raw) return [];
           if (Array.isArray(raw)) return raw.flatMap(unwrapN8n);
           if (raw.json) return [raw.json];
           if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8n);
           if (raw.data) return unwrapN8n(raw.data);
+          if (Array.isArray(raw.appointments)) return raw.appointments;
           return [raw];
         };
 
-        // Skip "running" responses (n8n hasn't finished yet)
-        const isRunning = resData?.status === 'running' || (resData?.result === null && resData?.executionId);
-        
-        let remoteApts: any[] = isRunning ? [] : unwrapN8n(resData).filter((a: any) => a && (a.id || a.appointment_id));
+        let remoteApts: any[] = unwrapN8n(resData).filter((a: any) => a && (a.id || a.appointment_id));
 
         // Map Supabase snake_case → Frontend camelCase
         const mappedRemote: Appointment[] = remoteApts.map(apt => {
@@ -626,17 +587,13 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           };
         });
 
-        // Always merge localStorage (has freshly booked appointments) with Supabase data
-        const combined = mergeListsById(localApts, mappedRemote);
-
-        // Filter by patient if requested (case-insensitive, accepts patientId or userId or patient_id)
         const targetPid = (payload.data?.patientId || payload.data?.patient_id || payload.data?.userId || '').trim().toLowerCase();
         const filtered = (targetPid && payload.data?.role !== 'admin')
-          ? combined.filter((a: Appointment) => {
+          ? mappedRemote.filter((a: Appointment) => {
               const aPid = (a.patientId || '').trim().toLowerCase();
               return aPid === targetPid || (payload.data?.email && a.patientEmail && a.patientEmail.toLowerCase() === payload.data.email.toLowerCase());
             })
-          : combined;
+          : mappedRemote;
 
         return {
           success: true,
@@ -775,17 +732,6 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         console.log('[GET_DOCTORS] Raw n8n response:', JSON.stringify(resData, null, 2));
         console.log('[GET_DOCTORS] After unwrap:', remoteRaw.length, 'items', remoteRaw);
 
-        // n8n returned "status: running" meaning it responded BEFORE the Postgres query finished
-        // In this case, fall back to local storage data
-        if (resData?.status === 'running' || resData?.result === null && resData?.executionId) {
-          console.warn('[GET_DOCTORS] n8n responded before query finished (Immediately mode). Using local data.');
-          return {
-            success: true,
-            message: 'Doctors retrieved from local cache.',
-            data: localDocs as any
-          };
-        }
-
         // Full doctor normalizer - maps ALL Supabase column name variants to frontend interface
         const normalizeDoctor = (d: any): Doctor => ({
           id: d.id || d.doctor_id || '',
@@ -805,7 +751,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
         const combined = IS_DEMO_MODE
           ? mergeListsById(localDocs, remoteDocs)
-          : remoteDocs.length > 0 ? remoteDocs : localDocs;
+          : remoteDocs;
         
         return {
           success: true,
