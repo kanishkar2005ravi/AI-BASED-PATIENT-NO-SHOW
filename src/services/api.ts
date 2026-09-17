@@ -54,6 +54,49 @@ function mergeListsById<T extends { id?: string }>(listA: T[], listB: T[]): T[] 
   return Array.from(map.values());
 }
 
+export function unwrapN8nData(raw: any): any[] {
+  if (!raw || typeof raw !== 'object') return [];
+  if (Array.isArray(raw)) return raw.flatMap(unwrapN8nData);
+  if (raw._responseData) return unwrapN8nData(raw._responseData);
+  if (raw.result && typeof raw.result === 'object') return unwrapN8nData(raw.result);
+  if (raw.body && typeof raw.body === 'object') return unwrapN8nData(raw.body);
+  if (raw.json && typeof raw.json === 'object') return [raw.json];
+  if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8nData);
+  if (raw.data && typeof raw.data === 'object') return unwrapN8nData(raw.data);
+  if (Array.isArray(raw.patients)) return raw.patients;
+  if (Array.isArray(raw.doctors)) return raw.doctors;
+  if (Array.isArray(raw.appointments)) return raw.appointments;
+  if (raw.id || raw.patient_id || raw.doctor_id || raw.appointment_id || raw.name) return [raw];
+  return [];
+}
+
+export function normalizeDoctor(d: any): Doctor {
+  if (!d) {
+    return {
+      id: '',
+      name: 'Unknown Doctor',
+      specialization: 'General Medicine',
+      department: 'General Medicine',
+      email: '',
+      phone: '',
+      experience: 0,
+      status: 'Active'
+    };
+  }
+  return {
+    ...d,
+    id: d.id || d.doctor_id || d.doctorId || '',
+    name: d.name || d.doctor_name || d.doctorName || 'Unknown Doctor',
+    specialization: d.specialization || d.specialty || 'General Medicine',
+    department: d.department || d.specialization || 'General Medicine',
+    email: d.email || d.doctor_email || '',
+    phone: d.phone || d.doctor_phone || '',
+    experience: Number(d.experience || d.experience_years || d.years_of_experience || 0),
+    status: (d.status === 'Active' || d.status === 'Inactive') ? d.status : 'Active',
+    avatar: d.avatar || undefined
+  };
+}
+
 function normalizePatient(p: any): Patient {
   if (!p) {
     return {
@@ -479,17 +522,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle GET_PATIENTS Action Specifically
       if (payload.action === 'GET_PATIENTS') {
-        const unwrapN8n = (raw: any): any[] => {
-          if (!raw) return [];
-          if (Array.isArray(raw)) return raw.flatMap(unwrapN8n);
-          if (raw.json) return [raw.json];
-          if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8n);
-          if (raw.data) return unwrapN8n(raw.data);
-          if (Array.isArray(raw.patients)) return raw.patients;
-          return [raw];
-        };
-
-        const remoteRaw = unwrapN8n(resData).filter((p: any) => p && (p.id || p.patient_id));
+        const remoteRaw = unwrapN8nData(resData).filter((p: any) => p && (p.id || p.patient_id));
         const remotePats = remoteRaw.map(normalizePatient).filter(p => p.id);
 
         const finalPats = IS_DEMO_MODE 
@@ -547,17 +580,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
 
-        const unwrapN8n = (raw: any): any[] => {
-          if (!raw) return [];
-          if (Array.isArray(raw)) return raw.flatMap(unwrapN8n);
-          if (raw.json) return [raw.json];
-          if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8n);
-          if (raw.data) return unwrapN8n(raw.data);
-          if (Array.isArray(raw.appointments)) return raw.appointments;
-          return [raw];
-        };
-
-        let remoteApts: any[] = unwrapN8n(resData).filter((a: any) => a && (a.id || a.appointment_id));
+        let remoteApts: any[] = unwrapN8nData(resData).filter((a: any) => a && (a.id || a.appointment_id));
 
         // Map Supabase snake_case → Frontend camelCase
         const mappedRemote: Appointment[] = remoteApts.map(apt => {
@@ -716,34 +739,9 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_DOCTORS Action Specifically
       if (payload.action === 'GET_DOCTORS') {
         const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-
-        // Same recursive unwrapper - handles all n8n/Postgres response formats
-        const unwrapN8n = (raw: any): any[] => {
-          if (!raw) return [];
-          if (Array.isArray(raw)) return raw.flatMap(unwrapN8n);
-          if (raw.json) return [raw.json];
-          if (Array.isArray(raw.items)) return raw.items.flatMap(unwrapN8n);
-          if (raw.data) return unwrapN8n(raw.data);
-          if (Array.isArray(raw.doctors)) return raw.doctors;
-          return [raw];
-        };
-
-        const remoteRaw = unwrapN8n(resData);
+        const remoteRaw = unwrapN8nData(resData);
         console.log('[GET_DOCTORS] Raw n8n response:', JSON.stringify(resData, null, 2));
         console.log('[GET_DOCTORS] After unwrap:', remoteRaw.length, 'items', remoteRaw);
-
-        // Full doctor normalizer - maps ALL Supabase column name variants to frontend interface
-        const normalizeDoctor = (d: any): Doctor => ({
-          id: d.id || d.doctor_id || '',
-          name: d.name || d.doctor_name || 'Unknown Doctor',
-          specialization: d.specialization || d.specialty || 'General Medicine',
-          department: d.department || d.specialization || 'General Medicine',
-          email: d.email || d.doctor_email || '',
-          phone: d.phone || d.doctor_phone || '',
-          experience: Number(d.experience || d.experience_years || d.years_of_experience || 0),
-          status: (d.status === 'Active' || d.status === 'Inactive') ? d.status : 'Active',
-          avatar: d.avatar || undefined
-        });
 
         const remoteDocs = remoteRaw
           .map(normalizeDoctor)
