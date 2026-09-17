@@ -599,26 +599,30 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         let remoteApts: any[] = isRunning ? [] : unwrapN8n(resData).filter((a: any) => a && (a.id || a.appointment_id));
 
         // Map Supabase snake_case → Frontend camelCase
-        const mappedRemote = remoteApts.map(apt => {
+        const mappedRemote: Appointment[] = remoteApts.map(apt => {
           const matchedPat = localPats.find(p => p.id === (apt.patient_id || apt.patientId));
           const matchedDoc = localDocs.find(d => d.id === (apt.doctor_id || apt.doctorId));
+          const isHighRisk = apt.risk_level === 'HIGH' || (apt.risk && apt.risk.level === 'HIGH');
           return {
-            id: apt.appointment_id || apt.id,
-            patientId: apt.patient_id || apt.patientId,
+            id: apt.appointment_id || apt.id || `APT-${Date.now()}`,
+            patientId: apt.patient_id || apt.patientId || '',
             patientName: matchedPat?.name || apt.patient_name || apt.patientName || 'Patient',
             patientEmail: apt.email || apt.patient_email || matchedPat?.email || '',
-            doctorId: apt.doctor_id || apt.doctorId,
+            doctorId: apt.doctor_id || apt.doctorId || '',
             doctorName: matchedDoc?.name || apt.doctor_name || apt.doctorName || 'Doctor',
             doctorSpecialization: matchedDoc?.specialization || apt.specialization || 'Specialist',
-            appointmentDate: apt.appointment_date || apt.appointmentDate,
-            appointmentTime: apt.appointment_time || apt.appointmentTime,
+            appointmentDate: apt.appointment_date || apt.appointmentDate || '',
+            appointmentTime: apt.appointment_time || apt.appointmentTime || '',
             appointmentType: apt.appointment_type || apt.appointmentType || 'Routine Checkup',
             status: apt.status || 'CONFIRMED',
             confirmedByPatient: true,
             createdAt: apt.created_at || apt.createdAt || '',
-            risk: apt.risk_level === 'HIGH'
-              ? { score: 85, level: 'HIGH', probability: apt.no_show_probability || 0.85, factors: [] }
-              : { score: 15, level: 'LOW', probability: apt.no_show_probability || 0.15, factors: [] }
+            risk: {
+              score: isHighRisk ? 85 : 15,
+              level: (isHighRisk ? 'HIGH' : 'LOW') as 'HIGH' | 'LOW',
+              probability: apt.no_show_probability || (isHighRisk ? 0.85 : 0.15),
+              factors: []
+            }
           };
         });
 
