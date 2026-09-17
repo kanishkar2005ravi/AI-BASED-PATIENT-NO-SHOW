@@ -286,6 +286,9 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       if (payload.action === 'CREATE_PATIENT') {
         console.log('[CREATE_PATIENT] Outgoing API Request Body:', JSON.stringify(requestBody, null, 2));
       }
+      if (payload.action === 'BOOK_APPOINTMENT') {
+        console.log('[BOOK_APPOINTMENT] payload:', requestBody);
+      }
 
       const response = await fetch(BACKEND_URL, {
         method: 'POST',
@@ -305,6 +308,9 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       if (payload.action === 'CREATE_PATIENT') {
         console.log('[CREATE_PATIENT] Backend API Response:', JSON.stringify({ httpStatus: response.status, ok: response.ok, data: resData }, null, 2));
+      }
+      if (payload.action === 'BOOK_APPOINTMENT') {
+        console.log('[BOOK_APPOINTMENT] response:', resData);
       }
 
       if (!response.ok) {
@@ -439,39 +445,42 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle BOOK_APPOINTMENT Action Specifically
       if (payload.action === 'BOOK_APPOINTMENT') {
-        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-        const selectedDoc = localDocs.find(d => d.id === requestBody.doctor_id) || INITIAL_DOCTORS[0];
-        const currentPat = localPats.find(p => p.id === requestBody.patient_id) || { name: payload.data?.patientName || 'Patient', email: payload.data?.email || 'patient@example.com' };
+        const unwrapped = unwrapN8nData(resData);
+        const savedApt: any = unwrapped.length > 0 ? unwrapped[0] : (resData.appointment || resData.data || null);
 
         const appointmentObj: Appointment = {
-          id: requestBody.appointment_id,
-          patientId: requestBody.patient_id,
-          patientName: currentPat.name,
-          patientEmail: (currentPat as any).email || payload.data?.email || '',
-          doctorId: requestBody.doctor_id,
-          doctorName: selectedDoc?.name || payload.data?.doctorName || 'Doctor',
-          doctorSpecialization: selectedDoc?.specialization || 'Specialist',
-          appointmentDate: requestBody.appointment_date,
-          appointmentTime: requestBody.appointment_time,
-          appointmentType: requestBody.reason || 'Routine Checkup',
-          status: 'CONFIRMED',
-          risk: resData.risk || { level: 'LOW', probability: 0.15, factors: [] },
+          id: savedApt?.id || savedApt?.appointment_id || requestBody.appointment_id,
+          patientId: savedApt?.patient_id || savedApt?.patientId || requestBody.patient_id,
+          patientName: savedApt?.patient_name || savedApt?.patientName || payload.data?.patient_name || payload.data?.patientName || payload.data?.name || 'Patient',
+          patientEmail: savedApt?.email || savedApt?.patient_email || savedApt?.patientEmail || payload.data?.email || payload.data?.patientEmail || '',
+          doctorId: savedApt?.doctor_id || savedApt?.doctorId || requestBody.doctor_id,
+          doctorName: savedApt?.doctor_name || savedApt?.doctorName || payload.data?.doctor_name || payload.data?.doctorName || 'Doctor',
+          doctorSpecialization: savedApt?.doctor_specialization || savedApt?.doctorSpecialization || payload.data?.doctorSpecialization || 'Specialist',
+          appointmentDate: savedApt?.appointment_date || savedApt?.appointmentDate || requestBody.appointment_date,
+          appointmentTime: savedApt?.appointment_time || savedApt?.appointmentTime || requestBody.appointment_time,
+          appointmentType: savedApt?.appointment_type || savedApt?.appointmentType || requestBody.reason || 'Routine Checkup',
+          status: ((savedApt?.status || 'CONFIRMED') as string).toUpperCase() as any,
+          risk: savedApt?.risk || {
+            score: savedApt?.risk_level === 'HIGH' ? 85 : 15,
+            level: (savedApt?.risk_level === 'HIGH' ? 'HIGH' : 'LOW') as 'HIGH' | 'LOW',
+            probability: Number(savedApt?.no_show_probability || 0.15),
+            factors: []
+          },
           confirmedByPatient: true,
-          createdAt: getLocalDateString()
+          createdAt: savedApt?.created_at || savedApt?.createdAt || getLocalDateString()
         };
 
-        // Always sync to localStorage so admin page shows it immediately
-        const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
-        if (!localApts.some(a => a.id === appointmentObj.id)) {
-          localApts.unshift(appointmentObj);
-          setLocalData(STORAGE_KEYS.APPOINTMENTS, localApts);
+        if (IS_DEMO_MODE) {
+          const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
+          if (!localApts.some(a => a.id === appointmentObj.id)) {
+            localApts.unshift(appointmentObj);
+            setLocalData(STORAGE_KEYS.APPOINTMENTS, localApts);
+          }
         }
 
-        // Always return success — data IS saved to Supabase even if n8n returns "running" status
         return {
-          success: true,
-          message: 'Appointment booked successfully! You will receive a confirmation shortly.',
+          success: isSuccess,
+          message: resData.message || (isSuccess ? 'Appointment booked successfully! You will receive a confirmation shortly.' : 'Unable to complete appointment booking.'),
           appointment: appointmentObj,
           data: appointmentObj as any
         };

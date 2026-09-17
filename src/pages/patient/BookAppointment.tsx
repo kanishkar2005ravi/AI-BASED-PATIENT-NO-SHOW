@@ -114,16 +114,33 @@ export const BookAppointment: React.FC = () => {
       return;
     }
 
+    console.log('[BOOK_APPOINTMENT] patientId:', user?.id);
+    console.log('[BOOK_APPOINTMENT] doctorId:', selectedDoctorId);
+    console.log('[BOOK_APPOINTMENT] doctor:', selectedDoctor);
+    console.log('[BOOK_APPOINTMENT] appointment date:', selectedDate);
+    console.log('[BOOK_APPOINTMENT] appointment time:', selectedTimeSlot);
+    console.log('[BOOK_APPOINTMENT] reason:', appointmentType);
+    console.log('[BOOK_APPOINTMENT] selected slot:', selectedTimeSlot);
+    console.log('[BOOK_APPOINTMENT] availability/slot object:', {
+      doctorId: selectedDoctorId,
+      doctorName: selectedDoctor?.name,
+      date: selectedDate,
+      timeSlot: selectedTimeSlot,
+      bookedSlots: bookedTimeSlots
+    });
+
     setBookingLoading(true);
     const res = await callBackend({
       action: 'BOOK_APPOINTMENT',
       data: {
-        patient_id: user?.id || 'PAT-1001',
-        patientId: user?.id || 'PAT-1001',
+        patient_id: user?.id || 'PAT-1',
+        patientId: user?.id || 'PAT-1',
         doctor_id: selectedDoctorId,
         doctorId: selectedDoctorId,
         doctorName: selectedDoctor?.name || '',
         doctor_name: selectedDoctor?.name || '',
+        doctorSpecialization: selectedDoctor?.specialization || '',
+        doctor_specialization: selectedDoctor?.specialization || '',
         appointment_date: selectedDate,
         appointmentDate: selectedDate,
         appointment_time: selectedTimeSlot,
@@ -142,29 +159,16 @@ export const BookAppointment: React.FC = () => {
       }
     });
 
+    console.log('[BOOK_APPOINTMENT] returned appointment data:', res.appointment || res.data);
 
     setBookingLoading(false);
-    if (res.success) {
-      setBookingResult(res.appointment || {
-        id: `APT-${Date.now()}`,
-        patientId: user?.id || 'PAT-001',
-        patientName: user?.name || 'Kiran Raj',
-        patientEmail: user?.email || 'patient@example.com',
-        doctorId: selectedDoctorId,
-        doctorName: selectedDoctor?.name || 'Doctor',
-        doctorSpecialization: selectedDoctor?.specialization || 'Medicine',
-        appointmentDate: selectedDate,
-        appointmentTime: selectedTimeSlot,
-        appointmentType: appointmentType as any,
-        status: 'CONFIRMED',
-        risk: { level: 'LOW', probability: 0.15, factors: [] },
-        confirmedByPatient: true,
-        createdAt: new Date().toISOString()
-      });
+    if (res.success && (res.appointment || res.data)) {
+      const confirmedAppointment = res.appointment || res.data;
+      setBookingResult(confirmedAppointment);
       setStep(3);
-      showToast(res.message || 'Appointment booked successfully', 'success');
+      showToast(res.message || 'Appointment booked successfully!', 'success');
     } else {
-      showToast(res.message || 'Unable to connect to appointment service.', 'error');
+      showToast(res.message || res.error || 'Unable to connect to appointment service.', 'error');
     }
   };
 
