@@ -595,6 +595,8 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle GET_APPOINTMENTS Action Specifically
       if (payload.action === 'GET_APPOINTMENTS') {
         const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
+        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
         
         let remoteApts: any[] = [];
         if (Array.isArray(resData.data)) {
@@ -607,20 +609,25 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         }
 
         // Map Supabase snake_case to Frontend camelCase so the dashboard can read it!
-        remoteApts = remoteApts.map(apt => ({
-          id: apt.appointment_id || apt.id,
-          patientId: apt.patient_id || apt.patientId,
-          patientName: apt.patient_name || apt.patientName || 'Patient',
-          doctorId: apt.doctor_id || apt.doctorId,
-          doctorName: apt.doctor_name || apt.doctorName || 'Doctor',
-          appointmentDate: apt.appointment_date || apt.appointmentDate,
-          appointmentTime: apt.appointment_time || apt.appointmentTime,
-          appointmentType: apt.appointment_type || apt.appointmentType || 'Routine Checkup',
-          status: apt.status || 'CONFIRMED',
-          risk: apt.risk_level === 'HIGH' 
-            ? { score: 85, level: 'HIGH', probability: apt.no_show_probability || 0.85, factors: apt.risk_factors || [] } 
-            : { score: 15, level: 'LOW', probability: apt.no_show_probability || 0.15, factors: apt.risk_factors || [] }
-        }));
+        remoteApts = remoteApts.map(apt => {
+          const matchedPat = localPats.find(p => p.id === (apt.patient_id || apt.patientId));
+          const matchedDoc = localDocs.find(d => d.id === (apt.doctor_id || apt.doctorId));
+          
+          return {
+            id: apt.appointment_id || apt.id,
+            patientId: apt.patient_id || apt.patientId,
+            patientName: matchedPat?.name || apt.patient_name || apt.patientName || 'Patient',
+            doctorId: apt.doctor_id || apt.doctorId,
+            doctorName: matchedDoc?.name || apt.doctor_name || apt.doctorName || 'Doctor',
+            appointmentDate: apt.appointment_date || apt.appointmentDate,
+            appointmentTime: apt.appointment_time || apt.appointmentTime,
+            appointmentType: apt.appointment_type || apt.appointmentType || 'Routine Checkup',
+            status: apt.status || 'CONFIRMED',
+            risk: apt.risk_level === 'HIGH' 
+              ? { score: 85, level: 'HIGH', probability: apt.no_show_probability || 0.85, factors: apt.risk_factors || [] } 
+              : { score: 15, level: 'LOW', probability: apt.no_show_probability || 0.15, factors: apt.risk_factors || [] }
+          };
+        });
 
         let combined = IS_DEMO_MODE ? mergeListsById(localApts, remoteApts) : remoteApts;
         if (payload.data?.patientId) {
