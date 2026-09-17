@@ -104,14 +104,32 @@ export const PatientDashboard: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     const [aptsRes, waitRes, notifRes, docsRes] = await Promise.all([
-      callBackend({ action: 'GET_APPOINTMENTS', data: { role: 'patient', userId: user?.id } }),
+      callBackend({ 
+        action: 'GET_APPOINTMENTS', 
+        data: { 
+          role: 'patient', 
+          userId: user?.id, 
+          patientId: user?.id, 
+          patient_id: user?.id,
+          email: user?.email 
+        } 
+      }),
       callBackend({ action: 'GET_WAITLIST' }),
       callBackend({ action: 'GET_NOTIFICATIONS', data: { userId: user?.id } }),
       callBackend({ action: 'GET_DOCTORS' })
     ]);
 
     if (aptsRes.success && Array.isArray(aptsRes.data)) {
-      setAppointments(aptsRes.data);
+      const userApts = user?.id 
+        ? aptsRes.data.filter((a: Appointment) => {
+            const aPid = (a.patientId || (a as any).patient_id || '').trim().toLowerCase();
+            const uId = (user.id || '').trim().toLowerCase();
+            const aEmail = (a.patientEmail || (a as any).email || '').trim().toLowerCase();
+            const uEmail = (user.email || '').trim().toLowerCase();
+            return aPid === uId || (uEmail && aEmail === uEmail);
+          })
+        : aptsRes.data;
+      setAppointments(userApts);
     }
     if (waitRes.success && Array.isArray(waitRes.data)) {
       setWaitlist(waitRes.data.filter((w: WaitlistItem) => w.patientId === user?.id));
@@ -127,16 +145,33 @@ export const PatientDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [user?.id]);
+  }, [user?.id, user?.email]);
 
-  const nextAppointment = appointments.find(
-    a => a.status === 'CONFIRMED' || a.status === 'CHECKED_IN' || a.status === 'RESCHEDULED'
-  );
+  const isUpcoming = (status?: string) => {
+    const s = (status || '').toUpperCase();
+    return s === 'CONFIRMED' || s === 'SCHEDULED' || s === 'CHECKED_IN' || s === 'RESCHEDULED' || s === 'BOOKED' || s === 'PENDING';
+  };
 
-  const attendedCount = appointments.filter(a => a.status === 'COMPLETED' || a.status === 'CHECKED_OUT' || (a.status as string) === 'ATTENDED').length;
-  const rescheduledCount = appointments.filter(a => a.status === 'RESCHEDULED').length;
-  const cancelledCount = appointments.filter(a => a.status === 'CANCELLED').length;
-  const missedCount = appointments.filter(a => a.status === 'NO_SHOW').length;
+  const isPast = (status?: string) => {
+    const s = (status || '').toUpperCase();
+    return s === 'COMPLETED' || s === 'CHECKED_OUT' || s === 'NO_SHOW' || s === 'ATTENDED' || s === 'MISSED';
+  };
+
+  const nextAppointment = appointments.find(a => isUpcoming(a.status));
+
+  const attendedCount = appointments.filter(a => {
+    const s = (a.status || '').toUpperCase();
+    return s === 'COMPLETED' || s === 'CHECKED_OUT' || s === 'ATTENDED';
+  }).length;
+  const rescheduledCount = appointments.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED').length;
+  const cancelledCount = appointments.filter(a => {
+    const s = (a.status || '').toUpperCase();
+    return s === 'CANCELLED' || s === 'CANCELED';
+  }).length;
+  const missedCount = appointments.filter(a => {
+    const s = (a.status || '').toUpperCase();
+    return s === 'NO_SHOW' || s === 'MISSED';
+  }).length;
 
   const handleCancel = async (aptId: string) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) return;

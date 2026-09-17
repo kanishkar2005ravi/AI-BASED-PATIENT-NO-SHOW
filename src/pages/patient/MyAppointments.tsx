@@ -8,7 +8,7 @@ import { Loading } from '../../components/common/Loading';
 import { EmptyState } from '../../components/common/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { callBackend } from '../../services/api';
+import { callBackend, normalizeAppointment } from '../../services/api';
 import { Appointment } from '../../types';
 import { Calendar, Clock, ChevronRight, XCircle, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
@@ -25,9 +25,38 @@ export const MyAppointments: React.FC = () => {
 
   const fetchAppointments = () => {
     setLoading(true);
-    callBackend({ action: 'GET_APPOINTMENTS', data: { patientId: user?.id } }).then(res => {
+    callBackend({ 
+      action: 'GET_APPOINTMENTS', 
+      data: { 
+        patientId: user?.id,
+        patient_id: user?.id,
+        userId: user?.id,
+        email: user?.email,
+        role: 'patient'
+      } 
+    }).then(res => {
       if (res.success && Array.isArray(res.data)) {
-        setAppointments(res.data);
+        const normalized = res.data.map(normalizeAppointment);
+        console.log('[GET_APPOINTMENTS] normalized appointments:', normalized);
+        console.log('[GET_APPOINTMENTS] current patient ID:', user?.id);
+
+        const patientMatched = user?.id
+          ? normalized.filter(a => {
+              const aPid = (a.patientId || (a as any).patient_id || '').trim().toLowerCase();
+              const uId = (user.id || '').trim().toLowerCase();
+              const aEmail = (a.patientEmail || (a as any).email || '').trim().toLowerCase();
+              const uEmail = (user.email || '').trim().toLowerCase();
+              return aPid === uId || (uEmail && aEmail === uEmail);
+            })
+          : normalized;
+
+        console.log('[GET_APPOINTMENTS] patient-matched appointments:', patientMatched);
+        setAppointments(patientMatched);
+      } else {
+        console.log('[GET_APPOINTMENTS] normalized appointments: []');
+        console.log('[GET_APPOINTMENTS] current patient ID:', user?.id);
+        console.log('[GET_APPOINTMENTS] patient-matched appointments: []');
+        setAppointments([]);
       }
       setLoading(false);
     });
@@ -35,12 +64,27 @@ export const MyAppointments: React.FC = () => {
 
   useEffect(() => {
     fetchAppointments();
-  }, [user?.id]);
+  }, [user?.id, user?.email]);
+
+  const isUpcoming = (status?: string) => {
+    const s = (status || '').toUpperCase();
+    return s === 'CONFIRMED' || s === 'SCHEDULED' || s === 'CHECKED_IN' || s === 'RESCHEDULED' || s === 'BOOKED' || s === 'PENDING';
+  };
+
+  const isPast = (status?: string) => {
+    const s = (status || '').toUpperCase();
+    return s === 'COMPLETED' || s === 'CHECKED_OUT' || s === 'NO_SHOW' || s === 'ATTENDED' || s === 'MISSED';
+  };
+
+  const isCancelled = (status?: string) => {
+    const s = (status || '').toUpperCase();
+    return s === 'CANCELLED' || s === 'CANCELED';
+  };
 
   const filtered = appointments.filter(a => {
-    if (tab === 'UPCOMING') return a.status === 'CONFIRMED' || a.status === 'CHECKED_IN' || a.status === 'RESCHEDULED';
-    if (tab === 'PAST') return a.status === 'COMPLETED' || a.status === 'CHECKED_OUT' || a.status === 'NO_SHOW';
-    if (tab === 'CANCELLED') return a.status === 'CANCELLED';
+    if (tab === 'UPCOMING') return isUpcoming(a.status);
+    if (tab === 'PAST') return isPast(a.status);
+    if (tab === 'CANCELLED') return isCancelled(a.status);
     return true;
   });
 
@@ -108,22 +152,26 @@ export const MyAppointments: React.FC = () => {
       {/* Tabs */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 text-xs font-bold">
-          {(['UPCOMING', 'PAST', 'CANCELLED'] as const).map(tabKey => (
-            <button
-              key={tabKey}
-              onClick={() => setTab(tabKey)}
-              className={`px-4 py-2 rounded-xl transition-all capitalize ${
-                tab === tabKey ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              {tabKey === 'UPCOMING' ? t('appointments.tab_upcoming') : tabKey === 'PAST' ? t('appointments.tab_past') : t('appointments.tab_cancelled')} ({appointments.filter(a => {
-                if (tabKey === 'UPCOMING') return a.status === 'CONFIRMED' || a.status === 'CHECKED_IN' || a.status === 'RESCHEDULED';
-                if (tabKey === 'PAST') return a.status === 'COMPLETED' || a.status === 'CHECKED_OUT' || a.status === 'NO_SHOW';
-                if (tabKey === 'CANCELLED') return a.status === 'CANCELLED';
-                return false;
-              }).length})
-            </button>
-          ))}
+          {(['UPCOMING', 'PAST', 'CANCELLED'] as const).map(tabKey => {
+            const count = appointments.filter(a => {
+              if (tabKey === 'UPCOMING') return isUpcoming(a.status);
+              if (tabKey === 'PAST') return isPast(a.status);
+              if (tabKey === 'CANCELLED') return isCancelled(a.status);
+              return false;
+            }).length;
+
+            return (
+              <button
+                key={tabKey}
+                onClick={() => setTab(tabKey)}
+                className={`px-4 py-2 rounded-xl transition-all capitalize ${
+                  tab === tabKey ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tabKey === 'UPCOMING' ? t('appointments.tab_upcoming') : tabKey === 'PAST' ? t('appointments.tab_past') : t('appointments.tab_cancelled')} ({count})
+              </button>
+            );
+          })}
         </div>
 
         <Button

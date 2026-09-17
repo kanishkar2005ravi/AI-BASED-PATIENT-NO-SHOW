@@ -166,6 +166,72 @@ function normalizePatient(p: any): Patient {
   } as Patient;
 }
 
+export function normalizeAppointment(apt: any): Appointment {
+  if (!apt || typeof apt !== 'object') {
+    return {
+      id: '',
+      patientId: '',
+      patientName: 'Valued Patient',
+      patientEmail: '',
+      patientPhone: '',
+      doctorId: '',
+      doctorName: 'Doctor',
+      doctorSpecialization: 'General Physician',
+      appointmentDate: '',
+      appointmentTime: '',
+      appointmentType: 'Routine Checkup' as any,
+      status: 'CONFIRMED',
+      risk: { level: 'LOW', probability: 0.15, factors: [] },
+      confirmedByPatient: true,
+      createdAt: getLocalDateString()
+    };
+  }
+
+  const rawStatus = (apt.status || 'CONFIRMED').toString().trim().toUpperCase();
+  let normStatus: AppointmentStatus = 'CONFIRMED';
+  if (rawStatus === 'CANCELLED' || rawStatus === 'CANCELED') {
+    normStatus = 'CANCELLED';
+  } else if (rawStatus === 'COMPLETED' || rawStatus === 'ATTENDED') {
+    normStatus = 'COMPLETED';
+  } else if (rawStatus === 'CHECKED_IN') {
+    normStatus = 'CHECKED_IN';
+  } else if (rawStatus === 'CHECKED_OUT') {
+    normStatus = 'CHECKED_OUT';
+  } else if (rawStatus === 'RESCHEDULED') {
+    normStatus = 'RESCHEDULED';
+  } else if (rawStatus === 'NO_SHOW' || rawStatus === 'MISSED') {
+    normStatus = 'NO_SHOW';
+  } else {
+    normStatus = 'CONFIRMED';
+  }
+
+  const isHighRisk = apt.risk_level === 'HIGH' || (apt.risk && apt.risk.level === 'HIGH');
+  const isMedRisk = apt.risk_level === 'MEDIUM' || (apt.risk && apt.risk.level === 'MEDIUM');
+
+  return {
+    ...apt,
+    id: String(apt.appointment_id || apt.id || apt.appointmentId || ''),
+    patientId: String(apt.patient_id || apt.patientId || ''),
+    patientName: apt.patient_name || apt.patientName || apt.name || 'Valued Patient',
+    patientEmail: apt.patient_email || apt.patientEmail || apt.email || '',
+    patientPhone: apt.patient_phone || apt.patientPhone || apt.phone || '',
+    doctorId: String(apt.doctor_id || apt.doctorId || ''),
+    doctorName: apt.doctor_name || apt.doctorName || 'Doctor',
+    doctorSpecialization: apt.doctor_specialization || apt.doctorSpecialization || apt.specialization || apt.specialty || 'General Physician',
+    appointmentDate: apt.appointment_date || apt.appointmentDate || apt.date || '',
+    appointmentTime: apt.appointment_time || apt.appointmentTime || apt.time || '',
+    appointmentType: (apt.appointment_type || apt.appointmentType || apt.reason || 'Routine Checkup') as any,
+    status: normStatus,
+    confirmedByPatient: true,
+    createdAt: apt.created_at || apt.createdAt || getLocalDateString(),
+    risk: apt.risk || {
+      level: (isHighRisk ? 'HIGH' : isMedRisk ? 'MEDIUM' : 'LOW') as 'HIGH' | 'MEDIUM' | 'LOW',
+      probability: Number(apt.no_show_probability || (isHighRisk ? 0.85 : isMedRisk ? 0.45 : 0.15)),
+      factors: []
+    }
+  };
+}
+
 export const isDemoMode = (): boolean => IS_DEMO_MODE;
 
 export const clearAllAppData = (): void => {
@@ -448,27 +514,13 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         const unwrapped = unwrapN8nData(resData);
         const savedApt: any = unwrapped.length > 0 ? unwrapped[0] : (resData.appointment || resData.data || null);
 
-        const appointmentObj: Appointment = {
-          id: savedApt?.id || savedApt?.appointment_id || requestBody.appointment_id,
-          patientId: savedApt?.patient_id || savedApt?.patientId || requestBody.patient_id,
+        const appointmentObj: Appointment = normalizeAppointment({
+          ...requestBody,
+          ...(savedApt || {}),
           patientName: savedApt?.patient_name || savedApt?.patientName || payload.data?.patient_name || payload.data?.patientName || payload.data?.name || 'Patient',
-          patientEmail: savedApt?.email || savedApt?.patient_email || savedApt?.patientEmail || payload.data?.email || payload.data?.patientEmail || '',
-          doctorId: savedApt?.doctor_id || savedApt?.doctorId || requestBody.doctor_id,
           doctorName: savedApt?.doctor_name || savedApt?.doctorName || payload.data?.doctor_name || payload.data?.doctorName || 'Doctor',
-          doctorSpecialization: savedApt?.doctor_specialization || savedApt?.doctorSpecialization || payload.data?.doctorSpecialization || 'Specialist',
-          appointmentDate: savedApt?.appointment_date || savedApt?.appointmentDate || requestBody.appointment_date,
-          appointmentTime: savedApt?.appointment_time || savedApt?.appointmentTime || requestBody.appointment_time,
-          appointmentType: savedApt?.appointment_type || savedApt?.appointmentType || requestBody.reason || 'Routine Checkup',
-          status: ((savedApt?.status || 'CONFIRMED') as string).toUpperCase() as any,
-          risk: savedApt?.risk || {
-            score: savedApt?.risk_level === 'HIGH' ? 85 : 15,
-            level: (savedApt?.risk_level === 'HIGH' ? 'HIGH' : 'LOW') as 'HIGH' | 'LOW',
-            probability: Number(savedApt?.no_show_probability || 0.15),
-            factors: []
-          },
-          confirmedByPatient: true,
-          createdAt: savedApt?.created_at || savedApt?.createdAt || getLocalDateString()
-        };
+          doctorSpecialization: savedApt?.doctor_specialization || savedApt?.doctorSpecialization || payload.data?.doctorSpecialization || 'Specialist'
+        });
 
         if (IS_DEMO_MODE) {
           const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
@@ -596,51 +648,28 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle GET_APPOINTMENTS Action Specifically
       if (payload.action === 'GET_APPOINTMENTS') {
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
-        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-
         console.log('[GET_APPOINTMENTS] Raw n8n backend response:', resData);
-        let remoteApts: any[] = unwrapN8nData(resData).filter((a: any) => a && (a.id || a.appointment_id));
+        const remoteApts: any[] = unwrapN8nData(resData).filter((a: any) => a && (a.id || a.appointment_id || a.appointmentId));
         console.log('[GET_APPOINTMENTS] Unwrapped appointments count:', remoteApts.length, remoteApts);
 
-        // Map Supabase snake_case → Frontend camelCase
-        const mappedRemote: Appointment[] = remoteApts.map(apt => {
-          const matchedPat = localPats.find(p => p.id === (apt.patient_id || apt.patientId));
-          const matchedDoc = localDocs.find(d => d.id === (apt.doctor_id || apt.doctorId));
-          const isHighRisk = apt.risk_level === 'HIGH' || (apt.risk && apt.risk.level === 'HIGH');
-          const rawStatus = (apt.status || 'CONFIRMED').toString().trim().toUpperCase();
-          const normStatus = (rawStatus === 'CONFIRMED' || rawStatus === 'CANCELLED' || rawStatus === 'COMPLETED' || rawStatus === 'NO_SHOW' || rawStatus === 'RESCHEDULED' || rawStatus === 'CHECKED_IN' || rawStatus === 'CHECKED_OUT') ? rawStatus : 'CONFIRMED';
-          
-          return {
-            id: apt.appointment_id || apt.id || `APT-${Date.now()}`,
-            patientId: apt.patient_id || apt.patientId || '',
-            patientName: matchedPat?.name || apt.patient_name || apt.patientName || 'Patient',
-            patientEmail: apt.email || apt.patient_email || matchedPat?.email || '',
-            doctorId: apt.doctor_id || apt.doctorId || '',
-            doctorName: matchedDoc?.name || apt.doctor_name || apt.doctorName || 'Doctor',
-            doctorSpecialization: matchedDoc?.specialization || apt.specialization || 'Specialist',
-            appointmentDate: apt.appointment_date || apt.appointmentDate || '',
-            appointmentTime: apt.appointment_time || apt.appointmentTime || '',
-            appointmentType: apt.appointment_type || apt.appointmentType || 'Routine Checkup',
-            status: normStatus as any,
-            confirmedByPatient: true,
-            createdAt: apt.created_at || apt.createdAt || '',
-            risk: {
-              score: isHighRisk ? 85 : 15,
-              level: (isHighRisk ? 'HIGH' : 'LOW') as 'HIGH' | 'LOW',
-              probability: apt.no_show_probability || (isHighRisk ? 0.85 : 0.15),
-              factors: []
-            }
-          };
-        });
+        // Standardize all appointments through normalizeAppointment
+        const mappedRemote: Appointment[] = remoteApts.map(normalizeAppointment);
 
         const targetPid = (payload.data?.patientId || payload.data?.patient_id || payload.data?.userId || '').trim().toLowerCase();
-        const filtered = (targetPid && payload.data?.role !== 'admin')
+        const targetEmail = (payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email || '').trim().toLowerCase();
+        const isAdmin = payload.data?.role === 'admin';
+
+        const filtered: Appointment[] = (targetPid && !isAdmin)
           ? mappedRemote.filter((a: Appointment) => {
               const aPid = (a.patientId || '').trim().toLowerCase();
-              return aPid === targetPid || (payload.data?.email && a.patientEmail && a.patientEmail.toLowerCase() === payload.data.email.toLowerCase());
+              const aEmail = (a.patientEmail || '').trim().toLowerCase();
+              return aPid === targetPid || (targetEmail && aEmail === targetEmail);
             })
           : mappedRemote;
+
+        console.log('[GET_APPOINTMENTS] normalized appointments:', mappedRemote);
+        console.log('[GET_APPOINTMENTS] current patient ID:', targetPid);
+        console.log('[GET_APPOINTMENTS] patient-matched appointments:', filtered);
 
         return {
           success: true,
