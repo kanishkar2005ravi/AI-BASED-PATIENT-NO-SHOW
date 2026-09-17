@@ -1062,10 +1062,11 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
   // ----------------------------------------------------
   // DEMO MODE IN-MEMORY & LOCALSTORAGE STATE SIMULATION
-  // ----------------------------------------------------
-  await new Promise(resolve => setTimeout(resolve, 250));
-
-  const { action, data } = payload;
+  // ==========================================
+  // DEMO MODE - LOCAL STORAGE FALLBACK LOGIC
+  // ==========================================
+  const action = payload.action;
+  const data = payload.data || {};
   let patients = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
   let doctors = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
   let availabilityMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, {});
@@ -1301,7 +1302,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
     // 11. BOOK_APPOINTMENT
     case 'BOOK_APPOINTMENT': {
-      const { patientId, doctorId, appointmentDate, appointmentTime, appointmentType, reason, patient_id, doctor_id, appointment_date, appointment_time } = data;
+      const { patientId, doctorId, appointmentDate, appointmentTime, appointmentType, reason, patient_id, doctor_id, appointment_date, appointment_time } = data || {};
 
       const pId = patientId || patient_id || 'PAT-001';
       const dId = doctorId || doctor_id || 'DOC-001';
