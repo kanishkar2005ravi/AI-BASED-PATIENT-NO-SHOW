@@ -43,8 +43,15 @@ export const Waitlist: React.FC = () => {
         setWaitlist(wtlRes.data.filter((w: WaitlistItem) => w.patientId === user?.id));
       }
       if (docRes.success && Array.isArray(docRes.data)) {
-        setDoctors(docRes.data.filter((d: Doctor) => d.status === 'Active'));
-        if (docRes.data.length > 0) setSelectedDoctorId(docRes.data[0].id);
+        const activeDoctors = docRes.data.filter((d: Doctor) => d.status === 'Active');
+        setDoctors(activeDoctors);
+
+        setSelectedDoctorId(current => {
+          if (current && activeDoctors.some(d => d.id === current)) {
+            return current;
+          }
+          return activeDoctors[0]?.id || '';
+        });
       }
       setLoading(false);
     });
