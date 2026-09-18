@@ -336,8 +336,17 @@ export function normalizeAppointment(inputApt: any): Appointment {
     normStatus = 'CONFIRMED';
   }
 
-  const isHighRisk = a.risk_level === 'HIGH' || (a.risk && a.risk.level === 'HIGH');
-  const isMedRisk = a.risk_level === 'MEDIUM' || (a.risk && a.risk.level === 'MEDIUM');
+  const rawRisk = (
+    a.risk_level ||
+    a.riskLevel ||
+    a.no_show_risk_level ||
+    (a.risk && (typeof a.risk === 'object' ? a.risk.level : a.risk)) ||
+    ''
+  ).toString().trim().toUpperCase();
+
+  const isHighRisk = rawRisk === 'HIGH';
+  const isMedRisk = rawRisk === 'MEDIUM' || rawRisk === 'MED';
+  const normRiskLevel: 'HIGH' | 'MEDIUM' | 'LOW' = isHighRisk ? 'HIGH' : isMedRisk ? 'MEDIUM' : 'LOW';
 
   // Guard: Ensure doctor fields do not overwrite patient/appointment attributes
   const isDoctorLike = (a.specialization || a.department || (typeof a.id === 'string' && a.id.startsWith('DOC-'))) && !a.appointment_date && !a.appointmentDate && !a.patient_id && !a.patientId;
@@ -375,10 +384,11 @@ export function normalizeAppointment(inputApt: any): Appointment {
     status: normStatus,
     confirmedByPatient: true,
     createdAt: a.created_at || a.createdAt || getLocalDateString(),
-    risk: a.risk || {
-      level: (isHighRisk ? 'HIGH' : isMedRisk ? 'MEDIUM' : 'LOW') as 'HIGH' | 'MEDIUM' | 'LOW',
-      probability: Number(a.no_show_probability || (isHighRisk ? 0.85 : isMedRisk ? 0.45 : 0.15)),
-      factors: []
+    risk_level: normRiskLevel,
+    risk: {
+      level: normRiskLevel,
+      probability: typeof a.no_show_probability === 'number' ? a.no_show_probability : (a.risk && typeof a.risk.probability === 'number' ? a.risk.probability : (isHighRisk ? 0.85 : isMedRisk ? 0.45 : 0.15)),
+      factors: Array.isArray(a.risk_factors) ? a.risk_factors : (a.risk && Array.isArray(a.risk.factors) ? a.risk.factors : [])
     }
   };
 }

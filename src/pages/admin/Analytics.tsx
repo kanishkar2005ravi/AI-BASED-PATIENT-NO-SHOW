@@ -8,12 +8,7 @@ import { callBackend, isDemoMode } from '../../services/api';
 import { Appointment, Doctor, ModelPerformance, Patient, WaitlistItem } from '../../types';
 import { INITIAL_DOCTORS, INITIAL_MODEL_PERFORMANCE } from '../../utils/mockData';
 import {
-  Brain,
   Sparkles,
-  Target,
-  Activity,
-  Award,
-  BarChart3,
   CheckCircle2,
   AlertCircle,
   Calendar,
@@ -56,6 +51,11 @@ export const Analytics: React.FC = () => {
     totalRescheduled: 0,
     totalMissed: 0,
     totalWaitlistCount: 0
+  });
+  const [riskDistribution, setRiskDistribution] = useState({
+    low: 0,
+    medium: 0,
+    high: 0
   });
   const [loading, setLoading] = useState(true);
   const demoActive = isDemoMode();
@@ -204,26 +204,46 @@ export const Analytics: React.FC = () => {
   const handleDownloadRiskReport = async (riskLevel: 'LOW' | 'MEDIUM' | 'HIGH') => {
     const todayStr = getLocalDateString();
     const res = await callBackend({ action: 'GET_APPOINTMENTS' });
-    const aptsList: Appointment[] = (res.success && Array.isArray(res.data)) ? res.data : [];
-    
-    let filteredApts = aptsList.filter(a => (a.risk?.level || 'LOW') === riskLevel);
-    if (filteredApts.length === 0) {
-      filteredApts = aptsList;
+    let aptsList: any[] = [];
+    const rawRes: any = res;
+    if (Array.isArray(rawRes?.data)) {
+      aptsList = rawRes.data;
+    } else if (Array.isArray(rawRes)) {
+      aptsList = rawRes;
+    } else if (rawRes?.data?.items && Array.isArray(rawRes.data.items)) {
+      aptsList = rawRes.data.items.map((i: any) => i.json || i);
+    } else if (rawRes?.items && Array.isArray(rawRes.items)) {
+      aptsList = rawRes.items.map((i: any) => i.json || i);
     }
+    
+    let filteredApts = aptsList.filter((a: any) => {
+      const item = a?.json || a;
+      const level = (
+        item?.risk_level ||
+        item?.riskLevel ||
+        item?.no_show_risk_level ||
+        item?.risk?.level ||
+        ''
+      ).toString().trim().toUpperCase();
+      return level === riskLevel;
+    });
 
-    const exportData = filteredApts.map(a => ({
-      AppointmentID: a.id,
-      PatientID: a.patientId,
-      PatientName: a.patientName,
-      DoctorName: a.doctorName,
-      Specialization: a.doctorSpecialization,
-      Date: a.appointmentDate,
-      Time: a.appointmentTime,
-      AIRiskLevel: riskLevel,
-      AIRiskProbability: `${Math.round((a.risk?.probability || (riskLevel === 'HIGH' ? 0.82 : riskLevel === 'MEDIUM' ? 0.45 : 0.12)) * 100)}%`,
-      RiskFactors: (a.risk?.factors || []).join('; ') || 'Standard Clinical Indicators',
-      Status: a.status
-    }));
+    const exportData = filteredApts.map((a: any) => {
+      const item = a?.json || a;
+      return {
+        AppointmentID: item.id || item.appointment_id || item.appointmentId,
+        PatientID: item.patientId || item.patient_id,
+        PatientName: item.patientName || item.patient_name,
+        DoctorName: item.doctorName || item.doctor_name,
+        Specialization: item.doctorSpecialization || item.doctor_specialization || item.specialization,
+        Date: item.appointmentDate || item.appointment_date,
+        Time: item.appointmentTime || item.appointment_time,
+        AIRiskLevel: riskLevel,
+        AIRiskProbability: `${Math.round((item.no_show_probability || item.risk?.probability || (riskLevel === 'HIGH' ? 0.82 : riskLevel === 'MEDIUM' ? 0.45 : 0.12)) * 100)}%`,
+        RiskFactors: (Array.isArray(item.risk_factors) ? item.risk_factors.join('; ') : Array.isArray(item.risk?.factors) ? item.risk.factors.join('; ') : '') || 'Standard Clinical Indicators',
+        Status: item.status
+      };
+    });
 
     downloadCSV(`${riskLevel}_Risk_Patients_Report_${todayStr}.csv`, exportData);
     showToast(`${riskLevel} Risk Patients CSV report downloaded successfully!`, 'success');
@@ -247,12 +267,55 @@ export const Analytics: React.FC = () => {
         : INITIAL_MODEL_PERFORMANCE;
       setModelPerf(perfData);
 
+      // Extract appointments safely from all possible response shapes (nested, flat, or items[].json)
+      let rawApts: any[] = [];
+      const rawAptsRes: any = aptsRes;
+      if (Array.isArray(rawAptsRes?.data)) {
+        rawApts = rawAptsRes.data;
+      } else if (Array.isArray(rawAptsRes)) {
+        rawApts = rawAptsRes;
+      } else if (rawAptsRes?.data?.items && Array.isArray(rawAptsRes.data.items)) {
+        rawApts = rawAptsRes.data.items.map((i: any) => i.json || i);
+      } else if (rawAptsRes?.items && Array.isArray(rawAptsRes.items)) {
+        rawApts = rawAptsRes.items.map((i: any) => i.json || i);
+      }
+
       const aptsList: Appointment[] = (aptsRes.success && Array.isArray(aptsRes.data)) ? aptsRes.data : [];
       const patsList: Patient[] = (patsRes.success && Array.isArray(patsRes.data)) ? patsRes.data : [];
       const waitList: WaitlistItem[] = (waitRes.success && Array.isArray(waitRes.data)) ? waitRes.data : [];
       const docsList: Doctor[] = (docsRes.success && Array.isArray(docsRes.data) && docsRes.data.length > 0) ? docsRes.data : INITIAL_DOCTORS;
 
       setDoctors(docsList);
+
+      // Calculate real risk distribution counts directly from backend appointment records
+      let lowCount = 0;
+      let mediumCount = 0;
+      let highCount = 0;
+
+      rawApts.forEach((a: any) => {
+        const item = a?.json || a;
+        const rawRisk = (
+          item?.risk_level ||
+          item?.riskLevel ||
+          item?.no_show_risk_level ||
+          item?.risk?.level ||
+          ''
+        ).toString().trim().toUpperCase();
+
+        if (rawRisk === 'LOW') {
+          lowCount++;
+        } else if (rawRisk === 'MEDIUM' || rawRisk === 'MED') {
+          mediumCount++;
+        } else if (rawRisk === 'HIGH') {
+          highCount++;
+        }
+      });
+
+      setRiskDistribution({
+        low: lowCount,
+        medium: mediumCount,
+        high: highCount
+      });
 
       setAptMetrics({
         totalPatients: patsList.length,
@@ -294,7 +357,6 @@ export const Analytics: React.FC = () => {
     };
   }, []);
 
-
   if (loading || !modelPerf) {
     return (
       <div>
@@ -313,9 +375,9 @@ export const Analytics: React.FC = () => {
   ];
 
   const riskDistributionData = [
-    { category: 'Low Risk', count: modelPerf.lowRiskPredictions, color: '#10b981' },
-    { category: 'Medium Risk', count: modelPerf.mediumRiskPredictions, color: '#f59e0b' },
-    { category: 'High Risk', count: modelPerf.highRiskPredictions, color: '#f43f5e' }
+    { category: 'Low Risk', count: riskDistribution.low, color: '#10b981' },
+    { category: 'Medium Risk', count: riskDistribution.medium, color: '#f59e0b' },
+    { category: 'High Risk', count: riskDistribution.high, color: '#f43f5e' }
   ];
 
   return (
@@ -341,7 +403,7 @@ export const Analytics: React.FC = () => {
         </div>
       )}
 
-      {/* 📊 OVERALL HOSPITAL SUMMARY METRICS (TOTAL PATIENTS, APPOINTMENTS, ATTENDED, CANCELLED, RESCHEDULED, MISSED, WAITLIST) 📊 */}
+      {/* 📊 OVERALL HOSPITAL SUMMARY METRICS 📊 */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {/* 1. Total Patients */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between group">
@@ -559,8 +621,11 @@ export const Analytics: React.FC = () => {
               <BarChart data={riskDistributionData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis dataKey="category" stroke="#94a3b8" fontSize={12} />
-                <YAxis stroke="#94a3b8" fontSize={12} />
-                <Tooltip />
+                <YAxis stroke="#94a3b8" fontSize={12} allowDecimals={false} />
+                <Tooltip
+                  formatter={(value: any) => [`${value} Patients`, 'Patient Volume']}
+                  labelFormatter={(label: any) => `${label}`}
+                />
                 <Bar dataKey="count" radius={[8, 8, 0, 0]}>
                   {riskDistributionData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
