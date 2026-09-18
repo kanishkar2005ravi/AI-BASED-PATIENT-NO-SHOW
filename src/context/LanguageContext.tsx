@@ -276,7 +276,10 @@ const translations: Record<Language, Record<string, string>> = {
     'profile.save_profile': 'Save Profile',
     'profile.loading_msg': 'Loading profile information...',
     'profile.update_success': 'Contact details updated successfully.',
-    'profile.update_fail': 'Failed to update profile.'
+    'profile.update_fail': 'Failed to update profile.',
+    'profile.not_found': 'Patient profile not found.',
+    'profile.load_error': 'Unable to load profile information. Please try again.',
+    'profile.retry': 'Try Again'
   },
   ta: {
     // Header & Navigation
@@ -543,7 +546,10 @@ const translations: Record<Language, Record<string, string>> = {
     'profile.save_profile': 'சுயவிவரத்தை சேமி',
     'profile.loading_msg': 'சுயவிவரத் தகவலை ஏற்றுகிறது...',
     'profile.update_success': 'தொடர்பு விவரங்கள் வெற்றிகரமாக புதுப்பிக்கப்பட்டன.',
-    'profile.update_fail': 'சுயவிவரத்தைப் புதுப்பிக்க முடியவில்லை.'
+    'profile.update_fail': 'சுயவிவரத்தைப் புதுப்பிக்க முடியவில்லை.',
+    'profile.not_found': 'நோயாளி சுயவிவரம் காணப்படவில்லை.',
+    'profile.load_error': 'சுயவிவரத் தகவலை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+    'profile.retry': 'மீண்டும் முயற்சிக்குக'
   }
 
 };

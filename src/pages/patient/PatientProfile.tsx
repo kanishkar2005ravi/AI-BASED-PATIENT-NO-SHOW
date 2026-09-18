@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { callBackend } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Patient } from '../../types';
-import { Phone, MapPin, Save, ArrowLeft } from 'lucide-react';
+import { Phone, MapPin, Save, ArrowLeft, AlertCircle, RefreshCw } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -20,50 +20,100 @@ export const PatientProfile: React.FC = () => {
 
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Editable fields permitted for patient self-update
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
 
-  useEffect(() => {
-    let isMounted = true;
+  const fetchProfile = useCallback(async () => {
+    if (!user?.id && !user?.email) {
+      setLoading(false);
+      setError(t('profile.not_found'));
+      return;
+    }
+
     setLoading(true);
-    callBackend({ action: 'GET_PATIENT', data: { patientId: user?.id } }).then(res => {
-      if (isMounted) {
-        if (res.success && res.data) {
-          setPatient(res.data);
-          setPhone(res.data.phone || '');
-          setAddress(res.data.address || '');
+    setError(null);
+
+    try {
+      // 1. Try GET_PATIENT action with patientId & email
+      const singleRes = await callBackend({
+        action: 'GET_PATIENT',
+        data: { patientId: user.id, email: user.email }
+      });
+
+      let foundPatient: Patient | null = null;
+      if (singleRes.success && singleRes.data) {
+        const raw = Array.isArray(singleRes.data) ? singleRes.data[0] : singleRes.data;
+        if (raw && (raw.id || raw.name)) {
+          foundPatient = raw;
         }
-        setLoading(false);
       }
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, [user?.id]);
+
+      // 2. Fallback to GET_PATIENTS list to find the matching patient record
+      if (!foundPatient) {
+        const listRes = await callBackend({
+          action: 'GET_PATIENTS',
+          data: { patientId: user.id }
+        });
+
+        if (listRes.success && Array.isArray(listRes.data)) {
+          const matched = listRes.data.find((p: Patient) =>
+            (user.id && p.id?.toString().toLowerCase() === user.id.toString().toLowerCase()) ||
+            (user.email && p.email?.toString().toLowerCase() === user.email.toString().toLowerCase())
+          );
+          if (matched) {
+            foundPatient = matched;
+          }
+        }
+      }
+
+      if (foundPatient) {
+        setPatient(foundPatient);
+        setPhone(foundPatient.phone || '');
+        setAddress(foundPatient.address || '');
+      } else {
+        setError(t('profile.not_found'));
+      }
+    } catch (err) {
+      console.error('[PatientProfile] Error loading profile:', err);
+      setError(t('profile.load_error'));
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id, user?.email, t]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!patient) return;
     setSaving(true);
 
-    const res = await callBackend({
-      action: 'UPDATE_PATIENT',
-      data: {
-        patientId: patient.id,
-        phone,
-        address
-      }
-    });
+    try {
+      const res = await callBackend({
+        action: 'UPDATE_PATIENT',
+        data: {
+          patientId: patient.id,
+          phone,
+          address
+        }
+      });
 
-    setSaving(false);
-    if (res.success) {
-      showToast(t('profile.update_success'), 'success');
-      setPatient({ ...patient, phone, address });
-    } else {
+      if (res.success) {
+        showToast(t('profile.update_success'), 'success');
+        setPatient({ ...patient, phone, address });
+      } else {
+        showToast(res.message || t('profile.update_fail'), 'error');
+      }
+    } catch (err) {
       showToast(t('profile.update_fail'), 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -73,12 +123,45 @@ export const PatientProfile: React.FC = () => {
     return gender;
   };
 
-  if (loading || !patient) {
+  if (loading) {
     return (
       <div>
         <Header title={t('nav.profile')} />
         <div className="py-20">
           <Loading message={t('profile.loading_msg')} />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !patient) {
+    return (
+      <div className="space-y-6 pb-12">
+        <Header title={t('nav.profile')} />
+        <div className="max-w-md mx-auto py-12 text-center">
+          <Card className="p-8 border border-slate-200 bg-white shadow-sm space-y-4">
+            <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-slate-800">
+              {error || t('profile.not_found')}
+            </h3>
+            {user?.id && (
+              <p className="text-xs font-mono font-medium text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg inline-block">
+                Patient ID: {user.id}
+              </p>
+            )}
+            <div className="pt-2 flex justify-center gap-3">
+              <Button variant="secondary" onClick={() => navigate('/patient/dashboard')}>
+                <ArrowLeft className="w-4 h-4 mr-1.5" />
+                {t('profile.back_dashboard')}
+              </Button>
+              <Button variant="primary" onClick={fetchProfile}>
+                <RefreshCw className="w-4 h-4 mr-1.5" />
+                {t('profile.retry')}
+              </Button>
+            </div>
+          </Card>
         </div>
       </div>
     );

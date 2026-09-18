@@ -887,22 +887,43 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle GET_PATIENT Action Specifically
       if (payload.action === 'GET_PATIENT') {
-        const pId = payload.data?.patientId || payload.data?.id;
-        
-        let found = null;
-        if (resData.patient && resData.patient.name) {
-          found = resData.patient;
-        } else if (resData.data && resData.data.name) {
-          found = resData.data;
-        } else if (resData.data?.items && Array.isArray(resData.data.items) && resData.data.items[0]?.json?.name) {
-          found = resData.data.items[0].json;
+        const pId = payload.data?.patientId || payload.data?.patient_id || payload.data?.id;
+        const pEmail = payload.data?.email || payload.data?.patientEmail;
+
+        let found: any = null;
+        const unwrapped = unwrapN8nData(resData);
+        if (unwrapped.length > 0) {
+          found = unwrapped.find((p: any) =>
+            (pId && (
+              p.id?.toString().toLowerCase() === pId.toString().toLowerCase() ||
+              p.patient_id?.toString().toLowerCase() === pId.toString().toLowerCase() ||
+              p.patientId?.toString().toLowerCase() === pId.toString().toLowerCase()
+            )) ||
+            (pEmail && (
+              p.email?.toString().toLowerCase() === pEmail.toString().toLowerCase() ||
+              p.patient_email?.toString().toLowerCase() === pEmail.toString().toLowerCase()
+            ))
+          ) || unwrapped[0];
         }
 
+        if (!found) {
+          if (resData.patient && typeof resData.patient === 'object') found = resData.patient;
+          else if (resData.data && typeof resData.data === 'object' && !Array.isArray(resData.data)) found = resData.data;
+          else if (resData.items?.[0]?.json?.data) found = resData.items[0].json.data;
+          else if (resData.items?.[0]?.json) found = resData.items[0].json;
+          else if (resData._responseData?.data?.items?.[0]?.json) found = resData._responseData.data.items[0].json;
+        }
+
+        if (found && found.json) found = found.json;
+
+        const normPat = found ? normalizePatient(found) : null;
+        const isValid = normPat && (Boolean(normPat.id) || (Boolean(normPat.name) && normPat.name !== 'Unknown'));
+
         return {
-          success: found ? true : false,
-          message: found ? 'Patient retrieved successfully.' : 'Patient not found.',
-          patient: found,
-          data: found as any
+          success: Boolean(isValid),
+          message: isValid ? 'Patient retrieved successfully.' : 'Patient not found.',
+          patient: isValid ? normPat : undefined,
+          data: isValid ? (normPat as any) : null
         };
       }
 
