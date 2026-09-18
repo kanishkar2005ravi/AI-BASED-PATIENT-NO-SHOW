@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
@@ -15,12 +15,14 @@ import { Search, Eye, XCircle, Calendar, Filter, RefreshCw, ShieldCheck, UserChe
 import { useToast } from '../../context/ToastContext';
 import { BackButton } from '../../components/common/BackButton';
 import { useLanguage } from '../../context/LanguageContext';
+import { getLocalDateString, formatDate } from '../../utils/helpers';
 
 export const Appointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [filteredAppointments, setFilteredAppointments] = useState<Appointment[]>([]);
   const [doctors, setDoctors] = useState<any[]>([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('ALL');
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -40,7 +42,6 @@ export const Appointments: React.FC = () => {
     ]).then(([aptsRes, docsRes]) => {
       if (aptsRes.success && Array.isArray(aptsRes.data)) {
         setAppointments(aptsRes.data);
-        setFilteredAppointments(aptsRes.data);
       }
       if (docsRes.success && Array.isArray(docsRes.data)) {
         setDoctors(docsRes.data);
@@ -53,11 +54,40 @@ export const Appointments: React.FC = () => {
     fetchAppointments();
   }, []);
 
-  useEffect(() => {
-    let result = appointments;
+  // 1. Filter appointments by selected date (using direct string comparison to avoid timezone issues)
+  const dateAppointments = useMemo(() => {
+    return appointments.filter(a => {
+      const aptDate = (a.appointmentDate || (a as any).appointment_date || '').trim();
+      return aptDate === selectedDate;
+    });
+  }, [appointments, selectedDate]);
+
+  // 2. Filter dateAppointments by doctor selection and sort chronologically by appointmentTime
+  const sortedDoctorAppointments = useMemo(() => {
+    let list = dateAppointments;
     if (selectedDoctorId !== 'ALL') {
-      result = result.filter(a => a.doctorId === selectedDoctorId || a.doctorName.toLowerCase().includes(doctors.find(d => d.id === selectedDoctorId)?.name?.toLowerCase() || ''));
+      const docName = doctors.find(d => d.id === selectedDoctorId)?.name?.toLowerCase() || '';
+      list = list.filter(a => a.doctorId === selectedDoctorId || (docName && a.doctorName.toLowerCase().includes(docName)));
     }
+    return [...list].sort((a, b) => (a.appointmentTime || '').localeCompare(b.appointmentTime || ''));
+  }, [dateAppointments, selectedDoctorId, doctors]);
+
+  // 3. Risk Breakdowns based on date and doctor
+  const lowRiskAppointments = useMemo(() => {
+    return sortedDoctorAppointments.filter(a => !a.risk || a.risk.level === 'LOW');
+  }, [sortedDoctorAppointments]);
+
+  const medRiskAppointments = useMemo(() => {
+    return sortedDoctorAppointments.filter(a => a.risk?.level === 'MEDIUM');
+  }, [sortedDoctorAppointments]);
+
+  const highRiskAppointments = useMemo(() => {
+    return sortedDoctorAppointments.filter(a => a.risk?.level === 'HIGH');
+  }, [sortedDoctorAppointments]);
+
+  // 4. Final filter for search, status, and risk level in the table
+  useEffect(() => {
+    let result = sortedDoctorAppointments;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -74,21 +104,11 @@ export const Appointments: React.FC = () => {
       result = result.filter(a => a.risk?.level === riskFilter);
     }
     setFilteredAppointments(result);
-  }, [searchQuery, statusFilter, riskFilter, selectedDoctorId, appointments, doctors]);
-
-  // Doctor Specific / Filtered Appointments Risk Breakdown
-  const doctorAppointments = selectedDoctorId === 'ALL'
-    ? appointments
-    : appointments.filter(a => a.doctorId === selectedDoctorId || a.doctorName.toLowerCase().includes(doctors.find(d => d.id === selectedDoctorId)?.name?.toLowerCase() || ''));
-
-  const lowRiskAppointments = doctorAppointments.filter(a => !a.risk || a.risk.level === 'LOW');
-  const medRiskAppointments = doctorAppointments.filter(a => a.risk?.level === 'MEDIUM');
-  const highRiskAppointments = doctorAppointments.filter(a => a.risk?.level === 'HIGH');
+  }, [searchQuery, statusFilter, riskFilter, sortedDoctorAppointments]);
 
   const handleUpdateStatus = async (apt: Appointment, newStatus: AppointmentStatus) => {
     // Optimistic UI Update - Instantly change it on screen!
     setAppointments(prev => prev.map(a => a.id === apt.id ? { ...a, status: newStatus } : a));
-    setFilteredAppointments(prev => prev.map(a => a.id === apt.id ? { ...a, status: newStatus } : a));
 
     const res = await callBackend({
       action: 'UPDATE_APPOINTMENT_STATUS',
@@ -110,11 +130,8 @@ export const Appointments: React.FC = () => {
     
     if (res.success) {
       showToast(`Appointment ${apt.id} status updated to ${newStatus}.`, 'success');
-      // We don't necessarily need to fetch again since we optimistically updated,
-      // but we do it silently in the background if needed.
     } else {
       showToast(res.message || 'Failed to update status.', 'error');
-      // Revert if failed
       fetchAppointments();
     }
   };
@@ -128,6 +145,51 @@ export const Appointments: React.FC = () => {
         onSearch={setSearchQuery}
       />
       <BackButton variant="admin" />
+
+      {/* 📅 Prominent Appointment Date Selector Card */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                Appointment Date
+              </h3>
+              <p className="text-xs text-slate-500 font-semibold">
+                {formatDate(selectedDate)}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 bg-slate-50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none cursor-pointer transition-all"
+            />
+            <button
+              onClick={() => setSelectedDate(getLocalDateString())}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                selectedDate === getLocalDateString()
+                  ? 'bg-teal-600 text-white shadow-sm'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Today
+            </button>
+            <button
+              onClick={fetchAppointments}
+              className="p-1.5 rounded-xl text-slate-500 hover:text-teal-600 hover:bg-slate-100 transition-all"
+              title="Refresh Appointments"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Doctor Selector Tabs */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
@@ -150,11 +212,11 @@ export const Appointments: React.FC = () => {
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            {t('appointments.all_doctors')} ({appointments.length})
+            {t('appointments.all_doctors')} ({dateAppointments.length})
           </button>
 
           {doctors.map(doc => {
-            const docAptCount = appointments.filter(a => a.doctorId === doc.id || a.doctorName === doc.name).length;
+            const docAptCount = dateAppointments.filter(a => a.doctorId === doc.id || a.doctorName.toLowerCase().includes(doc.name.toLowerCase())).length;
             return (
               <button
                 key={doc.id}
@@ -193,7 +255,7 @@ export const Appointments: React.FC = () => {
 
           <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
             {lowRiskAppointments.length === 0 ? (
-              <p className="text-xs text-emerald-700 italic py-4 text-center">No low risk patients scheduled.</p>
+              <p className="text-xs text-emerald-700 italic py-4 text-center">No low risk patients scheduled for this date.</p>
             ) : (
               lowRiskAppointments.map(apt => (
                 <div key={apt.id} className="bg-white p-3 rounded-xl border border-emerald-100 shadow-2xs hover:shadow-md transition-all">
@@ -225,7 +287,7 @@ export const Appointments: React.FC = () => {
 
           <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
             {medRiskAppointments.length === 0 ? (
-              <p className="text-xs text-amber-700 italic py-4 text-center">No medium risk patients scheduled.</p>
+              <p className="text-xs text-amber-700 italic py-4 text-center">No medium risk patients scheduled for this date.</p>
             ) : (
               medRiskAppointments.map(apt => (
                 <div key={apt.id} className="bg-white p-3 rounded-xl border border-amber-100 shadow-2xs hover:shadow-md transition-all">
@@ -257,7 +319,7 @@ export const Appointments: React.FC = () => {
 
           <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
             {highRiskAppointments.length === 0 ? (
-              <p className="text-xs text-rose-700 italic py-4 text-center">No high risk patients scheduled.</p>
+              <p className="text-xs text-rose-700 italic py-4 text-center">No high risk patients scheduled for this date.</p>
             ) : (
               highRiskAppointments.map(apt => (
                 <div key={apt.id} className="bg-white p-3 rounded-xl border border-rose-100 shadow-2xs hover:shadow-md transition-all">
@@ -291,7 +353,6 @@ export const Appointments: React.FC = () => {
               { value: 'ALL', label: t('appointments.all_statuses') },
               { value: 'CONFIRMED', label: t('status.confirmed') },
               { value: 'CHECKED_IN', label: 'Checked In' },
-
               { value: 'COMPLETED', label: t('status.completed') },
               { value: 'NO_SHOW', label: t('status.not_attended') },
               { value: 'CANCELLED', label: t('status.cancelled') },
@@ -320,7 +381,7 @@ export const Appointments: React.FC = () => {
         ) : filteredAppointments.length === 0 ? (
           <EmptyState
             title="No Appointments Found"
-            description="No appointments match your active filter criteria."
+            description={`No appointments scheduled for ${formatDate(selectedDate)} matching your criteria.`}
           />
         ) : (
           <div className="overflow-x-auto">
@@ -348,7 +409,15 @@ export const Appointments: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-4 text-xs font-medium text-slate-600">{apt.appointmentType}</td>
                     <td className="py-3.5 px-4">
-                      <Badge variant={apt.status === 'CONFIRMED' ? 'info' : apt.status === 'CHECKED_IN' ? 'purple' : apt.status === 'CHECKED_OUT' || apt.status === 'COMPLETED' ? 'success' : 'danger'} size="sm">
+                      <Badge 
+                        variant={
+                          apt.status === 'CONFIRMED' ? 'info' : 
+                          apt.status === 'CHECKED_IN' ? 'purple' : 
+                          apt.status === 'COMPLETED' || (apt.status as any) === 'CHECKED_OUT' ? 'success' : 
+                          apt.status === 'RESCHEDULED' ? 'warning' : 'danger'
+                        } 
+                        size="sm"
+                      >
                         {apt.status === 'NO_SHOW' ? 'NOT ATTENDED' : apt.status}
                       </Badge>
                     </td>
@@ -370,10 +439,10 @@ export const Appointments: React.FC = () => {
                         >
                           <option value="CONFIRMED">Confirmed</option>
                           <option value="CHECKED_IN">Checked In</option>
-
                           <option value="COMPLETED">Completed</option>
                           <option value="NO_SHOW">Not Attended (No-Show)</option>
                           <option value="CANCELLED">Cancelled</option>
+                          <option value="RESCHEDULED">Rescheduled</option>
                         </select>
 
                         <button
