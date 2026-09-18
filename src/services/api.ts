@@ -477,16 +477,24 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             password: payload.data?.password || ''
           }
         };
-      } else if (payload.action === 'CANCEL_APPOINTMENT') {
+      } else if (payload.action === 'SEND_DOCTOR_SCHEDULE') {
+        const dId = payload.data?.doctorId || payload.data?.doctor_id || payload.data?.id;
         requestBody = {
-          action: 'CANCEL_APPOINTMENT',
-          appointment_id: payload.data?.appointmentId || payload.data?.id || payload.data?.appointment_id,
-          appointmentId: payload.data?.appointmentId || payload.data?.id || payload.data?.appointment_id,
-          email: payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email,
-          phone: payload.data?.phone || payload.data?.patientPhone || payload.data?.patient_phone,
-          patient_name: payload.data?.patientName || payload.data?.patient_name || payload.data?.name,
+          action: 'SEND_DOCTOR_SCHEDULE',
+          doctor_id: dId,
+          doctorId: dId,
           doctor_name: payload.data?.doctorName || payload.data?.doctor_name,
-          data: payload.data,
+          doctorName: payload.data?.doctorName || payload.data?.doctor_name,
+          doctor_email: payload.data?.email || payload.data?.doctorEmail || payload.data?.doctor_email,
+          email: payload.data?.email || payload.data?.doctorEmail || payload.data?.doctor_email,
+          doctor_phone: payload.data?.phone || payload.data?.doctorPhone || payload.data?.doctor_phone,
+          phone: payload.data?.phone || payload.data?.doctorPhone || payload.data?.doctor_phone,
+          date: payload.data?.date || getLocalDateString(),
+          data: {
+            ...payload.data,
+            doctor_id: dId,
+            doctorId: dId
+          },
           ...payload.data
         };
       } else {

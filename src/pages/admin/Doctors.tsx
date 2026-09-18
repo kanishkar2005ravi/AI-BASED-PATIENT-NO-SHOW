@@ -9,7 +9,7 @@ import { Loading } from '../../components/common/Loading';
 import { EmptyState } from '../../components/common/EmptyState';
 import { callBackend } from '../../services/api';
 import { Doctor } from '../../types';
-import { Stethoscope, Plus, Calendar, Clock, Edit, UserX, UserCheck, Mail, Phone } from 'lucide-react';
+import { Stethoscope, Plus, Clock, Edit, Mail } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { BackButton } from '../../components/common/BackButton';
 import { useLanguage } from '../../context/LanguageContext';
@@ -34,20 +34,6 @@ export const Doctors: React.FC = () => {
   useEffect(() => {
     fetchDoctors();
   }, []);
-
-  const handleToggleDoctorStatus = async (doc: Doctor) => {
-    const newStatus = doc.status === 'Active' ? 'Inactive' : 'Active';
-    const res = await callBackend({
-      action: 'UPDATE_DOCTOR',
-      data: { doctorId: doc.id, status: newStatus }
-    });
-    if (res.success) {
-      showToast(`Doctor ${doc.name} status updated to ${newStatus}.`, 'success');
-      fetchDoctors();
-    } else {
-      showToast('Failed to update doctor status.', 'error');
-    }
-  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -148,9 +134,17 @@ export const Doctors: React.FC = () => {
                       action: 'SEND_DOCTOR_SCHEDULE',
                       data: {
                         doctorId: doc.id,
+                        doctor_id: doc.id,
                         doctorName: doc.name,
+                        doctor_name: doc.name,
+                        doctorSpecialization: doc.specialization,
+                        doctor_specialization: doc.specialization,
                         email: doc.email,
+                        doctorEmail: doc.email,
+                        doctor_email: doc.email,
                         phone: doc.phone || '+919876543210',
+                        doctorPhone: doc.phone || '+919876543210',
+                        doctor_phone: doc.phone || '+919876543210',
                         date: getLocalDateString()
                       }
                     });
