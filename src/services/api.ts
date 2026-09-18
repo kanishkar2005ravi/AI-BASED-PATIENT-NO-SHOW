@@ -214,11 +214,32 @@ function normalizePatient(p: any): Patient {
     attendedAppointments: Number(
       p.attendedAppointments ??
       p.attended_appointments ??
+      p.attended_visits ??
+      p.attendedVisits ??
+      p.attended_count ??
+      p.attendedCount ??
       0
     ),
     noShowAppointments: Number(
       p.noShowAppointments ??
       p.no_show_appointments ??
+      p.noshow_appointments ??
+      p.no_shows ??
+      p.noshows ??
+      p.no_show_visits ??
+      p.noShowVisits ??
+      p.missed_appointments ??
+      p.missedAppointments ??
+      p.missed_visits ??
+      p.missedVisits ??
+      p.not_attended_appointments ??
+      p.notAttendedAppointments ??
+      p.not_attended ??
+      p.notAttended ??
+      p.no_show_count ??
+      p.noshow_count ??
+      p.missed_count ??
+      p.noShowCount ??
       0
     ),
     cancelledAppointments: Number(
@@ -330,7 +351,15 @@ export function normalizeAppointment(inputApt: any): Appointment {
     normStatus = 'CHECKED_OUT';
   } else if (rawStatus === 'RESCHEDULED') {
     normStatus = 'RESCHEDULED';
-  } else if (rawStatus === 'NO_SHOW' || rawStatus === 'MISSED') {
+  } else if (
+    rawStatus === 'NO_SHOW' ||
+    rawStatus === 'NO-SHOW' ||
+    rawStatus === 'NOSHOW' ||
+    rawStatus === 'NOT_ATTENDED' ||
+    rawStatus === 'NOT ATTENDED' ||
+    rawStatus === 'ABSENT' ||
+    rawStatus === 'MISSED'
+  ) {
     normStatus = 'NO_SHOW';
   } else {
     normStatus = 'CONFIRMED';

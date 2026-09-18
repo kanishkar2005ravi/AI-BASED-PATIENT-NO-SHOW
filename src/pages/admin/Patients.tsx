@@ -6,8 +6,8 @@ import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { Loading } from '../../components/common/Loading';
 import { EmptyState } from '../../components/common/EmptyState';
-import { callBackend } from '../../services/api';
-import { Patient } from '../../types';
+import { callBackend, normalizeAppointment } from '../../services/api';
+import { Patient, Appointment } from '../../types';
 import { UserPlus, Search, Eye, Edit, UserX, UserCheck, ShieldAlert, Trash2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { BackButton } from '../../components/common/BackButton';
@@ -22,15 +22,98 @@ export const Patients: React.FC = () => {
   const { showToast } = useToast();
   const { t } = useLanguage();
 
-  const fetchPatients = () => {
+  const isAttendedStatus = (status: string | undefined): boolean => {
+    if (!status) return false;
+    const s = status.toString().trim().toUpperCase();
+    return s === 'COMPLETED' || s === 'ATTENDED' || s === 'CHECKED_IN' || s === 'CHECKED_OUT';
+  };
+
+  const isNoShowStatus = (status: string | undefined): boolean => {
+    if (!status) return false;
+    const s = status.toString().trim().toUpperCase();
+    return (
+      s === 'NO_SHOW' ||
+      s === 'NO-SHOW' ||
+      s === 'NOSHOW' ||
+      s === 'NOT_ATTENDED' ||
+      s === 'NOT ATTENDED' ||
+      s === 'ABSENT' ||
+      s === 'MISSED'
+    );
+  };
+
+  const fetchPatients = async () => {
     setLoading(true);
-    callBackend({ action: 'GET_PATIENTS' }).then(res => {
-      if (res.success && Array.isArray(res.data)) {
-        setPatients(res.data);
-        setFilteredPatients(res.data);
+    try {
+      const [patsRes, aptsRes] = await Promise.all([
+        callBackend({ action: 'GET_PATIENTS' }),
+        callBackend({ action: 'GET_APPOINTMENTS', data: {} })
+      ]);
+
+      const patsList: Patient[] = (patsRes.success && Array.isArray(patsRes.data)) ? patsRes.data : [];
+
+      // Safely unwrap appointment data from any nested SNS / n8n structure
+      let aptsList: Appointment[] = [];
+      const rawAptsRes: any = aptsRes;
+      if (aptsRes.success && Array.isArray(aptsRes.data)) {
+        aptsList = aptsRes.data;
+      } else if (Array.isArray(rawAptsRes?.data?.items)) {
+        aptsList = rawAptsRes.data.items.map((i: any) => normalizeAppointment(i.json || i));
+      } else if (Array.isArray(rawAptsRes?.items)) {
+        aptsList = rawAptsRes.items.map((i: any) => normalizeAppointment(i.json || i));
+      } else if (Array.isArray(rawAptsRes)) {
+        aptsList = rawAptsRes.map(normalizeAppointment);
       }
+
+      const enrichedPatients = patsList.map(pat => {
+        // Find lifetime appointments matching this patient
+        const patientApts = aptsList.filter(a => {
+          if (!a) return false;
+          // Exclude waitlist items
+          if ((a as any).position !== undefined || (a as any).requestedTimeSlot !== undefined || (a.status as any) === 'WAITING' || (a.status as any) === 'NOTIFIED') {
+            return false;
+          }
+          const aPid = (a.patientId || (a as any).patient_id || '').toString().trim().toLowerCase();
+          const pId = (pat.id || '').toString().trim().toLowerCase();
+          if (aPid && pId && aPid === pId) return true;
+          const aEmail = (a.patientEmail || (a as any).patient_email || (a as any).email || '').toString().trim().toLowerCase();
+          const pEmail = (pat.email || '').toString().trim().toLowerCase();
+          return Boolean(aEmail && pEmail && aEmail === pEmail);
+        });
+
+        const aptAttendedCount = patientApts.filter(a => isAttendedStatus(a.status)).length;
+        const aptNoShowCount = patientApts.filter(a => isNoShowStatus(a.status)).length;
+
+        // Preserve existing attended counts if backend patient record already had them
+        const finalAttended = aptAttendedCount > 0 ? aptAttendedCount : (pat.attendedAppointments || 0);
+        // Calculate real no-show count from actual appointments or backend record
+        const finalNoShow = aptNoShowCount > 0 ? aptNoShowCount : (pat.noShowAppointments || 0);
+
+        const totalVisits = (pat.totalAppointments && pat.totalAppointments >= (finalAttended + finalNoShow))
+          ? pat.totalAppointments
+          : (patientApts.length > 0 ? patientApts.length : (finalAttended + finalNoShow));
+
+        const calculatedRate = totalVisits > 0 ? Math.round((finalNoShow / totalVisits) * 100) : 0;
+        const finalNoShowRate = (finalNoShow > 0 && calculatedRate > 0)
+          ? calculatedRate
+          : (pat.noShowRate || 0);
+
+        return {
+          ...pat,
+          attendedAppointments: finalAttended,
+          noShowAppointments: finalNoShow,
+          totalAppointments: totalVisits,
+          noShowRate: finalNoShowRate
+        };
+      });
+
+      setPatients(enrichedPatients);
+      setFilteredPatients(enrichedPatients);
+    } catch (e) {
+      console.error('[Patients] Error loading patients and appointments:', e);
+    } finally {
       setLoading(false);
-    });
+    }
   };
 
   useEffect(() => {

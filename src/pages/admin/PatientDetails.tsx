@@ -29,12 +29,52 @@ export const PatientDetails: React.FC = () => {
       callBackend({ action: 'GET_APPOINTMENTS', data: { patientId: id } })
     ]).then(([patRes, patsRes, aptsRes]) => {
       if (isMounted) {
-        const foundPat = patRes.patient || (patRes.data && patRes.data.name ? patRes.data : null) || (Array.isArray(patsRes.data) ? patsRes.data.find((p: Patient) => p.id === id) : null);
-        if (foundPat) {
-          setPatient(foundPat);
-        }
+        let foundPat = patRes.patient || (patRes.data && patRes.data.name ? patRes.data : null) || (Array.isArray(patsRes.data) ? patsRes.data.find((p: Patient) => p.id === id) : null);
+        let apts: Appointment[] = [];
         if (aptsRes.success && Array.isArray(aptsRes.data)) {
-          setAppointments(aptsRes.data);
+          apts = aptsRes.data;
+          setAppointments(apts);
+        }
+        if (foundPat) {
+          if (apts.length > 0) {
+            const isAttended = (status: string | undefined): boolean => {
+              if (!status) return false;
+              const s = status.toString().trim().toUpperCase();
+              return s === 'COMPLETED' || s === 'ATTENDED' || s === 'CHECKED_IN' || s === 'CHECKED_OUT';
+            };
+            const isNoShow = (status: string | undefined): boolean => {
+              if (!status) return false;
+              const s = status.toString().trim().toUpperCase();
+              return (
+                s === 'NO_SHOW' ||
+                s === 'NO-SHOW' ||
+                s === 'NOSHOW' ||
+                s === 'NOT_ATTENDED' ||
+                s === 'NOT ATTENDED' ||
+                s === 'ABSENT' ||
+                s === 'MISSED'
+              );
+            };
+
+            const attendedCount = apts.filter(a => isAttended(a.status)).length;
+            const noShowCount = apts.filter(a => isNoShow(a.status)).length;
+            const finalAttended = attendedCount > 0 ? attendedCount : (foundPat.attendedAppointments || 0);
+            const finalNoShow = noShowCount > 0 ? noShowCount : (foundPat.noShowAppointments || 0);
+            const totalVisits = (foundPat.totalAppointments && foundPat.totalAppointments >= (finalAttended + finalNoShow))
+              ? foundPat.totalAppointments
+              : (apts.length > 0 ? apts.length : (finalAttended + finalNoShow));
+            const calculatedRate = totalVisits > 0 ? Math.round((finalNoShow / totalVisits) * 100) : 0;
+            const finalNoShowRate = (finalNoShow > 0 && calculatedRate > 0) ? calculatedRate : (foundPat.noShowRate || 0);
+
+            foundPat = {
+              ...foundPat,
+              attendedAppointments: finalAttended,
+              noShowAppointments: finalNoShow,
+              totalAppointments: totalVisits,
+              noShowRate: finalNoShowRate
+            };
+          }
+          setPatient(foundPat);
         }
         setLoading(false);
       }
