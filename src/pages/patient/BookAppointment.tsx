@@ -22,6 +22,10 @@ function extractBookingResponse(res: any): { isSuccess: boolean; appointmentId?:
     return { isSuccess: false, message: res.message || res.error };
   }
 
+  if (res.status === 500 || res.httpStatus === 500 || res.error === 'HTTP Error 500') {
+    return { isSuccess: false, message: res.message || res.error || 'HTTP Error 500' };
+  }
+
   let isSuccess = false;
   let extractedId: string | undefined = undefined;
   let extractedData: any = null;
@@ -61,17 +65,17 @@ function extractBookingResponse(res: any): { isSuccess: boolean; appointmentId?:
       extractedId = extractedId || node.appointment.id || node.appointment.appointment_id || node.appointment.appointmentId;
     }
 
-    if (node._responseData) inspectNode(node._responseData, depth + 1);
-    if (node.json) inspectNode(node.json, depth + 1);
-    if (node.data) inspectNode(node.data, depth + 1);
+    if (node._responseData && typeof node._responseData === 'object') inspectNode(node._responseData, depth + 1);
+    if (node.json && typeof node.json === 'object') inspectNode(node.json, depth + 1);
+    if (node.data && typeof node.data === 'object') inspectNode(node.data, depth + 1);
     if (Array.isArray(node.items)) {
       for (const it of node.items) {
-        inspectNode(it, depth + 1);
+        if (it && typeof it === 'object') inspectNode(it, depth + 1);
       }
     }
     if (Array.isArray(node)) {
       for (const it of node) {
-        inspectNode(it, depth + 1);
+        if (it && typeof it === 'object') inspectNode(it, depth + 1);
       }
     }
   };
@@ -79,7 +83,7 @@ function extractBookingResponse(res: any): { isSuccess: boolean; appointmentId?:
   inspectNode(res);
 
   // If no explicit error and we received a response, treat as success if not explicitly false
-  if (!isSuccess && res.success !== false && !res.error && res.status !== 'error') {
+  if (!isSuccess && res.success !== false && !res.error && res.status !== 'error' && res.status !== 500 && res.httpStatus !== 500) {
     isSuccess = true;
   }
 
@@ -89,6 +93,84 @@ function extractBookingResponse(res: any): { isSuccess: boolean; appointmentId?:
     appointmentData: extractedData,
     message: extractedMessage || 'Appointment booked successfully!'
   };
+}
+
+function findExactMatchingAppointment(
+  verifyRes: any,
+  targetPid: string,
+  targetDocId: string,
+  targetDate: string,
+  targetTime: string
+): any | null {
+  if (!verifyRes) return null;
+
+  const normPid = targetPid.trim().toLowerCase();
+  const normDocId = targetDocId.trim().toLowerCase();
+  const normDate = targetDate.trim().split('T')[0].split(' ')[0];
+  const normTime = targetTime.trim().slice(0, 5);
+
+  const candidates: any[] = [];
+  const visited = new Set<any>();
+
+  const scan = (node: any, depth = 0) => {
+    if (!node || typeof node !== 'object' || depth > 8 || visited.has(node)) return;
+    visited.add(node);
+
+    if (Array.isArray(node)) {
+      for (const item of node) {
+        if (item && typeof item === 'object') {
+          scan(item, depth + 1);
+        }
+      }
+      return;
+    }
+
+    // Check if node represents an appointment
+    const hasId = Boolean(node.id || node.appointment_id || node.appointmentId);
+    const hasPid = Boolean(node.patient_id || node.patientId || node.patient_ID || node.userId);
+    const hasDocId = Boolean(node.doctor_id || node.doctorId || node.doctor_ID);
+    const hasDate = Boolean(node.appointment_date || node.appointmentDate || node.date);
+    const isDoctorOnly = Boolean((node.specialization || node.department) && !hasPid && !hasDate);
+
+    if ((hasId || (hasPid && hasDocId)) && hasDate && !isDoctorOnly) {
+      candidates.push(node);
+    }
+
+    if (node && typeof node === 'object') {
+      for (const key of Object.keys(node)) {
+        const val = node[key];
+        if (val && typeof val === 'object') {
+          scan(val, depth + 1);
+        }
+      }
+    }
+  };
+
+  scan(verifyRes);
+
+  for (const apt of candidates) {
+    if (!apt || typeof apt !== 'object') continue;
+    const item = (apt.json && typeof apt.json === 'object') ? apt.json : apt;
+
+    const aPid = (item.patient_id || item.patientId || item.patient_ID || item.userId || '').toString().trim().toLowerCase();
+    const aDocId = (item.doctor_id || item.doctorId || item.doctor_ID || '').toString().trim().toLowerCase();
+    const rawDate = (item.appointment_date || item.appointmentDate || item.date || '').toString().trim();
+    const aDate = rawDate.split('T')[0].split(' ')[0];
+    const aTime = (item.appointment_time || item.appointmentTime || item.time || '').toString().trim().slice(0, 5);
+    const aStatus = (item.status || '').toString().trim().toUpperCase();
+
+    const isPatientMatch = aPid === normPid;
+    const isDocMatch = aDocId === normDocId;
+    const isDateMatch = aDate === normDate;
+    const isTimeMatch = aTime === normTime;
+    const isActive = aStatus !== 'CANCELLED';
+
+    if (isPatientMatch && isDocMatch && isDateMatch && isTimeMatch && isActive) {
+      return item;
+    }
+  }
+
+  return null;
 }
 
 export const BookAppointment: React.FC = () => {
@@ -230,21 +312,23 @@ export const BookAppointment: React.FC = () => {
       console.warn('Pre-check availability warning:', e);
     }
 
+    const targetPatientId = (user?.id || 'PAT-1').toString().trim();
     const bookingPayload = {
-      patient_id: user?.id || 'PAT-1',
-      patientId: user?.id || 'PAT-1',
+      patient_id: targetPatientId,
+      patientId: targetPatientId,
       doctor_id: selectedDoctorId,
       doctorId: selectedDoctorId,
-      doctorName: selectedDoctor?.name || '',
       doctor_name: selectedDoctor?.name || '',
-      doctorSpecialization: selectedDoctor?.specialization || '',
+      doctorName: selectedDoctor?.name || '',
       doctor_specialization: selectedDoctor?.specialization || '',
+      doctorSpecialization: selectedDoctor?.specialization || '',
       appointment_date: selectedDate,
       appointmentDate: selectedDate,
       appointment_time: selectedTimeSlot,
       appointmentTime: selectedTimeSlot,
-      reason: appointmentType,
+      appointment_type: appointmentType,
       appointmentType,
+      reason: appointmentType,
       email: user?.email || '',
       patientEmail: user?.email || '',
       patient_email: user?.email || '',
@@ -256,44 +340,108 @@ export const BookAppointment: React.FC = () => {
       name: user?.name || ''
     };
 
-    let res: any;
+    let res: any = null;
+    let postStatus = 200;
     try {
       res = await callBackend({
         action: 'BOOK_APPOINTMENT',
         data: bookingPayload
       });
-    } catch (err) {
+      postStatus = res?.status || res?.httpStatus || (res?.success ? 200 : 500);
+    } catch (err: any) {
       console.error('[BOOK_APPOINTMENT] callBackend exception:', err);
-      res = { success: false, error: String(err) };
+      postStatus = 500;
+      res = { success: false, status: 500, error: String(err?.message || err) };
     }
 
-    setBookingLoading(false);
+    console.log('[BOOK_APPOINTMENT] POST STATUS:', postStatus);
+    console.log('[BOOK_APPOINTMENT] POST RESPONSE:', res);
 
-    // Extract booking success using safe helper supporting all response shapes
     const parsed = extractBookingResponse(res);
 
+    // 2. If the POST returns 2xx and indicates success
     if (parsed.isSuccess) {
-      const respApt = res?.appointment || res?.data || parsed.appointmentData || {};
+      const respApt = (res && typeof res === 'object') ? (res.appointment || res.data || parsed.appointmentData || {}) : {};
       const confirmedAppointment: Appointment = normalizeAppointment({
         ...bookingPayload,
-        ...(typeof respApt === 'object' ? respApt : {}),
-        id: parsed.appointmentId || respApt.id || (bookingPayload as any).id || undefined,
-        doctorName: selectedDoctor?.name || respApt?.doctorName || bookingPayload.doctorName,
-        doctorSpecialization: selectedDoctor?.specialization || respApt?.doctorSpecialization || bookingPayload.doctorSpecialization,
+        ...(respApt && typeof respApt === 'object' ? respApt : {}),
+        id: parsed.appointmentId || (respApt && typeof respApt === 'object' ? (respApt.id || respApt.appointment_id || respApt.appointmentId) : undefined) || undefined,
+        doctorName: selectedDoctor?.name || (respApt && (respApt.doctorName || respApt.doctor_name)) || bookingPayload.doctorName,
+        doctorSpecialization: selectedDoctor?.specialization || (respApt && (respApt.doctorSpecialization || respApt.doctor_specialization)) || bookingPayload.doctorSpecialization,
         appointmentDate: selectedDate,
         appointmentTime: selectedTimeSlot,
         appointmentType: appointmentType
       });
 
+      console.log('[BOOK_APPOINTMENT] MOVING TO STEP 3:', confirmedAppointment);
       setBookingResult(confirmedAppointment);
       setStep(3);
+      setBookingLoading(false);
       showToast(parsed.message || 'Appointment booked successfully!', 'success');
-      // Refresh real-time slots immediately from backend
       fetchSlots();
-    } else {
-      showToast(res?.message || res?.error || parsed.message || 'Unable to complete appointment booking.', 'error');
-      fetchSlots();
+      return;
     }
+
+    // 3. If the POST returns HTTP 500 or error:
+    // Verify if the appointment was actually inserted into the database.
+    console.log('[BOOK_APPOINTMENT] POST FAILED - VERIFYING APPOINTMENT:', {
+      patient_id: targetPatientId,
+      doctor_id: selectedDoctorId,
+      appointment_date: selectedDate,
+      appointment_time: selectedTimeSlot
+    });
+
+    let verifyRes: any = null;
+    try {
+      verifyRes = await callBackend({
+        action: 'GET_APPOINTMENTS',
+        data: {
+          patientId: targetPatientId,
+          doctorId: selectedDoctorId
+        }
+      });
+    } catch (vErr) {
+      console.warn('[BOOK_APPOINTMENT] Verification request error:', vErr);
+    }
+
+    console.log('[BOOK_APPOINTMENT] VERIFICATION RESULT:', verifyRes);
+
+    const matchingApt = findExactMatchingAppointment(
+      verifyRes,
+      targetPatientId,
+      selectedDoctorId,
+      selectedDate,
+      selectedTimeSlot
+    );
+
+    console.log('[BOOK_APPOINTMENT] MATCHING APPOINTMENT:', matchingApt);
+
+    if (matchingApt) {
+      const matchObj = (matchingApt.json && typeof matchingApt.json === 'object') ? matchingApt.json : matchingApt;
+      const confirmedAppointment: Appointment = normalizeAppointment({
+        ...bookingPayload,
+        ...matchObj,
+        id: matchObj.id || matchObj.appointment_id || matchObj.appointmentId || undefined,
+        doctorName: selectedDoctor?.name || matchObj.doctor_name || matchObj.doctorName || bookingPayload.doctorName,
+        doctorSpecialization: selectedDoctor?.specialization || matchObj.doctor_specialization || matchObj.doctorSpecialization || bookingPayload.doctorSpecialization,
+        appointmentDate: selectedDate,
+        appointmentTime: selectedTimeSlot,
+        appointmentType: appointmentType
+      });
+
+      console.log('[BOOK_APPOINTMENT] MOVING TO STEP 3:', confirmedAppointment);
+      setBookingResult(confirmedAppointment);
+      setStep(3);
+      setBookingLoading(false);
+      showToast('Appointment booked successfully!', 'success');
+      fetchSlots();
+      return;
+    }
+
+    // 4. If no exact matching appointment is found
+    setBookingLoading(false);
+    showToast(res?.message || res?.error || 'Unable to complete appointment booking. Please try again.', 'error');
+    fetchSlots();
   };
 
   const renderSlotButton = (tStr: string) => {

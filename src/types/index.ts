@@ -175,4 +175,7 @@ export interface APIResponse<T = any> {
   appointment?: Appointment;
   risk?: AIRiskAssessment;
   error?: string;
+  status?: number | string;
+  httpStatus?: number;
+  [key: string]: any;
 }

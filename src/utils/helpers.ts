@@ -72,7 +72,7 @@ export function getStatusBadgeVariant(status: string): 'default' | 'success' | '
 }
 
 export function downloadCSV(filename: string, rows: Record<string, any>[]) {
-  if (!rows || !rows.length) return;
+  if (!rows || !Array.isArray(rows) || rows.length === 0 || !rows[0] || typeof rows[0] !== 'object') return;
   const headers = Object.keys(rows[0]);
   const csvContent = [
     headers.join(','),

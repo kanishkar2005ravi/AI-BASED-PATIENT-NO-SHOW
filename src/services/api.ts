@@ -783,8 +783,11 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       if (!response.ok) {
         return {
           success: false,
-          message: resData.message || resData.error || `Unable to connect to appointment service (HTTP ${response.status}).`,
-          error: resData.error || `HTTP Error ${response.status}`
+          status: response.status,
+          httpStatus: response.status,
+          message: (resData && (resData.message || resData.error)) || `Unable to connect to appointment service (HTTP ${response.status}).`,
+          error: (resData && resData.error) || `HTTP Error ${response.status}`,
+          data: resData
         };
       }
 
