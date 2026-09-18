@@ -512,8 +512,8 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           doctorName: payload.data?.doctorName || payload.data?.doctor_name || 'Doctor',
           requested_date: payload.data?.requestedDate || payload.data?.requested_date || getLocalDateString(),
           requestedDate: payload.data?.requestedDate || payload.data?.requested_date || getLocalDateString(),
-          requested_time_slot: payload.data?.requestedTimeSlot || payload.data?.requested_time_slot || 'Morning',
-          requestedTimeSlot: payload.data?.requestedTimeSlot || payload.data?.requested_time_slot || 'Morning',
+          requested_time_slot: payload.data?.requestedTimeSlot || payload.data?.requested_time_slot || 'Anytime',
+          requestedTimeSlot: payload.data?.requestedTimeSlot || payload.data?.requested_time_slot || 'Anytime',
           email: payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email,
           phone: payload.data?.phone || payload.data?.patientPhone || payload.data?.patient_phone,
           data: {

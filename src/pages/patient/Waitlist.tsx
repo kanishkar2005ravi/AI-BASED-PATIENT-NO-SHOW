@@ -30,7 +30,7 @@ export const Waitlist: React.FC = () => {
   const today = getLocalDateString();
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [requestedDate, setRequestedDate] = useState(today);
-  const [requestedTimeSlot, setRequestedTimeSlot] = useState('Morning');
+  const [requestedTimeSlot, setRequestedTimeSlot] = useState('Anytime');
   const [joining, setJoining] = useState(false);
 
   const fetchData = () => {
@@ -202,10 +202,7 @@ export const Waitlist: React.FC = () => {
               value={requestedTimeSlot}
               onChange={e => setRequestedTimeSlot(e.target.value)}
               options={[
-                { value: 'Morning', label: 'Morning' },
-                { value: 'Afternoon', label: 'Afternoon' },
-                { value: 'Evening', label: 'Evening' },
-                { value: 'Any Time', label: 'Any Time' }
+                { value: 'Anytime', label: 'Anytime' }
               ]}
             />
 
@@ -237,7 +234,7 @@ export const Waitlist: React.FC = () => {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-900">{item.doctorName}</h4>
-                      <p className="text-xs text-slate-500">{t('waitlist.req_date')}: {item.requestedDate} &bull; {item.requestedTimeSlot}</p>
+                      <p className="text-xs text-slate-500">{t('waitlist.req_date')}: {item.requestedDate} &bull; {item.requestedTimeSlot || 'Anytime'}</p>
                     </div>
                   </div>
 
