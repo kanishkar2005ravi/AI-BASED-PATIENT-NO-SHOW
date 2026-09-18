@@ -97,3 +97,49 @@ export function downloadCSV(filename: string, rows: Record<string, any>[]) {
   link.click();
   document.body.removeChild(link);
 }
+
+export type SlotAvailabilityStatus = 'AVAILABLE' | 'BOOKED' | 'UNAVAILABLE';
+
+/**
+ * Resolves a slot to exactly one of three states with explicit priority:
+ * A. If an active appointment exists for exact doctor/date/time: BOOKED
+ * B. Else if selected date is before today: UNAVAILABLE
+ * C. Else if selected date is today AND slot time has already passed: UNAVAILABLE
+ * D. Otherwise: AVAILABLE
+ */
+export function getSlotAvailabilityStatus(
+  slotTimeStr: string,
+  selectedDateStr: string,
+  bookedSlots: Set<string> | string[],
+  now: Date = new Date()
+): SlotAvailabilityStatus {
+  const bookedSet = bookedSlots instanceof Set ? bookedSlots : new Set(bookedSlots);
+
+  // A. Exact Doctor/Date/Time booked active appointment
+  if (bookedSet.has(slotTimeStr)) {
+    return 'BOOKED';
+  }
+
+  const todayStr = getLocalDateString(now);
+
+  // B. Selected date is in the past
+  if (selectedDateStr < todayStr) {
+    return 'UNAVAILABLE';
+  }
+
+  // C. Selected date is today and clock time has passed
+  if (selectedDateStr === todayStr) {
+    const parts = slotTimeStr.split(':');
+    if (parts.length >= 2) {
+      const slotMinutes = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      if (slotMinutes <= currentMinutes) {
+        return 'UNAVAILABLE';
+      }
+    }
+  }
+
+  // D. Otherwise available
+  return 'AVAILABLE';
+}
+

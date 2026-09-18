@@ -660,6 +660,13 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle BOOK_APPOINTMENT Action Specifically
       if (payload.action === 'BOOK_APPOINTMENT') {
         const unwrapped = unwrapN8nData(resData);
+        if (Array.isArray(resData) && resData.length === 0) {
+          return {
+            success: false,
+            message: 'This slot was just booked by another patient. Please choose another slot.',
+            error: 'Slot conflict'
+          };
+        }
         const savedApt: any = unwrapped.length > 0 ? unwrapped[0] : (resData.appointment || resData.data || null);
 
         const appointmentObj: Appointment = normalizeAppointment({

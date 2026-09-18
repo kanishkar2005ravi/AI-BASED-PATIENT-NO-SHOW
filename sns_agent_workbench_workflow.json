@@ -101,7 +101,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO appointments (id, patient_id, doctor_id, appointment_date, appointment_time, appointment_type, status, no_show_risk_score, no_show_risk_level) VALUES (CONCAT('APT-', CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT)), '{{json.body.patient_id}}', '{{json.body.doctor_id}}', CAST('{{json.body.appointment_date}}' AS DATE), '{{json.body.appointment_time}}', '{{json.body.reason}}', 'SCHEDULED', 20, 'LOW') RETURNING *;"
+        "query": "INSERT INTO appointments (id, patient_id, doctor_id, appointment_date, appointment_time, appointment_type, status, no_show_risk_score, no_show_risk_level) SELECT CONCAT('APT-', CAST(EXTRACT(EPOCH FROM NOW()) AS BIGINT)), '{{json.body.patient_id}}', '{{json.body.doctor_id}}', CAST('{{json.body.appointment_date}}' AS DATE), '{{json.body.appointment_time}}', '{{json.body.reason}}', 'SCHEDULED', 20, 'LOW' WHERE NOT EXISTS (SELECT 1 FROM appointments WHERE doctor_id = '{{json.body.doctor_id}}' AND appointment_date = CAST('{{json.body.appointment_date}}' AS DATE) AND appointment_time = '{{json.body.appointment_time}}' AND status != 'CANCELLED') RETURNING *;"
       },
       "id": "query-book-appointment",
       "name": "Execute Query: BOOK_APPOINTMENT",

@@ -7,11 +7,11 @@ import { Button } from '../../components/common/Button';
 import { Loading } from '../../components/common/Loading';
 import { useLanguage } from '../../context/LanguageContext';
 import { callBackend } from '../../services/api';
-import { Appointment, TimeSlot } from '../../types';
-import { ArrowLeft, Calendar, Clock, RefreshCw } from 'lucide-react';
+import { Appointment } from '../../types';
+import { ArrowLeft, Clock, RefreshCw } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
-import { formatTime, getLocalDateString } from '../../utils/helpers';
+import { formatTime, getLocalDateString, getSlotAvailabilityStatus } from '../../utils/helpers';
 
 export const RescheduleAppointment: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -52,17 +52,30 @@ export const RescheduleAppointment: React.FC = () => {
   useEffect(() => {
     if (!appointment) return;
     let isMounted = true;
-    callBackend({ action: 'GET_APPOINTMENTS', data: {} }).then(res => {
+    callBackend({ action: 'GET_APPOINTMENTS', data: { doctorId: appointment.doctorId } }).then(res => {
       if (isMounted && res.success && Array.isArray(res.data)) {
-        // Find all appointments for the same doctor on the selected new date
+        // Find all active appointments for the same doctor on the selected new date (excluding the current appointment being rescheduled)
         const booked = res.data
-          .filter((a: Appointment) => a.doctorId === appointment.doctorId && a.appointmentDate === newDate && a.id !== appointment.id && (a.status === 'CONFIRMED' || a.status === 'RESCHEDULED'))
-          .map((a: Appointment) => a.appointmentTime);
+          .filter((a: Appointment) => {
+            const aDocId = a.doctorId || (a as any).doctor_id;
+            const aDate = (a.appointmentDate || (a as any).appointment_date || '').trim();
+            const isActive = a.status !== 'CANCELLED';
+            return aDocId === appointment.doctorId && aDate === newDate && a.id !== appointment.id && isActive;
+          })
+          .map((a: Appointment) => {
+            const rawTime = (a.appointmentTime || (a as any).appointment_time || '').trim();
+            return rawTime.length >= 5 ? rawTime.slice(0, 5) : rawTime;
+          });
         
-        const freeSlots = ALL_25_SLOTS.filter(s => !booked.includes(s));
+        const bookedSet = new Set(booked);
+        const now = new Date();
+
+        const freeSlots = ALL_25_SLOTS.filter(s => getSlotAvailabilityStatus(s, newDate, bookedSet, now) === 'AVAILABLE');
         setAvailableSlots(freeSlots);
         if (freeSlots.length > 0 && !freeSlots.includes(selectedTime)) {
           setSelectedTime(freeSlots[0]);
+        } else if (freeSlots.length === 0) {
+          setSelectedTime('');
         }
       }
     });
@@ -77,24 +90,24 @@ export const RescheduleAppointment: React.FC = () => {
     }
 
     setSaving(true);
-      const res = await callBackend({
-        action: 'RESCHEDULE_APPOINTMENT',
-        data: {
-          appointmentId: id,
-          newDate,
-          newTime: selectedTime,
-          email: user?.email || appointment?.patientEmail,
-          patientEmail: user?.email || appointment?.patientEmail,
-          patient_email: user?.email || appointment?.patientEmail,
-          phone: user?.phone || appointment?.patientPhone || '8300096676',
-          patientPhone: user?.phone || appointment?.patientPhone || '8300096676',
-          patient_phone: user?.phone || appointment?.patientPhone || '8300096676',
-          patientName: user?.name || appointment?.patientName,
-          patient_name: user?.name || appointment?.patientName,
-          doctorName: appointment?.doctorName,
-          doctor_name: appointment?.doctorName
-        }
-      });
+    const res = await callBackend({
+      action: 'RESCHEDULE_APPOINTMENT',
+      data: {
+        appointmentId: id,
+        newDate,
+        newTime: selectedTime,
+        email: user?.email || appointment?.patientEmail,
+        patientEmail: user?.email || appointment?.patientEmail,
+        patient_email: user?.email || appointment?.patientEmail,
+        phone: user?.phone || appointment?.patientPhone || '8300096676',
+        patientPhone: user?.phone || appointment?.patientPhone || '8300096676',
+        patient_phone: user?.phone || appointment?.patientPhone || '8300096676',
+        patientName: user?.name || appointment?.patientName,
+        patient_name: user?.name || appointment?.patientName,
+        doctorName: appointment?.doctorName,
+        doctor_name: appointment?.doctorName
+      }
+    });
 
     setSaving(false);
     if (res.success) {
@@ -169,10 +182,10 @@ export const RescheduleAppointment: React.FC = () => {
                     type="button"
                     key={slot}
                     onClick={() => setSelectedTime(slot)}
-                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                       selectedTime === slot
-                        ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-600/20'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-teal-400 hover:bg-teal-50/50'
                     }`}
                   >
                     <Clock className="w-3.5 h-3.5" />
@@ -187,7 +200,7 @@ export const RescheduleAppointment: React.FC = () => {
             <Button variant="outline" type="button" onClick={() => navigate('/patient/appointments')}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit" isLoading={saving} icon={<RefreshCw className="w-4 h-4" />}>
+            <Button variant="primary" type="submit" isLoading={saving} disabled={!selectedTime || availableSlots.length === 0} icon={<RefreshCw className="w-4 h-4" />}>
               Confirm Reschedule
             </Button>
           </div>

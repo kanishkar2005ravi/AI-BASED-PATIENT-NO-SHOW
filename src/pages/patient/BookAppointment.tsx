@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { Card } from '../../components/common/Card';
@@ -8,18 +8,17 @@ import { Input } from '../../components/common/Input';
 import { Loading } from '../../components/common/Loading';
 import { useAuth } from '../../context/AuthContext';
 import { callBackend, normalizeAppointment } from '../../services/api';
-import { Doctor, TimeSlot, Appointment } from '../../types';
-import { Calendar, Clock, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Doctor, Appointment } from '../../types';
+import { Calendar, Clock, CheckCircle2, ArrowRight, ArrowLeft, RefreshCw, AlertCircle } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { formatTime, getLocalDateString } from '../../utils/helpers';
+import { formatTime, getLocalDateString, getSlotAvailabilityStatus } from '../../utils/helpers';
 
 export const BookAppointment: React.FC = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { showToast } = useToast();
-
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -29,8 +28,9 @@ export const BookAppointment: React.FC = () => {
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
   const todayStr = getLocalDateString();
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [bookedTimeSlots, setBookedTimeSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotFetchError, setSlotFetchError] = useState<string | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
   const [appointmentType, setAppointmentType] = useState<string>('Routine Checkup');
 
@@ -58,60 +58,99 @@ export const BookAppointment: React.FC = () => {
     };
   }, []);
 
-  // Generate 25 slots per doctor per day (20 mins each with Morning & Evening Tea Breaks)
-  // Morning: 09:00-10:40 (5 slots) + ☕ Tea Break 10:40-11:00 + 11:00-12:00 (3 slots) = 8 slots
-  // Evening: 14:00-16:00 (6 slots) + ☕ Tea Break 16:00-16:20 + 16:20-20:00 (11 slots) = 17 slots
-  // Total = 8 + 17 = 25 SLOTS PER DAY
-  const ALL_25_SLOTS = [
-    // Morning Part 1 (5 slots)
+  // 25 slots per doctor per day (20 mins each)
+  const ALL_25_SLOTS = useMemo(() => [
+    // Morning Part 1 (5 slots: 09:00 - 10:40)
     '09:00', '09:20', '09:40', '10:00', '10:20',
-    // Morning Part 2 (3 slots after 10:40 AM Tea Break)
+    // Morning Part 2 (3 slots: 11:00 - 12:00)
     '11:00', '11:20', '11:40',
-    // Evening Part 1 (6 slots after 12:00-14:00 Lunch Break)
+    // Afternoon (6 slots: 14:00 - 16:00)
     '14:00', '14:20', '14:40', '15:00', '15:20', '15:40',
-    // Evening Part 2 (11 slots after 16:00 Tea Break)
+    // Evening (11 slots: 16:20 - 20:00)
     '16:20', '16:40', '17:00', '17:20', '17:40', '18:00', '18:20', '18:40', '19:00', '19:20', '19:40'
-  ];
+  ], []);
 
-  const [bookedTimeSlots, setBookedTimeSlots] = useState<string[]>([]);
+  const bookedSet = useMemo(() => new Set(bookedTimeSlots), [bookedTimeSlots]);
 
-  // Fetch Appointments to find Booked 20-minute slots for selected doctor & date
-  useEffect(() => {
+  // Fetch real-time appointments from Supabase/backend to detect booked slots
+  const fetchSlots = useCallback(async () => {
     if (!selectedDoctorId) return;
     setLoadingSlots(true);
-    callBackend({ action: 'GET_APPOINTMENTS', data: { doctorId: selectedDoctorId } }).then(res => {
+    setSlotFetchError(null);
+    try {
+      const res = await callBackend({ action: 'GET_APPOINTMENTS', data: { doctorId: selectedDoctorId } });
       if (res.success && Array.isArray(res.data)) {
         const booked = res.data
-          .filter((a: Appointment) => 
-            a.doctorId === selectedDoctorId && 
-            a.appointmentDate === selectedDate && 
-            a.status !== 'CANCELLED'
-          )
-          .map((a: Appointment) => a.appointmentTime);
-        
+          .filter((a: Appointment) => {
+            const aDocId = a.doctorId || (a as any).doctor_id;
+            const aDate = (a.appointmentDate || (a as any).appointment_date || '').trim();
+            const isDocMatch = aDocId === selectedDoctorId;
+            const isDateMatch = aDate === selectedDate;
+            const isActive = a.status !== 'CANCELLED';
+            return isDocMatch && isDateMatch && isActive;
+          })
+          .map((a: Appointment) => {
+            const rawTime = (a.appointmentTime || (a as any).appointment_time || '').trim();
+            return rawTime.length >= 5 ? rawTime.slice(0, 5) : rawTime;
+          });
+
         setBookedTimeSlots(booked);
 
-        // Find first available unbooked slot
-        const firstAvailable = ALL_25_SLOTS.find(slot => !booked.includes(slot));
-        if (firstAvailable) {
-          setSelectedTimeSlot(firstAvailable);
-        } else {
-          setSelectedTimeSlot('');
+        const currentBookedSet = new Set(booked);
+        const now = new Date();
+
+        // Check if currently selected slot is available
+        const currentSlotStatus = selectedTimeSlot ? getSlotAvailabilityStatus(selectedTimeSlot, selectedDate, currentBookedSet, now) : 'UNAVAILABLE';
+        if (currentSlotStatus !== 'AVAILABLE') {
+          const firstAvailable = ALL_25_SLOTS.find(slot => getSlotAvailabilityStatus(slot, selectedDate, currentBookedSet, now) === 'AVAILABLE');
+          setSelectedTimeSlot(firstAvailable || '');
         }
       } else {
-        setBookedTimeSlots([]);
-        setSelectedTimeSlot(ALL_25_SLOTS[0]);
+        setSlotFetchError(res.message || 'Unable to retrieve real-time slot availability from the server.');
       }
+    } catch (err: any) {
+      setSlotFetchError(err?.message || 'Error connecting to appointment service.');
+    } finally {
       setLoadingSlots(false);
-    });
+    }
+  }, [selectedDoctorId, selectedDate, selectedTimeSlot, ALL_25_SLOTS]);
+
+  useEffect(() => {
+    fetchSlots();
   }, [selectedDoctorId, selectedDate]);
 
   const selectedDoctor = doctors.find(d => d.id === selectedDoctorId);
+  const now = new Date();
+  const availableCount = ALL_25_SLOTS.filter(s => getSlotAvailabilityStatus(s, selectedDate, bookedSet, now) === 'AVAILABLE').length;
 
   const handleConfirmBooking = async () => {
     if (!selectedDoctorId || !selectedDate || !selectedTimeSlot) {
       showToast('Please select a doctor, date, and available time slot.', 'error');
       return;
+    }
+
+    setBookingLoading(true);
+
+    // 1. Fresh pre-flight check from backend to prevent race condition (double booking)
+    try {
+      const preCheck = await callBackend({ action: 'GET_APPOINTMENTS', data: { doctorId: selectedDoctorId } });
+      if (preCheck.success && Array.isArray(preCheck.data)) {
+        const conflict = preCheck.data.some((a: Appointment) => {
+          const aDocId = a.doctorId || (a as any).doctor_id;
+          const aDate = (a.appointmentDate || (a as any).appointment_date || '').trim();
+          const aTime = (a.appointmentTime || (a as any).appointment_time || '').trim().slice(0, 5);
+          return aDocId === selectedDoctorId && aDate === selectedDate && aTime === selectedTimeSlot && a.status !== 'CANCELLED';
+        });
+
+        if (conflict) {
+          setBookingLoading(false);
+          showToast('This slot was just booked by another patient. Please choose another slot.', 'error');
+          fetchSlots();
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Pre-check availability warning:', e);
     }
 
     const bookingPayload = {
@@ -140,9 +179,6 @@ export const BookAppointment: React.FC = () => {
       name: user?.name || ''
     };
 
-    console.log('[BOOK_APPOINTMENT] request:', bookingPayload);
-
-    setBookingLoading(true);
     let res: any;
     try {
       res = await callBackend({
@@ -154,7 +190,6 @@ export const BookAppointment: React.FC = () => {
       res = { success: false, error: String(err) };
     }
 
-    console.log('[BOOK_APPOINTMENT] HTTP/backend response:', res);
     setBookingLoading(false);
 
     const isSuccess = res && (res.success === true || (res.success !== false && !res.error));
@@ -168,15 +203,54 @@ export const BookAppointment: React.FC = () => {
         doctorSpecialization: selectedDoctor?.specialization || respApt?.doctorSpecialization
       });
 
-      console.log('[BOOK_APPOINTMENT] normalized result:', confirmedAppointment);
-      console.log('[BOOK_APPOINTMENT] moving to confirmation');
-
       setBookingResult(confirmedAppointment);
       setStep(3);
       showToast(res.message || 'Appointment booked successfully!', 'success');
+      // Refresh real-time slots immediately from backend
+      fetchSlots();
     } else {
-      showToast(res?.message || res?.error || 'Unable to connect to appointment service.', 'error');
+      showToast(res?.message || res?.error || 'Unable to complete appointment booking.', 'error');
+      fetchSlots();
     }
+  };
+
+  const renderSlotButton = (tStr: string) => {
+    const status = getSlotAvailabilityStatus(tStr, selectedDate, bookedSet, now);
+    const isBooked = status === 'BOOKED';
+    const isUnavailable = status === 'UNAVAILABLE';
+    const isAvailable = status === 'AVAILABLE';
+    const isSelected = selectedTimeSlot === tStr;
+
+    return (
+      <button
+        type="button"
+        key={tStr}
+        disabled={!isAvailable}
+        onClick={() => {
+          if (isAvailable) setSelectedTimeSlot(tStr);
+        }}
+        className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-0.5 ${
+          isBooked
+            ? 'bg-rose-50 text-rose-700 border-rose-200 cursor-not-allowed opacity-85'
+            : isUnavailable
+            ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
+            : isSelected
+            ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-600/20 cursor-pointer'
+            : 'bg-white text-slate-700 border-slate-200 hover:border-teal-400 hover:bg-teal-50/50 cursor-pointer'
+        }`}
+      >
+        <span>{formatTime(tStr)}</span>
+        {isBooked ? (
+          <span className="text-[9px] font-black text-rose-600 bg-rose-100/90 px-1.5 py-0.5 rounded">BOOKED</span>
+        ) : isUnavailable ? (
+          <span className="text-[9px] font-semibold text-slate-400">PAST</span>
+        ) : isSelected ? (
+          <span className="text-[9px] font-bold text-teal-100">SELECTED</span>
+        ) : (
+          <span className="text-[9px] font-bold text-teal-600">AVAILABLE</span>
+        )}
+      </button>
+    );
   };
 
   if (loadingDoctors) {
@@ -290,7 +364,6 @@ export const BookAppointment: React.FC = () => {
 
               <Select
                 label={t('book.visit_purpose')}
-
                 value={appointmentType}
                 onChange={e => setAppointmentType(e.target.value)}
                 options={[
@@ -305,16 +378,45 @@ export const BookAppointment: React.FC = () => {
 
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  4. Select Time Slot (25 Slots Daily)
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-teal-600" />
+                  <span>Select Time Slot (25 Slots Daily)</span>
                 </label>
-                <span className="text-xs font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
-                  {25 - bookedTimeSlots.length} / 25 Available
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
+                    availableCount > 0 ? 'text-teal-700 bg-teal-50 border-teal-200' : 'text-rose-700 bg-rose-50 border-rose-200'
+                  }`}>
+                    {availableCount} / 25 Available
+                  </span>
+                  <button
+                    type="button"
+                    onClick={fetchSlots}
+                    disabled={loadingSlots}
+                    className="p-1 rounded-lg text-slate-400 hover:text-teal-600 hover:bg-slate-100 transition-all"
+                    title="Refresh Slot Availability"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingSlots ? 'animate-spin text-teal-600' : ''}`} />
+                  </button>
+                </div>
               </div>
 
+              {slotFetchError && (
+                <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-500 flex-shrink-0" />
+                    <span>{slotFetchError}</span>
+                  </div>
+                  <button
+                    onClick={fetchSlots}
+                    className="px-2 py-1 rounded-lg bg-rose-600 text-white font-bold text-[11px] hover:bg-rose-700"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
               {loadingSlots ? (
-                <p className="text-xs text-slate-500 italic py-3">Checking slot availability for {selectedDoctor?.name}...</p>
+                <p className="text-xs text-slate-500 italic py-3">Verifying live real-time slot availability for {selectedDoctor?.name}...</p>
               ) : (
                 <div className="space-y-4">
                   {/* Morning Session Part 1 (5 Slots: 09:00 - 10:40 AM) */}
@@ -323,31 +425,7 @@ export const BookAppointment: React.FC = () => {
                       <Clock className="w-3.5 h-3.5 mr-1 text-amber-500" /> Morning Session (9:00 AM – 10:40 AM &bull; 5 Slots)
                     </h5>
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                      {ALL_25_SLOTS.slice(0, 5).map((tStr) => {
-                        const isBooked = bookedTimeSlots.includes(tStr);
-                        const isSelected = selectedTimeSlot === tStr;
-
-                        return (
-                          <button
-                            type="button"
-                            key={tStr}
-                            disabled={isBooked}
-                            onClick={() => setSelectedTimeSlot(tStr)}
-                            className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-0.5 ${
-                              isBooked
-                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through opacity-70'
-                                : isSelected
-                                ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-600/20'
-                                : 'bg-white text-slate-700 border-slate-200 hover:border-teal-400 hover:bg-teal-50/50'
-                            }`}
-                          >
-                            <span>{formatTime(tStr)}</span>
-                            {isBooked && (
-                              <span className="text-[10px] font-medium">BOOKED</span>
-                            )}
-                          </button>
-                        );
-                      })}
+                      {ALL_25_SLOTS.slice(0, 5).map(renderSlotButton)}
                     </div>
                   </div>
 
@@ -362,31 +440,7 @@ export const BookAppointment: React.FC = () => {
                       <Clock className="w-3.5 h-3.5 mr-1 text-amber-600" /> Late Morning Session (11:00 AM – 12:00 PM &bull; 3 Slots)
                     </h5>
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                      {ALL_25_SLOTS.slice(5, 8).map((tStr) => {
-                        const isBooked = bookedTimeSlots.includes(tStr);
-                        const isSelected = selectedTimeSlot === tStr;
-
-                        return (
-                          <button
-                            type="button"
-                            key={tStr}
-                            disabled={isBooked}
-                            onClick={() => setSelectedTimeSlot(tStr)}
-                            className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-0.5 ${
-                              isBooked
-                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through opacity-70'
-                                : isSelected
-                                ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-600/20'
-                                : 'bg-white text-slate-700 border-slate-200 hover:border-teal-400 hover:bg-teal-50/50'
-                            }`}
-                          >
-                            <span>{formatTime(tStr)}</span>
-                            {isBooked && (
-                              <span className="text-[10px] font-medium">BOOKED</span>
-                            )}
-                          </button>
-                        );
-                      })}
+                      {ALL_25_SLOTS.slice(5, 8).map(renderSlotButton)}
                     </div>
                   </div>
 
@@ -401,31 +455,7 @@ export const BookAppointment: React.FC = () => {
                       <Clock className="w-3.5 h-3.5 mr-1 text-indigo-500" /> Afternoon Session (2:00 PM – 4:00 PM &bull; 6 Slots)
                     </h5>
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                      {ALL_25_SLOTS.slice(8, 14).map((tStr) => {
-                        const isBooked = bookedTimeSlots.includes(tStr);
-                        const isSelected = selectedTimeSlot === tStr;
-
-                        return (
-                          <button
-                            type="button"
-                            key={tStr}
-                            disabled={isBooked}
-                            onClick={() => setSelectedTimeSlot(tStr)}
-                            className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-0.5 ${
-                              isBooked
-                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through opacity-70'
-                                : isSelected
-                                ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-600/20'
-                                : 'bg-white text-slate-700 border-slate-200 hover:border-teal-400 hover:bg-teal-50/50'
-                            }`}
-                          >
-                            <span>{formatTime(tStr)}</span>
-                            {isBooked && (
-                              <span className="text-[10px] font-medium">BOOKED</span>
-                            )}
-                          </button>
-                        );
-                      })}
+                      {ALL_25_SLOTS.slice(8, 14).map(renderSlotButton)}
                     </div>
                   </div>
 
@@ -440,31 +470,7 @@ export const BookAppointment: React.FC = () => {
                       <Clock className="w-3.5 h-3.5 mr-1 text-purple-600" /> Evening Session (4:20 PM – 8:00 PM &bull; 11 Slots)
                     </h5>
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                      {ALL_25_SLOTS.slice(14).map((tStr) => {
-                        const isBooked = bookedTimeSlots.includes(tStr);
-                        const isSelected = selectedTimeSlot === tStr;
-
-                        return (
-                          <button
-                            type="button"
-                            key={tStr}
-                            disabled={isBooked}
-                            onClick={() => setSelectedTimeSlot(tStr)}
-                            className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-0.5 ${
-                              isBooked
-                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through opacity-70'
-                                : isSelected
-                                ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-600/20'
-                                : 'bg-white text-slate-700 border-slate-200 hover:border-teal-400 hover:bg-teal-50/50'
-                            }`}
-                          >
-                            <span>{formatTime(tStr)}</span>
-                            {isBooked && (
-                              <span className="text-[10px] font-medium">BOOKED</span>
-                            )}
-                          </button>
-                        );
-                      })}
+                      {ALL_25_SLOTS.slice(14).map(renderSlotButton)}
                     </div>
                   </div>
                 </div>
@@ -475,7 +481,7 @@ export const BookAppointment: React.FC = () => {
               <Button
                 variant="primary"
                 size="lg"
-                disabled={!selectedTimeSlot}
+                disabled={!selectedTimeSlot || availableCount === 0 || loadingSlots || !!slotFetchError}
                 icon={<ArrowRight className="w-4 h-4" />}
                 onClick={() => setStep(2)}
               >
