@@ -273,7 +273,7 @@ export function normalizeWaitlistItem(w: any): WaitlistItem {
     doctorId: w.doctorId || w.doctor_id || '',
     doctorName: w.doctorName || w.doctor_name || 'Doctor',
     requestedDate: w.requestedDate || w.requested_date || getLocalDateString(),
-    requestedTimeSlot: w.requestedTimeSlot || w.requested_time_slot || w.time_slot || w.timeSlot || 'Morning',
+    requestedTimeSlot: w.requestedTimeSlot || w.requested_time_slot || w.time_slot || w.timeSlot || 'Anytime',
     position: (w.position !== undefined && w.position !== null && w.position !== '' && !isNaN(Number(w.position))) ? Number(w.position) : 1,
     status: normStatus,
     notifiedAt: w.notifiedAt || w.notified_at || undefined,
@@ -593,6 +593,21 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
             ...payload.data,
             waitlist_id: wId,
             waitlistId: wId,
+            id: wId
+          },
+          ...payload.data
+        };
+      } else if (payload.action === 'LEAVE_WAITLIST' || payload.action === 'DELETE_WAITLIST' || payload.action === 'REMOVE_FROM_WAITLIST') {
+        const wId = payload.data?.waitlistId || payload.data?.waitlist_id || payload.data?.id;
+        requestBody = {
+          action: 'LEAVE_WAITLIST',
+          waitlistId: wId,
+          waitlist_id: wId,
+          id: wId,
+          data: {
+            ...payload.data,
+            waitlistId: wId,
+            waitlist_id: wId,
             id: wId
           },
           ...payload.data
@@ -1338,7 +1353,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       }
 
       // Handle LEAVE_WAITLIST Action Specifically
-      if (payload.action === 'LEAVE_WAITLIST') {
+      if (payload.action === 'LEAVE_WAITLIST' || payload.action === 'DELETE_WAITLIST' || payload.action === 'REMOVE_FROM_WAITLIST') {
         if (IS_DEMO_MODE) {
           const wId = payload.data?.waitlistId || payload.data?.id;
           const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
@@ -1352,9 +1367,21 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           };
         }
 
+        const hasError = resData.success === false || resData.status === 'error' || Boolean(resData.error);
+        const rowCount = typeof resData.rowCount === 'number' ? resData.rowCount : (typeof resData.affectedRows === 'number' ? resData.affectedRows : null);
+
+        if (hasError || (rowCount !== null && rowCount === 0)) {
+          return {
+            success: false,
+            message: resData.message || resData.error || 'Unable to remove from waitlist. Record not found.',
+            error: resData.error || 'Record not found in database',
+            data: [] as any
+          };
+        }
+
         return {
           success: isSuccess,
-          message: resData.message || 'Removed from waitlist.',
+          message: resData.message || (isSuccess ? 'Removed from waitlist.' : 'Failed to remove from waitlist.'),
           data: (resData.data || []) as any
         };
       }

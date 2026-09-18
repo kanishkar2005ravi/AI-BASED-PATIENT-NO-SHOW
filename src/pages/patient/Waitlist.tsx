@@ -142,10 +142,20 @@ export const Waitlist: React.FC = () => {
   };
 
   const handleLeave = async (waitlistId: string) => {
-    const res = await callBackend({ action: 'LEAVE_WAITLIST', data: { waitlistId } });
+    if (!waitlistId) return;
+    const res = await callBackend({ 
+      action: 'LEAVE_WAITLIST', 
+      data: { 
+        waitlistId,
+        waitlist_id: waitlistId,
+        id: waitlistId
+      } 
+    });
     if (res.success) {
       showToast('Removed from waitlist.', 'info');
       fetchData();
+    } else {
+      showToast(res.message || 'Failed to remove from waitlist.', 'error');
     }
   };
 
