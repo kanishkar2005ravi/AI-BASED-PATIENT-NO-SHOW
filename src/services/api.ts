@@ -905,64 +905,78 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle CANCEL_APPOINTMENT Action Specifically
       if (payload.action === 'CANCEL_APPOINTMENT') {
-        const aptId = payload.data?.appointmentId || payload.data?.id;
-        const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
-        const updatedApts = localApts.map(a => a.id === aptId ? { ...a, status: 'CANCELLED' as const } : a);
-        setLocalData(STORAGE_KEYS.APPOINTMENTS, updatedApts);
-        
-        // Also simulate the auto-recovery locally so the UI updates instantly
-        const cancelledApt = localApts.find(a => a.id === aptId);
-        if (cancelledApt) {
-          const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
-          const matchingIdx = localWaitlist.findIndex(w => w.doctorId === cancelledApt.doctorId && w.status === 'WAITING');
-          if (matchingIdx !== -1) {
-            localWaitlist[matchingIdx].status = 'NOTIFIED';
-            setLocalData(STORAGE_KEYS.WAITLIST, localWaitlist);
+        if (IS_DEMO_MODE) {
+          const aptId = payload.data?.appointmentId || payload.data?.id;
+          const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
+          const updatedApts = localApts.map(a => a.id === aptId ? { ...a, status: 'CANCELLED' as const } : a);
+          setLocalData(STORAGE_KEYS.APPOINTMENTS, updatedApts);
+          
+          const cancelledApt = localApts.find(a => a.id === aptId);
+          if (cancelledApt) {
+            const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+            const matchingIdx = localWaitlist.findIndex(w => w.doctorId === cancelledApt.doctorId && w.status === 'WAITING');
+            if (matchingIdx !== -1) {
+              localWaitlist[matchingIdx].status = 'NOTIFIED';
+              setLocalData(STORAGE_KEYS.WAITLIST, localWaitlist);
+            }
           }
+
+          return {
+            success: true,
+            message: resData.message || 'Appointment cancelled successfully.',
+            data: updatedApts as any
+          };
         }
 
         return {
-          success: true,
-          message: resData.message || 'Appointment cancelled successfully.',
-          data: updatedApts as any
+          success: isSuccess,
+          message: resData.message || (isSuccess ? 'Appointment cancelled successfully.' : 'Failed to cancel appointment.'),
+          data: (resData.data || []) as any
         };
       }
 
       // Handle RESCHEDULE_APPOINTMENT Action Specifically
       if (payload.action === 'RESCHEDULE_APPOINTMENT') {
-        const aptId = payload.data?.appointmentId || payload.data?.id;
-        const newDate = payload.data?.newDate || payload.data?.appointmentDate;
-        const newTime = payload.data?.newTime || payload.data?.appointmentTime;
+        if (IS_DEMO_MODE) {
+          const aptId = payload.data?.appointmentId || payload.data?.id;
+          const newDate = payload.data?.newDate || payload.data?.appointmentDate;
+          const newTime = payload.data?.newTime || payload.data?.appointmentTime;
 
-        const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
-        const updatedApts = localApts.map(a => {
-          if (a.id === aptId) {
-            return {
-              ...a,
-              appointmentDate: newDate || a.appointmentDate,
-              appointmentTime: newTime || a.appointmentTime,
-              status: 'RESCHEDULED' as const
-            };
-          }
-          return a;
-        });
-        setLocalData(STORAGE_KEYS.APPOINTMENTS, updatedApts);
+          const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
+          const updatedApts = localApts.map(a => {
+            if (a.id === aptId) {
+              return {
+                ...a,
+                appointmentDate: newDate || a.appointmentDate,
+                appointmentTime: newTime || a.appointmentTime,
+                status: 'RESCHEDULED' as const
+              };
+            }
+            return a;
+          });
+          setLocalData(STORAGE_KEYS.APPOINTMENTS, updatedApts);
+
+          return {
+            success: true,
+            message: resData.message || 'Appointment rescheduled successfully.',
+            data: updatedApts as any
+          };
+        }
 
         return {
-          success: true,
-          message: resData.message || 'Appointment rescheduled successfully.',
-          data: updatedApts as any
+          success: isSuccess,
+          message: resData.message || (isSuccess ? 'Appointment rescheduled successfully.' : 'Failed to reschedule appointment.'),
+          data: (resData.data || []) as any
         };
       }
 
       // Handle GET_DOCTOR_AVAILABILITY Action Specifically
       if (payload.action === 'GET_DOCTOR_AVAILABILITY') {
         const docId = payload.data?.doctorId || payload.data?.doctor_id || 'DOC-001';
-        const availMap = getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, {});
+        const availMap = IS_DEMO_MODE ? getLocalData<Record<string, DoctorAvailability>>(STORAGE_KEYS.AVAILABILITY, {}) : {};
         const docSchedule = (resData.data && resData.data.weeklySchedule)
           ? resData.data
           : (availMap[docId] || null);
-
 
         return {
           success: true,
@@ -973,25 +987,21 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle CREATE_DOCTOR Action Specifically
       if (payload.action === 'CREATE_DOCTOR') {
-        const newDoc: Doctor = resData.doctor || {
-          id: payload.data?.doctorId || `DOC-${Math.floor(100 + Math.random() * 900)}`,
-          name: payload.data?.name || 'New Doctor',
-          specialization: payload.data?.specialization || 'General Medicine',
-          department: payload.data?.department || 'General Medicine',
-          email: payload.data?.email || 'doctor@example.com',
-          phone: payload.data?.phone || '9876543210',
-          experience: Number(payload.data?.experience) || 5,
-          status: 'Active'
-        };
+        const newDoc: Doctor = resData.doctor || normalizeDoctor({
+          ...payload.data,
+          id: payload.data?.doctorId || payload.data?.id || `DOC-${Math.floor(100 + Math.random() * 900)}`
+        });
 
-        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-        if (!localDocs.some(d => d.id === newDoc.id)) {
-          localDocs.unshift(newDoc);
-          setLocalData(STORAGE_KEYS.DOCTORS, localDocs);
+        if (IS_DEMO_MODE) {
+          const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
+          if (!localDocs.some(d => d.id === newDoc.id)) {
+            localDocs.unshift(newDoc);
+            setLocalData(STORAGE_KEYS.DOCTORS, localDocs);
+          }
         }
 
         return {
-          success: true,
+          success: isSuccess,
           message: resData.message || 'Doctor added successfully!',
           doctor: newDoc,
           data: newDoc as any
@@ -1001,13 +1011,23 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       // Handle UPDATE_DOCTOR Action Specifically
       if (payload.action === 'UPDATE_DOCTOR') {
         const dId = payload.data?.doctorId || payload.data?.id;
-        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-        const updatedDocs = localDocs.map(d => d.id === dId ? { ...d, ...payload.data } : d);
-        setLocalData(STORAGE_KEYS.DOCTORS, updatedDocs);
+        if (IS_DEMO_MODE) {
+          const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
+          const updatedDocs = localDocs.map(d => d.id === dId ? { ...d, ...payload.data } : d);
+          setLocalData(STORAGE_KEYS.DOCTORS, updatedDocs);
 
-        const updatedDoc = updatedDocs.find(d => d.id === dId) || updatedDocs[0];
+          const updatedDoc = updatedDocs.find(d => d.id === dId) || updatedDocs[0];
+          return {
+            success: true,
+            message: resData.message || 'Doctor profile updated successfully!',
+            doctor: updatedDoc,
+            data: updatedDoc as any
+          };
+        }
+
+        const updatedDoc = resData.doctor || normalizeDoctor({ ...payload.data, id: dId });
         return {
-          success: true,
+          success: isSuccess,
           message: resData.message || 'Doctor profile updated successfully!',
           doctor: updatedDoc,
           data: updatedDoc as any
