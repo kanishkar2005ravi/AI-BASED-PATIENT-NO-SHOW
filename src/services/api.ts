@@ -404,6 +404,10 @@ export function normalizeAppointment(inputApt: any): Appointment {
     }
   }
 
+  if (!a || typeof a !== 'object') {
+    a = {};
+  }
+
   const rawStatus = (a.status || 'CONFIRMED').toString().trim().toUpperCase();
   let normStatus: AppointmentStatus = 'CONFIRMED';
   if (rawStatus === 'CANCELLED' || rawStatus === 'CANCELED') {
@@ -1118,10 +1122,12 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           }
 
           // Recursively inspect all properties of the object (rows, data, items, json, appointments, etc.)
-          for (const key of Object.keys(node)) {
-            const val = node[key];
-            if (val && (typeof val === 'object' || typeof val === 'string')) {
-              found.push(...extractAppointments(val, visited));
+          if (node && typeof node === 'object') {
+            for (const key of Object.keys(node)) {
+              const val = node[key];
+              if (val && (typeof val === 'object' || typeof val === 'string')) {
+                found.push(...extractAppointments(val, visited));
+              }
             }
           }
 

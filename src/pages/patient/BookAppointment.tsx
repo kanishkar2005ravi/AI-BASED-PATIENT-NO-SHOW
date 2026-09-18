@@ -14,6 +14,83 @@ import { useToast } from '../../context/ToastContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { formatTime, getLocalDateString, getSlotAvailabilityStatus } from '../../utils/helpers';
 
+function extractBookingResponse(res: any): { isSuccess: boolean; appointmentId?: string; appointmentData?: any; message?: string } {
+  if (!res) return { isSuccess: false };
+
+  // Explicit failure check
+  if (res.success === false && !res.items && !res._responseData && !res.data) {
+    return { isSuccess: false, message: res.message || res.error };
+  }
+
+  let isSuccess = false;
+  let extractedId: string | undefined = undefined;
+  let extractedData: any = null;
+  let extractedMessage: string = (res.message && typeof res.message === 'string') ? res.message : '';
+
+  // 1. Direct checks on root
+  if (res.success === true || res.status === 'success' || res.status === 200 || res.status === 201) {
+    isSuccess = true;
+  }
+  if (res.id || res.appointment_id || res.appointmentId) {
+    extractedId = (res.id || res.appointment_id || res.appointmentId).toString();
+  }
+  if (res.appointment && typeof res.appointment === 'object') {
+    extractedData = res.appointment;
+    extractedId = extractedId || res.appointment.id || res.appointment.appointment_id || res.appointment.appointmentId;
+  }
+  if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
+    extractedData = extractedData || res.data;
+    extractedId = extractedId || res.data.id || res.data.appointment_id || res.data.appointmentId;
+  }
+
+  // 2. Deep recursive search into nested objects (items, json, _responseData, data)
+  const inspectNode = (node: any, depth = 0) => {
+    if (!node || typeof node !== 'object' || depth > 6) return;
+
+    if (node.success === true || node.status === 'success' || node._responseCode === 200 || node._responseCode === 201) {
+      isSuccess = true;
+    }
+    if (node.message && typeof node.message === 'string') {
+      extractedMessage = extractedMessage || node.message;
+    }
+    if (node.id || node.appointment_id || node.appointmentId) {
+      extractedId = extractedId || (node.id || node.appointment_id || node.appointmentId).toString();
+    }
+    if (node.appointment && typeof node.appointment === 'object') {
+      extractedData = extractedData || node.appointment;
+      extractedId = extractedId || node.appointment.id || node.appointment.appointment_id || node.appointment.appointmentId;
+    }
+
+    if (node._responseData) inspectNode(node._responseData, depth + 1);
+    if (node.json) inspectNode(node.json, depth + 1);
+    if (node.data) inspectNode(node.data, depth + 1);
+    if (Array.isArray(node.items)) {
+      for (const it of node.items) {
+        inspectNode(it, depth + 1);
+      }
+    }
+    if (Array.isArray(node)) {
+      for (const it of node) {
+        inspectNode(it, depth + 1);
+      }
+    }
+  };
+
+  inspectNode(res);
+
+  // If no explicit error and we received a response, treat as success if not explicitly false
+  if (!isSuccess && res.success !== false && !res.error && res.status !== 'error') {
+    isSuccess = true;
+  }
+
+  return {
+    isSuccess,
+    appointmentId: extractedId,
+    appointmentData: extractedData,
+    message: extractedMessage || 'Appointment booked successfully!'
+  };
+}
+
 export const BookAppointment: React.FC = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -178,83 +255,6 @@ export const BookAppointment: React.FC = () => {
       patient_name: user?.name || '',
       name: user?.name || ''
     };
-
-function extractBookingResponse(res: any): { isSuccess: boolean; appointmentId?: string; appointmentData?: any; message?: string } {
-  if (!res) return { isSuccess: false };
-
-  // Explicit failure check
-  if (res.success === false && !res.items && !res._responseData && !res.data) {
-    return { isSuccess: false, message: res.message || res.error };
-  }
-
-  let isSuccess = false;
-  let extractedId: string | undefined = undefined;
-  let extractedData: any = null;
-  let extractedMessage: string = (res.message && typeof res.message === 'string') ? res.message : '';
-
-  // 1. Direct checks on root
-  if (res.success === true || res.status === 'success' || res.status === 200 || res.status === 201) {
-    isSuccess = true;
-  }
-  if (res.id || res.appointment_id || res.appointmentId) {
-    extractedId = (res.id || res.appointment_id || res.appointmentId).toString();
-  }
-  if (res.appointment && typeof res.appointment === 'object') {
-    extractedData = res.appointment;
-    extractedId = extractedId || res.appointment.id || res.appointment.appointment_id || res.appointment.appointmentId;
-  }
-  if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
-    extractedData = extractedData || res.data;
-    extractedId = extractedId || res.data.id || res.data.appointment_id || res.data.appointmentId;
-  }
-
-  // 2. Deep recursive search into nested objects (items, json, _responseData, data)
-  const inspectNode = (node: any, depth = 0) => {
-    if (!node || typeof node !== 'object' || depth > 6) return;
-
-    if (node.success === true || node.status === 'success' || node._responseCode === 200 || node._responseCode === 201) {
-      isSuccess = true;
-    }
-    if (node.message && typeof node.message === 'string') {
-      extractedMessage = extractedMessage || node.message;
-    }
-    if (node.id || node.appointment_id || node.appointmentId) {
-      extractedId = extractedId || (node.id || node.appointment_id || node.appointmentId).toString();
-    }
-    if (node.appointment && typeof node.appointment === 'object') {
-      extractedData = extractedData || node.appointment;
-      extractedId = extractedId || node.appointment.id || node.appointment.appointment_id || node.appointment.appointmentId;
-    }
-
-    if (node._responseData) inspectNode(node._responseData, depth + 1);
-    if (node.json) inspectNode(node.json, depth + 1);
-    if (node.data) inspectNode(node.data, depth + 1);
-    if (Array.isArray(node.items)) {
-      for (const it of node.items) {
-        inspectNode(it, depth + 1);
-      }
-    }
-    if (Array.isArray(node)) {
-      for (const it of node) {
-        inspectNode(it, depth + 1);
-      }
-    }
-  };
-
-  inspectNode(res);
-
-  // If no explicit error and we received a response, treat as success if not explicitly false
-  if (!isSuccess && res.success !== false && !res.error && res.status !== 'error') {
-    isSuccess = true;
-  }
-
-  return {
-    isSuccess,
-    appointmentId: extractedId,
-    appointmentData: extractedData,
-    message: extractedMessage || 'Appointment booked successfully!'
-  };
-}
 
     let res: any;
     try {
