@@ -277,8 +277,29 @@ export const MyAppointments: React.FC = () => {
                     <h3 className="text-base font-bold text-slate-900">
                       {apt.doctorName || (apt.doctorId ? `Doctor (${apt.doctorId})` : 'Doctor')}
                     </h3>
-                    <Badge variant={isAppointmentPast(apt) ? 'success' : isAppointmentCancelled(apt) ? 'danger' : 'info'} size="sm">
-                      {isAppointmentPast(apt) ? (apt.status === 'NO_SHOW' ? 'NO SHOW' : t('status.completed')) : isAppointmentCancelled(apt) ? t('status.cancelled') : t('status.confirmed')}
+                    <Badge
+                      variant={
+                        isAppointmentCancelled(apt) || apt.status?.toUpperCase() === 'CANCELLED' || apt.status?.toUpperCase() === 'CANCELED'
+                          ? 'danger'
+                          : isAppointmentPast(apt)
+                          ? apt.status?.toUpperCase() === 'NO_SHOW'
+                            ? 'danger'
+                            : 'success'
+                          : apt.status?.toUpperCase() === 'RESCHEDULED'
+                          ? 'warning'
+                          : 'info'
+                      }
+                      size="sm"
+                    >
+                      {isAppointmentCancelled(apt) || apt.status?.toUpperCase() === 'CANCELLED' || apt.status?.toUpperCase() === 'CANCELED'
+                        ? 'Cancelled'
+                        : isAppointmentPast(apt)
+                        ? apt.status?.toUpperCase() === 'NO_SHOW'
+                          ? 'NO SHOW'
+                          : 'Completed'
+                        : apt.status?.toUpperCase() === 'RESCHEDULED'
+                        ? 'Rescheduled'
+                        : 'Confirmed'}
                     </Badge>
                   </div>
                   {apt.doctorSpecialization ? (
