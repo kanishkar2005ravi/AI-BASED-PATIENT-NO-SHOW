@@ -558,14 +558,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('carepilot_lang', lang);
-    
-    // Auto-translate the whole DOM including hardcoded words
-    if (lang === 'ta') {
-      document.cookie = "googtrans=/en/ta; path=/";
-    } else {
-      document.cookie = "googtrans=/en/en; path=/";
-    }
-    window.location.reload();
+    // Clear any legacy Google Translate cookie
+    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   };
 
   const t = (key: string): string => {
