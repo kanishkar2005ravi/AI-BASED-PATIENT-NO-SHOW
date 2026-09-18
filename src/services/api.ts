@@ -94,6 +94,12 @@ export function unwrapN8nData(raw: any): any[] {
   if (raw.doctor && typeof raw.doctor === 'object') {
     nestedResults.push(...unwrapN8nData(raw.doctor));
   }
+  if (raw.waitlist) {
+    nestedResults.push(...unwrapN8nData(raw.waitlist));
+  }
+  if (raw.waitlists) {
+    nestedResults.push(...unwrapN8nData(raw.waitlists));
+  }
   if (raw.items) {
     nestedResults.push(...unwrapN8nData(raw.items));
   }
@@ -233,6 +239,46 @@ function normalizePatient(p: any): Patient {
     ),
     createdAt: p.createdAt || p.created_at || getLocalDateString()
   } as Patient;
+}
+
+export function normalizeWaitlistItem(w: any): WaitlistItem {
+  if (!w || typeof w !== 'object') {
+    return {
+      id: '',
+      patientId: '',
+      patientName: 'Patient',
+      doctorId: '',
+      doctorName: 'Doctor',
+      requestedDate: getLocalDateString(),
+      requestedTimeSlot: 'Morning',
+      position: undefined as any,
+      status: 'WAITING',
+      createdAt: getLocalDateString()
+    };
+  }
+
+  const rawStatus = (w.status || 'WAITING').toString().trim().toUpperCase();
+  let normStatus: 'WAITING' | 'NOTIFIED' | 'ACCEPTED' | 'EXPIRED' | 'CANCELLED' = 'WAITING';
+  if (rawStatus === 'NOTIFIED') normStatus = 'NOTIFIED';
+  else if (rawStatus === 'ACCEPTED' || rawStatus === 'CONFIRMED') normStatus = 'ACCEPTED';
+  else if (rawStatus === 'CANCELLED' || rawStatus === 'CANCELED') normStatus = 'CANCELLED';
+  else if (rawStatus === 'EXPIRED') normStatus = 'EXPIRED';
+  else normStatus = 'WAITING';
+
+  return {
+    ...w,
+    id: w.id || w.waitlist_id || w.waitlistId || '',
+    patientId: w.patientId || w.patient_id || '',
+    patientName: w.patientName || w.patient_name || 'Patient',
+    doctorId: w.doctorId || w.doctor_id || '',
+    doctorName: w.doctorName || w.doctor_name || 'Doctor',
+    requestedDate: w.requestedDate || w.requested_date || getLocalDateString(),
+    requestedTimeSlot: w.requestedTimeSlot || w.requested_time_slot || w.time_slot || w.timeSlot || 'Morning',
+    position: (w.position !== undefined && w.position !== null && w.position !== '') ? Number(w.position) : undefined,
+    status: normStatus,
+    notifiedAt: w.notifiedAt || w.notified_at || undefined,
+    createdAt: w.createdAt || w.created_at || getLocalDateString()
+  };
 }
 
 export function normalizeAppointment(inputApt: any): Appointment {
@@ -1033,118 +1079,148 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Handle JOIN_WAITLIST & ADD_TO_WAITLIST Action Specifically
       if (payload.action === 'JOIN_WAITLIST' || payload.action === 'ADD_TO_WAITLIST') {
-        const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
-        const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
+        if (IS_DEMO_MODE) {
+          const localDocs = getLocalData<Doctor[]>(STORAGE_KEYS.DOCTORS, INITIAL_DOCTORS);
+          const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS);
 
-        const pId = payload.data?.patientId || 'PAT-001';
-        const dId = payload.data?.doctorId || 'DOC-001';
-        const selDoc = localDocs.find(d => d.id === dId) || localDocs[0];
-        const selPat = localPats.find(p => p.id === pId) || { name: payload.data?.patientName || 'Patient' };
+          const pId = payload.data?.patientId || 'PAT-001';
+          const dId = payload.data?.doctorId || 'DOC-001';
+          const selDoc = localDocs.find(d => d.id === dId) || localDocs[0];
+          const selPat = localPats.find(p => p.id === pId) || { name: payload.data?.patientName || 'Patient' };
 
-        const reasonStr = payload.data?.reason || payload.data?.requestedTimeSlot || 'Urgent Priority Consultation';
+          const reasonStr = payload.data?.reason || payload.data?.requestedTimeSlot || 'Urgent Priority Consultation';
 
-        const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+          const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
 
-        const newItem: WaitlistItem = {
-          id: `WTL-${Date.now()}`,
-          patientId: pId,
-          patientName: selPat.name || payload.data?.patientName || 'Patient',
-          doctorId: dId,
-          doctorName: selDoc.name || payload.data?.doctorName || 'Doctor',
-          requestedDate: payload.data?.requestedDate || getLocalDateString(),
-          requestedTimeSlot: reasonStr,
-          position: localWaitlist.filter(w => w.doctorId === dId && w.status === 'WAITING').length + 1,
-          status: 'WAITING',
-          createdAt: getLocalDateString()
-        };
+          const newItem: WaitlistItem = {
+            id: `WTL-${Date.now()}`,
+            patientId: pId,
+            patientName: selPat.name || payload.data?.patientName || 'Patient',
+            doctorId: dId,
+            doctorName: selDoc.name || payload.data?.doctorName || 'Doctor',
+            requestedDate: payload.data?.requestedDate || getLocalDateString(),
+            requestedTimeSlot: reasonStr,
+            position: localWaitlist.filter(w => w.doctorId === dId && w.status === 'WAITING').length + 1,
+            status: 'WAITING',
+            createdAt: getLocalDateString()
+          };
 
-        localWaitlist.unshift(newItem);
-        setLocalData(STORAGE_KEYS.WAITLIST, localWaitlist);
+          localWaitlist.unshift(newItem);
+          setLocalData(STORAGE_KEYS.WAITLIST, localWaitlist);
 
-        // Dispatches Real-time Notification for Hospital Admin
-        const localNotifs = getLocalData<NotificationItem[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS);
-        const adminNotif: NotificationItem = {
-          id: `NOTIF-${Date.now()}`,
-          userId: 'ADMIN',
-          type: 'Waitlist',
-          title: `Urgent Consultation Request: ${newItem.patientName}`,
-          message: `${newItem.patientName} requested an urgent consultation with ${newItem.doctorName} on ${newItem.requestedDate}. ${reasonStr}`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          read: false,
-          actionUrl: '/admin/waitlist'
-        };
-        localNotifs.unshift(adminNotif);
-        setLocalData(STORAGE_KEYS.NOTIFICATIONS, localNotifs);
+          return {
+            success: true,
+            message: resData.message || 'Urgent consultation requested and added to waitlist queue!',
+            data: newItem as any
+          };
+        }
+
+        const rawNewItem = unwrapN8nData(resData)[0] || resData.waitlist || resData.data || payload.data;
+        const normalized = normalizeWaitlistItem(rawNewItem);
 
         return {
-          success: true,
-          message: resData.message || 'Urgent consultation requested and added to waitlist queue!',
-          data: newItem as any
+          success: isSuccess,
+          message: resData.message || (isSuccess ? 'Joined waitlist successfully!' : 'Failed to join waitlist.'),
+          data: normalized as any
         };
       }
 
       // Handle GET_WAITLIST Action Specifically
       if (payload.action === 'GET_WAITLIST') {
-        const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
-        const remoteList = Array.isArray(resData.data) ? resData.data : [];
-        const combined = mergeListsById(localWaitlist, remoteList);
+        if (IS_DEMO_MODE) {
+          const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+          const remoteList = Array.isArray(resData.data) ? resData.data : [];
+          const combined = mergeListsById(localWaitlist, remoteList);
+          return {
+            success: true,
+            message: 'Waitlist retrieved successfully.',
+            data: combined.map(normalizeWaitlistItem) as any
+          };
+        }
+
+        const remoteRaw = unwrapN8nData(resData).filter((w: any) => {
+          if (!w || typeof w !== 'object') return false;
+          return Boolean(w.id || w.waitlist_id || w.waitlistId || w.patient_id || w.patientId || w.doctor_id || w.doctorId);
+        });
+
+        const normalizedWaitlist: WaitlistItem[] = remoteRaw.map(normalizeWaitlistItem);
+
+        console.log('[GET_WAITLIST] Raw response:', resData);
+        console.log('[GET_WAITLIST] Extracted items count:', normalizedWaitlist.length, normalizedWaitlist);
+
         return {
           success: true,
           message: 'Waitlist retrieved successfully.',
-          data: combined as any
+          data: normalizedWaitlist as any
         };
       }
 
       // Handle ACCEPT_WAITLIST_SLOT Action Specifically
       if (payload.action === 'ACCEPT_WAITLIST_SLOT') {
-        const wId = payload.data?.waitlistId || payload.data?.id;
-        const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
-        const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
+        if (IS_DEMO_MODE) {
+          const wId = payload.data?.waitlistId || payload.data?.id;
+          const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+          const localApts = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
 
-        const targetItem = localWaitlist.find(w => w.id === wId);
-        if (targetItem) {
-          targetItem.status = 'ACCEPTED';
-          const newApt: Appointment = {
-            id: `APT-WTL-${Date.now()}`,
-            patientId: targetItem.patientId,
-            patientName: targetItem.patientName,
-            patientEmail: 'patient@example.com',
-            doctorId: targetItem.doctorId,
-            doctorName: targetItem.doctorName,
-            doctorSpecialization: 'Specialist',
-            appointmentDate: targetItem.requestedDate,
-            appointmentTime: targetItem.requestedTimeSlot || '10:00',
-            appointmentType: 'Consultation',
-            status: 'CONFIRMED',
-            risk: { level: 'LOW', probability: 0.1, factors: [] },
-            confirmedByPatient: true,
-            createdAt: getLocalDateString()
+          const targetItem = localWaitlist.find(w => w.id === wId);
+          if (targetItem) {
+            targetItem.status = 'ACCEPTED';
+            const newApt: Appointment = {
+              id: `APT-WTL-${Date.now()}`,
+              patientId: targetItem.patientId,
+              patientName: targetItem.patientName,
+              patientEmail: 'patient@example.com',
+              doctorId: targetItem.doctorId,
+              doctorName: targetItem.doctorName,
+              doctorSpecialization: 'Specialist',
+              appointmentDate: targetItem.requestedDate,
+              appointmentTime: targetItem.requestedTimeSlot || '10:00',
+              appointmentType: 'Consultation',
+              status: 'CONFIRMED',
+              risk: { level: 'LOW', probability: 0.1, factors: [] },
+              confirmedByPatient: true,
+              createdAt: getLocalDateString()
+            };
+            localApts.unshift(newApt);
+            setLocalData(STORAGE_KEYS.APPOINTMENTS, localApts);
+          }
+
+          const updated = localWaitlist.map(w => w.id === wId ? { ...w, status: 'ACCEPTED' as const } : w);
+          setLocalData(STORAGE_KEYS.WAITLIST, updated);
+
+          return {
+            success: true,
+            message: resData.message || 'Slot confirmed! Your appointment has been booked.',
+            data: updated as any
           };
-          localApts.unshift(newApt);
-          setLocalData(STORAGE_KEYS.APPOINTMENTS, localApts);
         }
 
-        const updated = localWaitlist.map(w => w.id === wId ? { ...w, status: 'ACCEPTED' as const } : w);
-        setLocalData(STORAGE_KEYS.WAITLIST, updated);
-
         return {
-          success: true,
+          success: isSuccess,
           message: resData.message || 'Slot confirmed! Your appointment has been booked.',
-          data: updated as any
+          data: (resData.data || []) as any
         };
       }
 
       // Handle LEAVE_WAITLIST Action Specifically
       if (payload.action === 'LEAVE_WAITLIST') {
-        const wId = payload.data?.waitlistId || payload.data?.id;
-        const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
-        const updated = localWaitlist.filter(w => w.id !== wId);
-        setLocalData(STORAGE_KEYS.WAITLIST, updated);
+        if (IS_DEMO_MODE) {
+          const wId = payload.data?.waitlistId || payload.data?.id;
+          const localWaitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
+          const updated = localWaitlist.filter(w => w.id !== wId);
+          setLocalData(STORAGE_KEYS.WAITLIST, updated);
+
+          return {
+            success: true,
+            message: resData.message || 'Removed from waitlist.',
+            data: updated as any
+          };
+        }
 
         return {
-          success: true,
+          success: isSuccess,
           message: resData.message || 'Removed from waitlist.',
-          data: updated as any
+          data: (resData.data || []) as any
         };
       }
 

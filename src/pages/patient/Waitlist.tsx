@@ -40,7 +40,11 @@ export const Waitlist: React.FC = () => {
       callBackend({ action: 'GET_DOCTORS' })
     ]).then(([wtlRes, docRes]) => {
       if (wtlRes.success && Array.isArray(wtlRes.data)) {
-        setWaitlist(wtlRes.data.filter((w: WaitlistItem) => w.patientId === user?.id));
+        const uId = (user?.id || '').trim().toLowerCase();
+        setWaitlist(wtlRes.data.filter((w: WaitlistItem) => {
+          const pId = (w.patientId || (w as any).patient_id || '').trim().toLowerCase();
+          return pId === uId;
+        }));
       }
       if (docRes.success && Array.isArray(docRes.data)) {
         const activeDoctors = docRes.data.filter((d: Doctor) => d.status === 'Active');

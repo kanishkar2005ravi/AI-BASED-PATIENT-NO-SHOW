@@ -148,7 +148,8 @@ export const PatientDashboard: React.FC = () => {
       setAppointments(enrichedApts);
     }
     if (waitRes.success && Array.isArray(waitRes.data)) {
-      setWaitlist(waitRes.data.filter((w: WaitlistItem) => w.patientId === user?.id));
+      const uId = (user?.id || '').trim().toLowerCase();
+      setWaitlist(waitRes.data.filter((w: WaitlistItem) => (w.patientId || (w as any).patient_id || '').trim().toLowerCase() === uId));
     }
     if (notifRes.success && Array.isArray(notifRes.data)) {
       setNotifications(notifRes.data.slice(0, 3));
