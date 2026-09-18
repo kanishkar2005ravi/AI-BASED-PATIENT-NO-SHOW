@@ -80,11 +80,21 @@ export const Waitlist: React.FC = () => {
       action: 'JOIN_WAITLIST',
       data: {
         patientId: user?.id || 'PAT-001',
-        patientName: user?.name || 'Kiran Raj',
+        patient_id: user?.id || 'PAT-001',
+        patientName: user?.name || 'Patient',
+        patient_name: user?.name || 'Patient',
         doctorId: doc.id,
+        doctor_id: doc.id,
         doctorName: doc.name,
+        doctor_name: doc.name,
+        doctorSpecialization: doc.specialization,
+        doctor_specialization: doc.specialization,
         requestedDate,
-        requestedTimeSlot
+        requested_date: requestedDate,
+        requestedTimeSlot,
+        requested_time_slot: requestedTimeSlot,
+        email: user?.email,
+        phone: user?.phone
       }
     });
 

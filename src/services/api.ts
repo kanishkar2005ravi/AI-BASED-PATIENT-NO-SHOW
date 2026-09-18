@@ -497,6 +497,51 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           },
           ...payload.data
         };
+      } else if (payload.action === 'JOIN_WAITLIST' || payload.action === 'ADD_TO_WAITLIST') {
+        const pId = payload.data?.patientId || payload.data?.patient_id || 'PAT-1';
+        const dId = payload.data?.doctorId || payload.data?.doctor_id || 'DOC-501';
+        requestBody = {
+          action: 'JOIN_WAITLIST',
+          patient_id: pId,
+          patientId: pId,
+          patient_name: payload.data?.patientName || payload.data?.patient_name || 'Patient',
+          patientName: payload.data?.patientName || payload.data?.patient_name || 'Patient',
+          doctor_id: dId,
+          doctorId: dId,
+          doctor_name: payload.data?.doctorName || payload.data?.doctor_name || 'Doctor',
+          doctorName: payload.data?.doctorName || payload.data?.doctor_name || 'Doctor',
+          requested_date: payload.data?.requestedDate || payload.data?.requested_date || getLocalDateString(),
+          requestedDate: payload.data?.requestedDate || payload.data?.requested_date || getLocalDateString(),
+          requested_time_slot: payload.data?.requestedTimeSlot || payload.data?.requested_time_slot || 'Morning',
+          requestedTimeSlot: payload.data?.requestedTimeSlot || payload.data?.requested_time_slot || 'Morning',
+          email: payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email,
+          phone: payload.data?.phone || payload.data?.patientPhone || payload.data?.patient_phone,
+          data: {
+            ...payload.data,
+            patient_id: pId,
+            patientId: pId,
+            doctor_id: dId,
+            doctorId: dId
+          },
+          ...payload.data
+        };
+      } else if (payload.action === 'ACCEPT_WAITLIST_SLOT') {
+        const wId = payload.data?.waitlistId || payload.data?.waitlist_id || payload.data?.id;
+        requestBody = {
+          action: 'ACCEPT_WAITLIST_SLOT',
+          waitlist_id: wId,
+          waitlistId: wId,
+          id: wId,
+          email: payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email,
+          phone: payload.data?.phone || payload.data?.patientPhone || payload.data?.patient_phone,
+          data: {
+            ...payload.data,
+            waitlist_id: wId,
+            waitlistId: wId,
+            id: wId
+          },
+          ...payload.data
+        };
       } else {
         requestBody = {
           action: payload.action,
