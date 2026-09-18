@@ -44,7 +44,7 @@ export const AdminDashboard: React.FC = () => {
   const [expandedMetricKey, setExpandedMetricKey] = useState<
     'appointments' | 'attended' | 'cancelled' | 'rescheduled' | 'waitlist' | 'accepted_waitlist' | 'missed' | 'LOW_RISK' | 'MEDIUM_RISK' | 'HIGH_RISK' | null
   >(null);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -66,19 +66,70 @@ export const AdminDashboard: React.FC = () => {
     acceptedWaitlistCount: 0
   });
 
+  const normalizeDateStr = (d: any): string => {
+    if (!d) return '';
+    const s = String(d).trim();
+    if (s.includes('T')) return s.split('T')[0];
+    if (s.includes(' ')) return s.split(' ')[0];
+    return s;
+  };
+
+  const isAttendedStatus = (status: string | undefined): boolean => {
+    if (!status) return false;
+    const s = status.trim().toUpperCase();
+    return s === 'COMPLETED' || s === 'ATTENDED' || s === 'CHECKED_IN' || s === 'CHECKED_OUT';
+  };
+
+  const getRiskLevel = (a: Appointment): 'LOW' | 'MEDIUM' | 'HIGH' => {
+    const raw = ((a as any).risk_level || (a.risk && a.risk.level) || 'LOW').toString().trim().toUpperCase();
+    if (raw === 'HIGH') return 'HIGH';
+    if (raw === 'MEDIUM' || raw === 'MED') return 'MEDIUM';
+    return 'LOW';
+  };
+
   const getFilteredMetricLabel = (type: 'appointments' | 'cancelled' | 'rescheduled' | 'missed' | 'attended') => {
-    const prefix = dateRange === 'yesterday' ? "Yesterday's" : dateRange === 'custom' ? "Selected Date" : "Today's";
-    if (type === 'attended') return `${prefix} Attended`;
-    if (dateRange === 'yesterday') return t(`metric.yesterdays_${type}`);
-    if (dateRange === 'custom') return t(`metric.custom_${type}`);
-    return t(`metric.todays_${type}`);
+    if (type === 'attended') {
+      if (dateRange === 'yesterday') return t('metric.yesterdays_attended');
+      if (dateRange === 'custom') return t('metric.custom_attended');
+      return t('metric.todays_attended');
+    }
+    if (type === 'appointments') {
+      if (dateRange === 'yesterday') return t('metric.yesterdays_appointments');
+      if (dateRange === 'custom') return t('metric.custom_appointments');
+      return t('metric.todays_appointments');
+    }
+    if (type === 'cancelled') {
+      if (dateRange === 'yesterday') return t('metric.yesterdays_cancelled');
+      if (dateRange === 'custom') return t('metric.custom_cancelled');
+      return t('metric.todays_cancelled');
+    }
+    if (type === 'rescheduled') {
+      if (dateRange === 'yesterday') return t('metric.yesterdays_rescheduled');
+      if (dateRange === 'custom') return t('metric.custom_rescheduled');
+      return t('metric.todays_rescheduled');
+    }
+    if (type === 'missed') {
+      if (dateRange === 'yesterday') return t('metric.yesterdays_missed');
+      if (dateRange === 'custom') return t('metric.custom_missed');
+      return t('metric.todays_missed');
+    }
+    return '';
   };
 
   const getFilteredRiskLabel = (level: 'low' | 'medium' | 'high') => {
-    const prefix = dateRange === 'yesterday' ? "Yesterday's" : dateRange === 'custom' ? "Selected Date" : "Today's";
-    if (level === 'low') return `${prefix} Low Risk`;
-    if (level === 'medium') return `${prefix} Medium Risk`;
-    return `${prefix} High Risk`;
+    if (level === 'low') {
+      if (dateRange === 'yesterday') return t('metric.yesterdays_low_risk');
+      if (dateRange === 'custom') return t('metric.custom_low_risk');
+      return t('metric.todays_low_risk');
+    }
+    if (level === 'medium') {
+      if (dateRange === 'yesterday') return t('metric.yesterdays_medium_risk');
+      if (dateRange === 'custom') return t('metric.custom_medium_risk');
+      return t('metric.todays_medium_risk');
+    }
+    if (dateRange === 'yesterday') return t('metric.yesterdays_high_risk');
+    if (dateRange === 'custom') return t('metric.custom_high_risk');
+    return t('metric.todays_high_risk');
   };
 
   useEffect(() => {
@@ -106,53 +157,52 @@ export const AdminDashboard: React.FC = () => {
           y.setDate(y.getDate() - 1);
           targetDateStr = getLocalDateString(y);
         } else if (dateRange === 'custom') {
-          targetDateStr = customDate;
+          targetDateStr = normalizeDateStr(customDate) || todayStr;
         }
 
-        const dateFilteredApts = aptsList.filter(a => a.appointmentDate === targetDateStr);
-        const dateFilteredWaitlist = waitList.filter(w => w.requestedDate === targetDateStr || (w.createdAt && w.createdAt.startsWith(targetDateStr)));
-        const activeDocsCount = docsList.filter(d => d.status === 'Active').length || docsList.length || 4;
+        const dateFilteredApts = aptsList.filter(a => normalizeDateStr(a.appointmentDate) === targetDateStr);
+        const dateFilteredWaitlist = waitList.filter(w => normalizeDateStr(w.requestedDate) === targetDateStr || normalizeDateStr(w.createdAt) === targetDateStr);
+        const activeDocsCount = docsList.filter(d => (d.status || '').toUpperCase() === 'ACTIVE').length || docsList.length || 4;
         const workingDocsCount = new Set(dateFilteredApts.map(a => a.doctorId)).size;
 
-        const dateAttendedCount = dateFilteredApts.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT').length;
-        const fallbackAttended = Math.max(0, dateFilteredApts.length - dateFilteredApts.filter(a => a.status === 'CANCELLED' || a.status === 'NO_SHOW').length);
+        const dateAttendedCount = dateFilteredApts.filter(a => isAttendedStatus(a.status)).length;
 
         const calculatedMetrics = {
           totalPatients: patsList.length,
           totalAppointments: aptsList.length,
-          totalCancelled: aptsList.filter(a => a.status === 'CANCELLED').length,
-          totalRescheduled: aptsList.filter(a => a.status === 'RESCHEDULED').length,
-          totalMissed: aptsList.filter(a => a.status === 'NO_SHOW').length,
+          totalCancelled: aptsList.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length,
+          totalRescheduled: aptsList.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED').length,
+          totalMissed: aptsList.filter(a => (a.status || '').toUpperCase() === 'NO_SHOW' || (a.status || '').toUpperCase() === 'MISSED').length,
           totalWaitlistCount: waitList.length,
           activeDoctors: workingDocsCount > 0 ? workingDocsCount : activeDocsCount,
           todayAppointments: dateFilteredApts.length,
           todayAttended: dateAttendedCount,
-          todayCancelled: dateFilteredApts.filter(a => a.status === 'CANCELLED').length,
-          todayRescheduled: dateFilteredApts.filter(a => a.status === 'RESCHEDULED').length,
-          todayMissed: dateFilteredApts.filter(a => a.status === 'NO_SHOW').length,
+          todayCancelled: dateFilteredApts.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length,
+          todayRescheduled: dateFilteredApts.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED').length,
+          todayMissed: dateFilteredApts.filter(a => (a.status || '').toUpperCase() === 'NO_SHOW' || (a.status || '').toUpperCase() === 'MISSED').length,
           waitlistCount: dateFilteredWaitlist.length,
-          acceptedWaitlistCount: dateFilteredWaitlist.filter(w => w.status === 'ACCEPTED').length
+          acceptedWaitlistCount: dateFilteredWaitlist.filter(w => (w.status || '').toUpperCase() === 'ACCEPTED' || (w.status || '').toUpperCase() === 'CONFIRMED').length
         };
 
         setMetrics(calculatedMetrics);
 
-        const filteredLowCount = dateFilteredApts.filter(a => !a.risk || a.risk.level === 'LOW').length;
-        const filteredMedCount = dateFilteredApts.filter(a => a.risk && a.risk.level === 'MEDIUM').length;
-        const filteredHighCount = dateFilteredApts.filter(a => a.risk && a.risk.level === 'HIGH').length;
+        const filteredLowCount = dateFilteredApts.filter(a => getRiskLevel(a) === 'LOW').length;
+        const filteredMedCount = dateFilteredApts.filter(a => getRiskLevel(a) === 'MEDIUM').length;
+        const filteredHighCount = dateFilteredApts.filter(a => getRiskLevel(a) === 'HIGH').length;
 
-        const lowCount = aptsList.filter(a => !a.risk || a.risk.level === 'LOW').length;
-        const medCount = aptsList.filter(a => a.risk && a.risk.level === 'MEDIUM').length;
-        const highCount = aptsList.filter(a => a.risk && a.risk.level === 'HIGH').length;
+        const lowCount = aptsList.filter(a => getRiskLevel(a) === 'LOW').length;
+        const medCount = aptsList.filter(a => getRiskLevel(a) === 'MEDIUM').length;
+        const highCount = aptsList.filter(a => getRiskLevel(a) === 'HIGH').length;
 
         const liveAnalytics: AnalyticsData = {
           totalPatients: calculatedMetrics.totalPatients,
           totalDoctors: calculatedMetrics.activeDoctors,
           totalAppointments: calculatedMetrics.totalAppointments,
           todayAppointments: calculatedMetrics.todayAppointments,
-          attendanceRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => a.status === 'COMPLETED' || a.status === 'CHECKED_IN').length / aptsList.length) * 100).toFixed(1)) : 0,
-          noShowRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => a.status === 'NO_SHOW').length / aptsList.length) * 100).toFixed(1)) : 0,
-          cancellationRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => a.status === 'CANCELLED').length / aptsList.length) * 100).toFixed(1)) : 0,
-          waitlistRecoveryRate: waitList.length > 0 ? parseFloat(((waitList.filter(w => w.status === 'ACCEPTED').length / waitList.length) * 100).toFixed(1)) : 0,
+          attendanceRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => isAttendedStatus(a.status)).length / aptsList.length) * 100).toFixed(1)) : 0,
+          noShowRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => (a.status || '').toUpperCase() === 'NO_SHOW' || (a.status || '').toUpperCase() === 'MISSED').length / aptsList.length) * 100).toFixed(1)) : 0,
+          cancellationRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length / aptsList.length) * 100).toFixed(1)) : 0,
+          waitlistRecoveryRate: waitList.length > 0 ? parseFloat(((waitList.filter(w => (w.status || '').toUpperCase() === 'ACCEPTED' || (w.status || '').toUpperCase() === 'CONFIRMED').length / waitList.length) * 100).toFixed(1)) : 0,
           highRiskCount: dateFilteredApts.length > 0 ? filteredHighCount : highCount,
           mediumRiskCount: dateFilteredApts.length > 0 ? filteredMedCount : medCount,
           lowRiskCount: dateFilteredApts.length > 0 ? filteredLowCount : lowCount,
@@ -162,7 +212,6 @@ export const AdminDashboard: React.FC = () => {
           doctorUtilizationData: [],
           waitlistRecoveryData: []
         };
-
 
         setAnalytics(liveAnalytics);
         setAllAppointmentsList(aptsList);
@@ -176,29 +225,6 @@ export const AdminDashboard: React.FC = () => {
     };
   }, [dateRange, customDate]);
 
-  const getModalAppointments = (level?: RiskLevel): Appointment[] => {
-    const targetLevel = level || 'LOW';
-    if (!targetLevel) return [];
-
-    const todayStr = getLocalDateString();
-    let targetDateStr = todayStr;
-    if (dateRange === 'yesterday') {
-      const y = new Date();
-      y.setDate(y.getDate() - 1);
-      targetDateStr = getLocalDateString(y);
-    } else if (dateRange === 'custom') {
-      targetDateStr = customDate;
-    }
-
-    const dateFiltered = allAppointmentsList.filter(a => a.appointmentDate === targetDateStr);
-    let matched = dateFiltered.filter(a => {
-      if (targetLevel === 'LOW') return !a.risk || a.risk.level === 'LOW';
-      return a.risk && a.risk.level === targetLevel;
-    });
-
-    return matched;
-  };
-
   const getPatientsForMetricKey = (key: string): Appointment[] => {
     const todayStr = getLocalDateString();
     let targetDateStr = todayStr;
@@ -207,34 +233,46 @@ export const AdminDashboard: React.FC = () => {
       y.setDate(y.getDate() - 1);
       targetDateStr = getLocalDateString(y);
     } else if (dateRange === 'custom') {
-      targetDateStr = customDate;
+      targetDateStr = normalizeDateStr(customDate) || todayStr;
     }
 
-    const dateFiltered = allAppointmentsList.filter(a => a.appointmentDate === targetDateStr);
+    const dateFiltered = allAppointmentsList.filter(a => normalizeDateStr(a.appointmentDate) === targetDateStr);
     const listToFilter = dateFiltered;
 
     if (key === 'LOW_RISK' || key === 'MEDIUM_RISK' || key === 'HIGH_RISK') {
       const targetLevel = key === 'LOW_RISK' ? 'LOW' : key === 'MEDIUM_RISK' ? 'MEDIUM' : 'HIGH';
-      return getModalAppointments(targetLevel as RiskLevel);
+      return listToFilter.filter(a => getRiskLevel(a) === targetLevel);
     }
 
     if (key === 'attended') {
-      return listToFilter.filter(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED' || a.status === 'CHECKED_IN' || a.status === 'CHECKED_OUT');
+      return listToFilter.filter(a => isAttendedStatus(a.status));
     }
 
     if (key === 'cancelled') {
-      return listToFilter.filter(a => a.status === 'CANCELLED');
+      return listToFilter.filter(a => (a.status || '').toUpperCase() === 'CANCELLED');
     }
 
     if (key === 'rescheduled') {
-      return listToFilter.filter(a => a.status === 'RESCHEDULED');
+      return listToFilter.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED');
     }
 
     if (key === 'missed') {
-      return listToFilter.filter(a => a.status === 'NO_SHOW');
+      return listToFilter.filter(a => (a.status || '').toUpperCase() === 'NO_SHOW' || (a.status || '').toUpperCase() === 'MISSED');
     }
 
     return listToFilter;
+  };
+
+  const formatStatus = (status: string) => {
+    const s = (status || '').toUpperCase();
+    if (s === 'CONFIRMED') return t('status.confirmed');
+    if (s === 'COMPLETED' || s === 'ATTENDED') return t('status.completed');
+    if (s === 'CHECKED_IN') return language === 'ta' ? 'பதிவு செய்யப்பட்டது' : 'CHECKED IN';
+    if (s === 'CHECKED_OUT') return language === 'ta' ? 'முடிந்தது' : 'CHECKED OUT';
+    if (s === 'CANCELLED') return t('status.cancelled');
+    if (s === 'RESCHEDULED') return language === 'ta' ? 'மறுதேதியிடப்பட்டது' : 'RESCHEDULED';
+    if (s === 'NO_SHOW' || s === 'MISSED') return t('status.not_attended');
+    return status;
   };
 
   if (loading || !analytics) {
@@ -242,7 +280,7 @@ export const AdminDashboard: React.FC = () => {
       <div>
         <Header title={t('nav.dashboard')} />
         <div className="py-20">
-          <Loading message="Fetching hospital metrics & AI predictions..." />
+          <Loading message={t('dashboard.fetching_metrics')} />
         </div>
       </div>
     );
@@ -255,8 +293,8 @@ export const AdminDashboard: React.FC = () => {
       {/* 🏥 HOSPITAL OVERVIEW & PATIENT STATS HEADER BAR 🏥 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <h2 className="text-base font-black text-slate-900">Daily Hospital Operations & Patient Attendance</h2>
-          <p className="text-xs text-slate-500">Real-time daily physician schedules, consultation outcomes & emergency waitlist tracking</p>
+          <h2 className="text-base font-black text-slate-900">{t('dashboard.daily_hospital_ops')}</h2>
+          <p className="text-xs text-slate-500">{t('dashboard.realtime_schedules_sub')}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -271,7 +309,7 @@ export const AdminDashboard: React.FC = () => {
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {range === 'yesterday' ? 'Yesterday' : 'Today'}
+                {range === 'yesterday' ? t('dashboard.yesterday') : t('dashboard.today')}
               </button>
             ))}
           </div>
@@ -313,7 +351,7 @@ export const AdminDashboard: React.FC = () => {
                 ? 'bg-teal-600 text-white shadow-xs ring-2 ring-teal-300'
                 : 'bg-slate-100 hover:bg-teal-100 text-slate-400 hover:text-teal-700'
             }`}
-            title="Click down arrow to view appointments patient list"
+            title={t('dashboard.click_view_apts_list')}
           >
             {expandedMetricKey === 'appointments' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
@@ -349,7 +387,7 @@ export const AdminDashboard: React.FC = () => {
                 ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-300'
                 : 'bg-slate-100 hover:bg-emerald-100 text-slate-400 hover:text-emerald-700'
             }`}
-            title="Click down arrow to view attended patient list"
+            title={t('dashboard.click_view_attended_list')}
           >
             {expandedMetricKey === 'attended' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
@@ -385,7 +423,7 @@ export const AdminDashboard: React.FC = () => {
                 ? 'bg-rose-600 text-white shadow-xs ring-2 ring-rose-300'
                 : 'bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-700'
             }`}
-            title="Click down arrow to view cancelled patient list"
+            title={t('dashboard.click_view_cancelled_list')}
           >
             {expandedMetricKey === 'cancelled' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
@@ -421,7 +459,7 @@ export const AdminDashboard: React.FC = () => {
                 ? 'bg-blue-600 text-white shadow-xs ring-2 ring-blue-300'
                 : 'bg-slate-100 hover:bg-blue-100 text-slate-400 hover:text-blue-700'
             }`}
-            title="Click down arrow to view rescheduled patient list"
+            title={t('dashboard.click_view_rescheduled_list')}
           >
             {expandedMetricKey === 'rescheduled' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
@@ -457,7 +495,7 @@ export const AdminDashboard: React.FC = () => {
                 ? 'bg-amber-600 text-white shadow-xs ring-2 ring-amber-300'
                 : 'bg-slate-100 hover:bg-amber-100 text-slate-400 hover:text-amber-700'
             }`}
-            title="Click down arrow to view waitlist patient list"
+            title={t('dashboard.click_view_waitlist_list')}
           >
             {expandedMetricKey === 'waitlist' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
@@ -472,7 +510,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
           <div className="space-y-0.5">
             <p className="text-2xl font-black text-amber-600 leading-none">{metrics.waitlistCount}</p>
-            <p className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider">{t('metric.waitlist')}</p>
+            <p className="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider">{t('metric.emergency_waitlist')}</p>
           </div>
         </div>
 
@@ -493,7 +531,7 @@ export const AdminDashboard: React.FC = () => {
                 ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-300'
                 : 'bg-slate-100 hover:bg-indigo-100 text-slate-400 hover:text-indigo-700'
             }`}
-            title="Click down arrow to view accepted waitlist patient list"
+            title={t('dashboard.click_view_accepted_list')}
           >
             {expandedMetricKey === 'accepted_waitlist' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
@@ -529,7 +567,7 @@ export const AdminDashboard: React.FC = () => {
                 ? 'bg-purple-600 text-white shadow-xs ring-2 ring-purple-300'
                 : 'bg-slate-100 hover:bg-purple-100 text-slate-400 hover:text-purple-700'
             }`}
-            title="Click down arrow to view missed patient list"
+            title={t('dashboard.click_view_missed_list')}
           >
             {expandedMetricKey === 'missed' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
@@ -573,21 +611,21 @@ export const AdminDashboard: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base font-black text-slate-900 tracking-tight">
-                    {dateRange === 'yesterday' ? "Yesterday's" : dateRange === 'custom' ? "Selected Date" : "Today's"} {
-                      expandedMetricKey === 'attended' ? 'Attended' :
-                      expandedMetricKey === 'cancelled' ? 'Cancelled' :
-                      expandedMetricKey === 'rescheduled' ? 'Rescheduled' :
-                      expandedMetricKey === 'missed' ? 'Missed / No-Show' :
-                      expandedMetricKey === 'waitlist' ? 'Waitlist Queue' :
-                      expandedMetricKey === 'accepted_waitlist' ? 'Accepted Waitlist' : 'Scheduled Appointments'
-                    } Patient List
+                    {dateRange === 'yesterday' ? t('dashboard.yesterdays') : dateRange === 'custom' ? t('dashboard.selected_dates') : t('dashboard.todays')} {
+                      expandedMetricKey === 'attended' ? t('metric.attended_visits') :
+                      expandedMetricKey === 'cancelled' ? t('metric.cancelled_slots') :
+                      expandedMetricKey === 'rescheduled' ? t('metric.rescheduled_slots') :
+                      expandedMetricKey === 'missed' ? t('metric.noshow_absences') :
+                      expandedMetricKey === 'waitlist' ? t('metric.emergency_waitlist') :
+                      expandedMetricKey === 'accepted_waitlist' ? t('metric.accepted_waitlist') : t('metric.todays_appointments')
+                    } {t('dashboard.patient_list')}
                   </h3>
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-slate-100 text-slate-800 border border-slate-200">
-                    {getPatientsForMetricKey(expandedMetricKey).length} Patient(s)
+                    {getPatientsForMetricKey(expandedMetricKey).length} {t('dashboard.patient_count')}
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  Detailed patient records, appointment slots, assigned doctors, and AI risk evaluations
+                  {t('dashboard.patient_list_sub')}
                 </p>
               </div>
             </div>
@@ -595,10 +633,10 @@ export const AdminDashboard: React.FC = () => {
             <button
               onClick={() => setExpandedMetricKey(null)}
               className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
-              title="Close patient list"
+              title={t('dashboard.close_patient_list')}
             >
               <X className="w-4 h-4" />
-              <span>Close</span>
+              <span>{t('dashboard.close')}</span>
             </button>
           </div>
 
@@ -606,12 +644,12 @@ export const AdminDashboard: React.FC = () => {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-900 text-slate-200 font-black uppercase text-[10px] tracking-wider border-b border-slate-800">
-                  <th className="py-3.5 px-4 text-indigo-300">Appointment ID</th>
-                  <th className="py-3.5 px-4 text-white">Patient Name</th>
-                  <th className="py-3.5 px-4 text-purple-300">Physician & Department</th>
-                  <th className="py-3.5 px-4 text-amber-300">Time & Date</th>
-                  <th className="py-3.5 px-4 text-teal-300">AI Risk Assessment</th>
-                  <th className="py-3.5 px-4 text-emerald-300">Status</th>
+                  <th className="py-3.5 px-4 text-indigo-300">{t('table.appointment_id')}</th>
+                  <th className="py-3.5 px-4 text-white">{t('table.patient_name')}</th>
+                  <th className="py-3.5 px-4 text-purple-300">{t('table.physician_dept')}</th>
+                  <th className="py-3.5 px-4 text-amber-300">{t('table.time_date')}</th>
+                  <th className="py-3.5 px-4 text-teal-300">{t('table.ai_risk')}</th>
+                  <th className="py-3.5 px-4 text-emerald-300">{t('table.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
@@ -628,14 +666,14 @@ export const AdminDashboard: React.FC = () => {
                     </td>
                     <td className="py-3 px-4">
                       <div>
-                        <p className="font-bold text-slate-800 text-xs">{apt.doctorName || 'Assigned Specialist'}</p>
-                        <span className="text-[10px] font-semibold text-slate-500">{apt.doctorSpecialization || 'General Practice'}</span>
+                        <p className="font-bold text-slate-800 text-xs">{apt.doctorName || t('dashboard.assigned_specialist')}</p>
+                        <span className="text-[10px] font-semibold text-slate-500">{apt.doctorSpecialization || t('dashboard.general_practice')}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       <div className="font-mono text-slate-700">
                         <span className="font-bold text-slate-900">{apt.appointmentTime || '09:00 AM'}</span>
-                        <p className="text-[10px] text-slate-400">{apt.appointmentDate || (dateRange === 'yesterday' ? 'Yesterday' : dateRange === 'custom' ? customDate : 'Today')}</p>
+                        <p className="text-[10px] text-slate-400">{apt.appointmentDate || (dateRange === 'yesterday' ? t('dashboard.yesterday') : dateRange === 'custom' ? customDate : t('dashboard.today'))}</p>
                       </div>
                     </td>
                     <td className="py-3 px-4">
@@ -651,7 +689,7 @@ export const AdminDashboard: React.FC = () => {
                           ? 'bg-blue-50 text-blue-700 border-blue-200'
                           : 'bg-purple-50 text-purple-700 border-purple-200'
                       }`}>
-                        {apt.status}
+                        {formatStatus(apt.status)}
                       </span>
                     </td>
                   </tr>
@@ -671,9 +709,9 @@ export const AdminDashboard: React.FC = () => {
               <Sparkles className="w-4 h-4 animate-pulse text-indigo-600" />
             </div>
             <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
-              <span>AI Predictive No-Show Risk Breakdown</span>
+              <span>{t('dashboard.ai_risk_breakdown')}</span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 uppercase">
-                {dateRange === 'yesterday' ? 'Yesterday' : dateRange === 'custom' ? customDate : 'Today'}
+                {dateRange === 'yesterday' ? t('dashboard.yesterday') : dateRange === 'custom' ? customDate : t('dashboard.today')}
               </span>
             </h3>
           </div>
@@ -726,7 +764,7 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> LOW RISK
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> {t('risk.low')}
                 </span>
                 <button
                   onClick={(e) => {
@@ -738,7 +776,7 @@ export const AdminDashboard: React.FC = () => {
                       ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-300'
                       : 'bg-emerald-100/80 hover:bg-emerald-200 text-emerald-800'
                   }`}
-                  title="Click down arrow to view Low Risk patient list"
+                  title={t('dashboard.click_view_low_risk_list')}
                 >
                   {expandedMetricKey === 'LOW_RISK' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
@@ -748,7 +786,7 @@ export const AdminDashboard: React.FC = () => {
             {/* Percentage Bar & Protocol */}
             <div className="mt-4 pt-3 border-t border-emerald-200/60 relative z-10 space-y-2">
               <div className="flex items-center justify-between text-[11px] font-bold text-emerald-900">
-                <span>Distribution Volume</span>
+                <span>{t('dashboard.distribution_volume')}</span>
                 <span>
                   {Math.round((analytics.lowRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))) * 100)}%
                 </span>
@@ -764,7 +802,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 pt-1">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 <span className="flex items-center gap-1">
-                  Action: Email <Mail className="w-3 h-3 inline text-emerald-600" /> & WhatsApp <MessageSquare className="w-3 h-3 inline text-emerald-600" />
+                  {t('dashboard.action_label')}: {t('dashboard.email')} <Mail className="w-3 h-3 inline text-emerald-600" /> & {t('dashboard.whatsapp')} <MessageSquare className="w-3 h-3 inline text-emerald-600" />
                 </span>
               </div>
             </div>
@@ -815,7 +853,7 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase bg-amber-100 text-amber-800 border border-amber-300 shadow-sm flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" /> MED RISK
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" /> {t('risk.medium')}
                 </span>
                 <button
                   onClick={(e) => {
@@ -827,7 +865,7 @@ export const AdminDashboard: React.FC = () => {
                       ? 'bg-amber-600 text-white shadow-xs ring-2 ring-amber-300'
                       : 'bg-amber-100/80 hover:bg-amber-200 text-amber-800'
                   }`}
-                  title="Click down arrow to view Medium Risk patient list"
+                  title={t('dashboard.click_view_med_risk_list')}
                 >
                   {expandedMetricKey === 'MEDIUM_RISK' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
@@ -837,7 +875,7 @@ export const AdminDashboard: React.FC = () => {
             {/* Percentage Bar & Protocol */}
             <div className="mt-4 pt-3 border-t border-amber-200/60 relative z-10 space-y-2">
               <div className="flex items-center justify-between text-[11px] font-bold text-amber-900">
-                <span>Distribution Volume</span>
+                <span>{t('dashboard.distribution_volume')}</span>
                 <span>
                   {Math.round((analytics.mediumRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))) * 100)}%
                 </span>
@@ -853,7 +891,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 pt-1">
                 <span className="w-2 h-2 rounded-full bg-amber-500" />
                 <span className="flex items-center gap-1">
-                  Action: Email <Mail className="w-3 h-3 inline text-amber-600" /> & WhatsApp <MessageSquare className="w-3 h-3 inline text-amber-600" />
+                  {t('dashboard.action_label')}: {t('dashboard.email')} <Mail className="w-3 h-3 inline text-amber-600" /> & {t('dashboard.whatsapp')} <MessageSquare className="w-3 h-3 inline text-amber-600" />
                 </span>
               </div>
             </div>
@@ -904,7 +942,7 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase bg-rose-100 text-rose-800 border border-rose-300 shadow-sm flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" /> HIGH RISK
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" /> {t('risk.high')}
                 </span>
                 <button
                   onClick={(e) => {
@@ -916,7 +954,7 @@ export const AdminDashboard: React.FC = () => {
                       ? 'bg-rose-600 text-white shadow-xs ring-2 ring-rose-300'
                       : 'bg-rose-100/80 hover:bg-rose-200 text-rose-800'
                   }`}
-                  title="Click down arrow to view High Risk patient list"
+                  title={t('dashboard.click_view_high_risk_list')}
                 >
                   {expandedMetricKey === 'HIGH_RISK' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
@@ -926,7 +964,7 @@ export const AdminDashboard: React.FC = () => {
             {/* Percentage Bar & Protocol */}
             <div className="mt-4 pt-3 border-t border-rose-200/60 relative z-10 space-y-2">
               <div className="flex items-center justify-between text-[11px] font-bold text-rose-900">
-                <span>Distribution Volume</span>
+                <span>{t('dashboard.distribution_volume')}</span>
                 <span>
                   {Math.round((analytics.highRiskCount / Math.max(1, (analytics.lowRiskCount + analytics.mediumRiskCount + analytics.highRiskCount))) * 100)}%
                 </span>
@@ -942,7 +980,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-rose-800 pt-1">
                 <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
                 <span className="flex items-center gap-1">
-                  Action: Email <Mail className="w-3 h-3 inline text-rose-600" /> & WhatsApp <MessageSquare className="w-3 h-3 inline text-rose-600" />
+                  {t('dashboard.action_label')}: {t('dashboard.email')} <Mail className="w-3 h-3 inline text-rose-600" /> & {t('dashboard.whatsapp')} <MessageSquare className="w-3 h-3 inline text-rose-600" />
                 </span>
               </div>
             </div>
@@ -965,17 +1003,17 @@ export const AdminDashboard: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-base font-black text-slate-900 tracking-tight">
-                      {dateRange === 'yesterday' ? "Yesterday's" : dateRange === 'custom' ? "Selected Date" : "Today's"} {
-                        expandedMetricKey === 'LOW_RISK' ? 'Low Risk' :
-                        expandedMetricKey === 'MEDIUM_RISK' ? 'Medium Risk' : 'High Risk'
-                      } Patient Breakdown
+                      {dateRange === 'yesterday' ? t('dashboard.yesterdays') : dateRange === 'custom' ? t('dashboard.selected_dates') : t('dashboard.todays')} {
+                        expandedMetricKey === 'LOW_RISK' ? t('dashboard.low_risk') :
+                        expandedMetricKey === 'MEDIUM_RISK' ? t('dashboard.medium_risk') : t('dashboard.high_risk')
+                      } {t('dashboard.patient_breakdown')}
                     </h3>
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-slate-100 text-slate-800 border border-slate-200">
-                      {getPatientsForMetricKey(expandedMetricKey).length} Patient(s)
+                      {getPatientsForMetricKey(expandedMetricKey).length} {t('dashboard.patient_count')}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    Detailed AI predictions, risk scores, and clinical factors for {expandedMetricKey.replace('_RISK', '').toLowerCase()} risk patients
+                    {t('dashboard.risk_patient_sub').replace('{level}', (expandedMetricKey === 'LOW_RISK' ? t('dashboard.low_risk') : expandedMetricKey === 'MEDIUM_RISK' ? t('dashboard.medium_risk') : t('dashboard.high_risk')))}
                   </p>
                 </div>
               </div>
@@ -983,10 +1021,10 @@ export const AdminDashboard: React.FC = () => {
               <button
                 onClick={() => setExpandedMetricKey(null)}
                 className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
-                title="Close patient list"
+                title={t('dashboard.close_patient_list')}
               >
                 <X className="w-4 h-4" />
-                <span>Close</span>
+                <span>{t('dashboard.close')}</span>
               </button>
             </div>
 
@@ -994,12 +1032,12 @@ export const AdminDashboard: React.FC = () => {
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-900 text-slate-200 font-black uppercase text-[10px] tracking-wider border-b border-slate-800">
-                    <th className="py-3.5 px-4 text-indigo-300">Appointment ID</th>
-                    <th className="py-3.5 px-4 text-white">Patient Name</th>
-                    <th className="py-3.5 px-4 text-purple-300">Physician & Department</th>
-                    <th className="py-3.5 px-4 text-amber-300">Time & Date</th>
-                    <th className="py-3.5 px-4 text-teal-300">AI Risk Assessment</th>
-                    <th className="py-3.5 px-4 text-emerald-300">Status</th>
+                    <th className="py-3.5 px-4 text-indigo-300">{t('table.appointment_id')}</th>
+                    <th className="py-3.5 px-4 text-white">{t('table.patient_name')}</th>
+                    <th className="py-3.5 px-4 text-purple-300">{t('table.physician_dept')}</th>
+                    <th className="py-3.5 px-4 text-amber-300">{t('table.time_date')}</th>
+                    <th className="py-3.5 px-4 text-teal-300">{t('table.ai_risk')}</th>
+                    <th className="py-3.5 px-4 text-emerald-300">{t('table.status')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
@@ -1016,14 +1054,14 @@ export const AdminDashboard: React.FC = () => {
                       </td>
                       <td className="py-3 px-4">
                         <div>
-                          <p className="font-bold text-slate-800 text-xs">{apt.doctorName || 'Assigned Specialist'}</p>
-                          <span className="text-[10px] font-semibold text-slate-500">{apt.doctorSpecialization || 'General Practice'}</span>
+                          <p className="font-bold text-slate-800 text-xs">{apt.doctorName || t('dashboard.assigned_specialist')}</p>
+                          <span className="text-[10px] font-semibold text-slate-500">{apt.doctorSpecialization || t('dashboard.general_practice')}</span>
                         </div>
                       </td>
                       <td className="py-3 px-4">
                         <div className="font-mono text-slate-700">
                           <span className="font-bold text-slate-900">{apt.appointmentTime || '09:00 AM'}</span>
-                          <p className="text-[10px] text-slate-400">{apt.appointmentDate || (dateRange === 'yesterday' ? 'Yesterday' : dateRange === 'custom' ? customDate : 'Today')}</p>
+                          <p className="text-[10px] text-slate-400">{apt.appointmentDate || (dateRange === 'yesterday' ? t('dashboard.yesterday') : dateRange === 'custom' ? customDate : t('dashboard.today'))}</p>
                         </div>
                       </td>
                       <td className="py-3 px-4">
@@ -1039,7 +1077,7 @@ export const AdminDashboard: React.FC = () => {
                             ? 'bg-blue-50 text-blue-700 border-blue-200'
                             : 'bg-purple-50 text-purple-700 border-purple-200'
                         }`}>
-                          {apt.status}
+                          {formatStatus(apt.status)}
                         </span>
                       </td>
                     </tr>
@@ -1054,6 +1092,5 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
-
 
 

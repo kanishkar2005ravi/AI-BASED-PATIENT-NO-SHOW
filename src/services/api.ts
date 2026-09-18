@@ -365,16 +365,17 @@ export function normalizeAppointment(inputApt: any): Appointment {
       a.doctorSpecialization ||
       a.doctor_specialization ||
       (!isDoctorLike ? (a.specialization || a.specialty || '') : ''),
-    appointmentDate:
-      a.appointmentDate ||
-      a.appointment_date ||
-      a.date ||
-      '',
-    appointmentTime:
-      a.appointmentTime ||
-      a.appointment_time ||
-      a.time ||
-      '',
+    appointmentDate: (() => {
+      const rawD = (a.appointmentDate || a.appointment_date || a.date || '').toString().trim();
+      if (!rawD) return '';
+      if (rawD.includes('T')) return rawD.split('T')[0];
+      if (rawD.includes(' ')) return rawD.split(' ')[0];
+      return rawD;
+    })(),
+    appointmentTime: (() => {
+      const rawT = (a.appointmentTime || a.appointment_time || a.time || '').toString().trim();
+      return rawT;
+    })(),
     appointmentType: (
       a.appointmentType ||
       a.appointment_type ||
