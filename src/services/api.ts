@@ -172,7 +172,8 @@ export function normalizeDoctor(d: any): Doctor {
   };
 }
 
-export function normalizePatient(p: any): Patient {
+export function normalizePatient(inputP: any): Patient {
+  let p = inputP;
   if (!p || typeof p !== 'object') {
     return {
       id: '',
@@ -194,16 +195,80 @@ export function normalizePatient(p: any): Patient {
     };
   }
 
+  // Deep unwrap if an outer container/wrapper was passed
+  while (p) {
+    if (p.json && typeof p.json === 'object') {
+      p = p.json;
+    } else if (p.data && typeof p.data === 'object' && !p.id && !p.patient_id && !p.patientId) {
+      p = p.data;
+    } else if (p.patient && typeof p.patient === 'object') {
+      p = p.patient;
+    } else if (Array.isArray(p.items) && p.items.length > 0 && typeof p.items[0] === 'object') {
+      p = p.items[0];
+    } else {
+      break;
+    }
+  }
+
+  const phoneVal = (
+    p.phone ||
+    p.phone_number ||
+    p.phoneNumber ||
+    p.contact_number ||
+    p.contactNumber ||
+    p.contact_no ||
+    p.contactNo ||
+    p.mobile ||
+    p.mobile_number ||
+    p.mobile_no ||
+    p.patient_phone ||
+    p.patientPhone ||
+    ''
+  ).toString().trim();
+
+  const addressVal = (
+    p.address ||
+    p.residential_address ||
+    p.residentialAddress ||
+    p.home_address ||
+    p.homeAddress ||
+    p.patient_address ||
+    p.patientAddress ||
+    p.location ||
+    p.street_address ||
+    p.streetAddress ||
+    ''
+  ).toString().trim();
+
+  const dobVal = (
+    p.dateOfBirth ||
+    p.date_of_birth ||
+    p.dob ||
+    p.birth_date ||
+    p.birthDate ||
+    p.patient_dob ||
+    p.patientDob ||
+    ''
+  ).toString().trim();
+
+  const genderVal = (
+    p.gender ||
+    p.sex ||
+    p.patient_gender ||
+    p.patientGender ||
+    'Male'
+  ).toString().trim();
+
   return {
     ...p,
     id: p.id || p.patient_id || p.patientId || '',
-    name: p.name || p.patient_name || p.patientName || '',
+    name: p.name || p.patient_name || p.patientName || p.full_name || p.fullName || 'Unknown',
     email: p.email || p.patient_email || p.patientEmail || '',
     password: p.password || '',
-    phone: p.phone || p.phone_number || p.phoneNumber || p.contact_number || p.contactNumber || p.mobile || p.mobile_number || '',
-    dateOfBirth: p.dateOfBirth || p.date_of_birth || p.dob || p.birth_date || p.birthDate || '',
-    gender: p.gender || p.sex || 'Male',
-    address: p.address || p.home_address || p.residential_address || p.residentialAddress || p.location || '',
+    phone: phoneVal,
+    dateOfBirth: dobVal,
+    gender: genderVal || 'Male',
+    address: addressVal,
     status: (p.status === 'Inactive' || p.is_active === false) ? 'Inactive' : 'Active',
     totalAppointments: Number(
       p.totalAppointments ??
@@ -633,12 +698,43 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           action: 'LEAVE_WAITLIST',
           waitlistId: wId,
           waitlist_id: wId,
-          id: wId,
           data: {
             ...payload.data,
             waitlistId: wId,
             waitlist_id: wId,
             id: wId
+          },
+          ...payload.data
+        };
+      } else if (payload.action === 'UPDATE_PATIENT') {
+        const pId = payload.data?.patientId || payload.data?.patient_id || payload.data?.id;
+        const phoneVal = payload.data?.phone || payload.data?.phone_number || payload.data?.phoneNumber;
+        const addressVal = payload.data?.address || payload.data?.residential_address || payload.data?.residentialAddress || payload.data?.home_address;
+        requestBody = {
+          action: 'UPDATE_PATIENT',
+          patientId: pId,
+          patient_id: pId,
+          id: pId,
+          phone: phoneVal,
+          phone_number: phoneVal,
+          phoneNumber: phoneVal,
+          patient_phone: phoneVal,
+          patientPhone: phoneVal,
+          address: addressVal,
+          residential_address: addressVal,
+          residentialAddress: addressVal,
+          home_address: addressVal,
+          patient_address: addressVal,
+          patientAddress: addressVal,
+          data: {
+            ...payload.data,
+            patientId: pId,
+            patient_id: pId,
+            id: pId,
+            phone: phoneVal,
+            phone_number: phoneVal,
+            address: addressVal,
+            residential_address: addressVal
           },
           ...payload.data
         };

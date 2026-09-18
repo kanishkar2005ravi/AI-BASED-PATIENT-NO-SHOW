@@ -75,9 +75,9 @@ export const PatientProfile: React.FC = () => {
       ]);
 
       let foundPatient: Patient | null = null;
-      if (singleRes.success && singleRes.data) {
-        const raw = Array.isArray(singleRes.data) ? singleRes.data[0] : singleRes.data;
-        if (raw && (raw.id || raw.name)) {
+      if (singleRes.success && (singleRes.patient || singleRes.data)) {
+        const raw = singleRes.patient || (Array.isArray(singleRes.data) ? singleRes.data[0] : singleRes.data);
+        if (raw && (raw.id || raw.patient_id || raw.patientId || raw.name)) {
           foundPatient = normalizePatient(raw);
         }
       }
@@ -186,14 +186,30 @@ export const PatientProfile: React.FC = () => {
         action: 'UPDATE_PATIENT',
         data: {
           patientId: patient.id,
+          id: patient.id,
+          patient_id: patient.id,
+          name: patient.name,
+          email: patient.email,
           phone,
-          address
+          phone_number: phone,
+          phoneNumber: phone,
+          patient_phone: phone,
+          patientPhone: phone,
+          address,
+          residential_address: address,
+          residentialAddress: address,
+          home_address: address,
+          patient_address: address,
+          patientAddress: address,
+          dateOfBirth: patient.dateOfBirth,
+          date_of_birth: patient.dateOfBirth,
+          gender: patient.gender
         }
       });
 
       if (res.success) {
         showToast(t('profile.update_success'), 'success');
-        setPatient({ ...patient, phone, address });
+        await fetchProfile();
       } else {
         showToast(res.message || t('profile.update_fail'), 'error');
       }
