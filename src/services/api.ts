@@ -172,7 +172,7 @@ export function normalizeDoctor(d: any): Doctor {
   };
 }
 
-function normalizePatient(p: any): Patient {
+export function normalizePatient(p: any): Patient {
   if (!p || typeof p !== 'object') {
     return {
       id: '',
@@ -200,10 +200,10 @@ function normalizePatient(p: any): Patient {
     name: p.name || p.patient_name || p.patientName || '',
     email: p.email || p.patient_email || p.patientEmail || '',
     password: p.password || '',
-    phone: p.phone || p.phone_number || p.phoneNumber || '',
-    dateOfBirth: p.dateOfBirth || p.date_of_birth || p.dob || '',
-    gender: p.gender || 'Male',
-    address: p.address || p.home_address || '',
+    phone: p.phone || p.phone_number || p.phoneNumber || p.contact_number || p.contactNumber || p.mobile || p.mobile_number || '',
+    dateOfBirth: p.dateOfBirth || p.date_of_birth || p.dob || p.birth_date || p.birthDate || '',
+    gender: p.gender || p.sex || 'Male',
+    address: p.address || p.home_address || p.residential_address || p.residentialAddress || p.location || '',
     status: (p.status === 'Inactive' || p.is_active === false) ? 'Inactive' : 'Active',
     totalAppointments: Number(
       p.totalAppointments ??

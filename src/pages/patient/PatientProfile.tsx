@@ -5,9 +5,9 @@ import { Input } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
 import { Loading } from '../../components/common/Loading';
 import { useAuth } from '../../context/AuthContext';
-import { callBackend } from '../../services/api';
+import { callBackend, normalizeAppointment, normalizePatient } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
-import { Patient } from '../../types';
+import { Patient, Appointment } from '../../types';
 import { Phone, MapPin, Save, ArrowLeft, AlertCircle, RefreshCw } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -27,6 +27,26 @@ export const PatientProfile: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
 
+  const isAttendedStatus = (status: string | undefined): boolean => {
+    if (!status) return false;
+    const s = status.toString().trim().toUpperCase();
+    return s === 'COMPLETED' || s === 'ATTENDED' || s === 'CHECKED_IN' || s === 'CHECKED_OUT';
+  };
+
+  const isNoShowStatus = (status: string | undefined): boolean => {
+    if (!status) return false;
+    const s = status.toString().trim().toUpperCase();
+    return (
+      s === 'NO_SHOW' ||
+      s === 'NO-SHOW' ||
+      s === 'NOSHOW' ||
+      s === 'NOT_ATTENDED' ||
+      s === 'NOT ATTENDED' ||
+      s === 'ABSENT' ||
+      s === 'MISSED'
+    );
+  };
+
   const fetchProfile = useCallback(async () => {
     if (!user?.id && !user?.email) {
       setLoading(false);
@@ -38,42 +58,109 @@ export const PatientProfile: React.FC = () => {
     setError(null);
 
     try {
-      // 1. Try GET_PATIENT action with patientId & email
-      const singleRes = await callBackend({
-        action: 'GET_PATIENT',
-        data: { patientId: user.id, email: user.email }
-      });
+      // 1. Fetch patient profile & appointments concurrently
+      const [singleRes, listRes, aptsRes] = await Promise.all([
+        callBackend({
+          action: 'GET_PATIENT',
+          data: { patientId: user.id, email: user.email }
+        }),
+        callBackend({
+          action: 'GET_PATIENTS',
+          data: { patientId: user.id }
+        }),
+        callBackend({
+          action: 'GET_APPOINTMENTS',
+          data: { patientId: user.id }
+        })
+      ]);
 
       let foundPatient: Patient | null = null;
       if (singleRes.success && singleRes.data) {
         const raw = Array.isArray(singleRes.data) ? singleRes.data[0] : singleRes.data;
         if (raw && (raw.id || raw.name)) {
-          foundPatient = raw;
+          foundPatient = normalizePatient(raw);
         }
       }
 
       // 2. Fallback to GET_PATIENTS list to find the matching patient record
-      if (!foundPatient) {
-        const listRes = await callBackend({
-          action: 'GET_PATIENTS',
-          data: { patientId: user.id }
-        });
-
-        if (listRes.success && Array.isArray(listRes.data)) {
-          const matched = listRes.data.find((p: Patient) =>
-            (user.id && p.id?.toString().toLowerCase() === user.id.toString().toLowerCase()) ||
-            (user.email && p.email?.toString().toLowerCase() === user.email.toString().toLowerCase())
-          );
-          if (matched) {
-            foundPatient = matched;
-          }
+      if (!foundPatient && listRes.success && Array.isArray(listRes.data)) {
+        const matched = listRes.data.find((p: Patient) =>
+          (user.id && p.id?.toString().toLowerCase() === user.id.toString().toLowerCase()) ||
+          (user.email && p.email?.toString().toLowerCase() === user.email.toString().toLowerCase())
+        );
+        if (matched) {
+          foundPatient = normalizePatient(matched);
         }
       }
 
+      // 3. Extract and normalize all appointment records
+      let rawApts: any[] = [];
+      const rawAptsRes: any = aptsRes;
+      if (aptsRes.success && Array.isArray(aptsRes.data)) {
+        rawApts = aptsRes.data;
+      } else if (Array.isArray(rawAptsRes?.data?.items)) {
+        rawApts = rawAptsRes.data.items.map((i: any) => i.json || i);
+      } else if (Array.isArray(rawAptsRes?.items)) {
+        rawApts = rawAptsRes.items.map((i: any) => i.json || i);
+      } else if (Array.isArray(rawAptsRes)) {
+        rawApts = rawAptsRes;
+      }
+
+      const allApts: Appointment[] = rawApts.map(normalizeAppointment).filter(a => a.id);
+
+      // 4. Filter appointments strictly for this logged-in patient
+      const targetPid = (user.id || foundPatient?.id || '').toString().trim().toLowerCase();
+      const targetEmail = (user.email || foundPatient?.email || '').toString().trim().toLowerCase();
+
+      const patientApts = allApts.filter(a => {
+        if (!a) return false;
+        // Exclude waitlist items
+        if (
+          (a as any).position !== undefined ||
+          (a as any).requestedTimeSlot !== undefined ||
+          (a.status as any) === 'WAITING' ||
+          (a.status as any) === 'NOTIFIED'
+        ) {
+          return false;
+        }
+
+        const aPid = (a.patientId || (a as any).patient_id || '').toString().trim().toLowerCase();
+        if (targetPid && aPid) {
+          return aPid === targetPid;
+        }
+        const aEmail = (a.patientEmail || (a as any).patient_email || (a as any).email || '').toString().trim().toLowerCase();
+        if (targetEmail && aEmail) {
+          return aEmail === targetEmail;
+        }
+        return false;
+      });
+
+      const attendedCount = patientApts.filter(a => isAttendedStatus(a.status)).length;
+      const noShowCount = patientApts.filter(a => isNoShowStatus(a.status)).length;
+
+      const finalAttended = attendedCount > 0 ? attendedCount : (foundPatient?.attendedAppointments || 0);
+      const finalNoShow = noShowCount > 0 ? noShowCount : (foundPatient?.noShowAppointments || 0);
+
+      const totalVisits = (foundPatient?.totalAppointments && foundPatient.totalAppointments >= (finalAttended + finalNoShow))
+        ? foundPatient.totalAppointments
+        : (patientApts.length > 0 ? patientApts.length : (finalAttended + finalNoShow));
+
+      const calculatedRate = totalVisits > 0 ? Math.round((finalNoShow / totalVisits) * 100) : 0;
+      const finalNoShowRate = (finalNoShow > 0 && calculatedRate > 0)
+        ? calculatedRate
+        : (foundPatient?.noShowRate || 0);
+
       if (foundPatient) {
-        setPatient(foundPatient);
-        setPhone(foundPatient.phone || '');
-        setAddress(foundPatient.address || '');
+        const enriched: Patient = {
+          ...foundPatient,
+          totalAppointments: totalVisits,
+          attendedAppointments: finalAttended,
+          noShowAppointments: finalNoShow,
+          noShowRate: finalNoShowRate
+        };
+        setPatient(enriched);
+        setPhone(enriched.phone || '');
+        setAddress(enriched.address || '');
       } else {
         setError(t('profile.not_found'));
       }
