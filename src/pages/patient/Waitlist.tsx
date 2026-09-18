@@ -205,12 +205,12 @@ export const Waitlist: React.FC = () => {
                   className="p-4 rounded-2xl border border-slate-200/80 bg-white flex items-center justify-between shadow-sm"
                 >
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-800 font-extrabold flex items-center justify-center text-sm border border-teal-200">
-                      #{item.position}
+                    <div className="px-3 py-1.5 rounded-xl bg-teal-50 text-teal-800 font-extrabold flex items-center justify-center text-xs border border-teal-200 shadow-2xs">
+                      Position #{item.position}
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-slate-900">{item.doctorName}</h4>
-                      <p className="text-xs text-slate-500">{t('waitlist.req_date')}: {item.requestedDate}</p>
+                      <p className="text-xs text-slate-500">{t('waitlist.req_date')}: {item.requestedDate} &bull; {item.requestedTimeSlot}</p>
                     </div>
                   </div>
 

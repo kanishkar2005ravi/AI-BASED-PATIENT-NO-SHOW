@@ -77,9 +77,9 @@ export const Waitlist: React.FC = () => {
               <tbody className="divide-y divide-slate-100">
                 {waitlist.map(item => (
                   <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-center text-teal-700 font-mono">
-                      <span className="w-7 h-7 rounded-full bg-teal-50 border border-teal-200 flex items-center justify-center inline-flex">
-                        #{item.position}
+                    <td className="py-3.5 px-4 font-bold text-teal-800 font-mono">
+                      <span className="px-2.5 py-1 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center inline-flex text-xs font-black">
+                        Position #{item.position}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 font-bold text-slate-900">{item.patientName}</td>

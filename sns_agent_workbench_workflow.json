@@ -130,6 +130,17 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 1,
       "position": [580, 700]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT w.id, w.patient_id, w.patient_name, w.doctor_id, w.doctor_name, w.requested_date, w.requested_time_slot, w.status, ROW_NUMBER() OVER (PARTITION BY w.doctor_id ORDER BY w.created_at ASC) AS position, w.created_at FROM public.waitlist w WHERE UPPER(w.status) IN ('WAITING', 'NOTIFIED') ORDER BY w.doctor_id, w.created_at ASC;"
+      },
+      "id": "query-get-waitlist",
+      "name": "Execute Query: GET_WAITLIST",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [580, 850]
     }
   ],
   "connections": {
@@ -142,7 +153,8 @@
         [{ "node": "Execute Query: CREATE_PATIENT", "type": "main", "index": 0 }],
         [{ "node": "Execute Query: BOOK_APPOINTMENT", "type": "main", "index": 0 }],
         [{ "node": "Execute Query: GET_PATIENTS", "type": "main", "index": 0 }],
-        [{ "node": "Execute Query: GET_APPOINTMENTS", "type": "main", "index": 0 }]
+        [{ "node": "Execute Query: GET_APPOINTMENTS", "type": "main", "index": 0 }],
+        [{ "node": "Execute Query: GET_WAITLIST", "type": "main", "index": 0 }]
       ]
     },
     "Execute Query: LOGIN": {

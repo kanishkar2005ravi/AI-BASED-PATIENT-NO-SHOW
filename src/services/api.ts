@@ -274,7 +274,7 @@ export function normalizeWaitlistItem(w: any): WaitlistItem {
     doctorName: w.doctorName || w.doctor_name || 'Doctor',
     requestedDate: w.requestedDate || w.requested_date || getLocalDateString(),
     requestedTimeSlot: w.requestedTimeSlot || w.requested_time_slot || w.time_slot || w.timeSlot || 'Morning',
-    position: (w.position !== undefined && w.position !== null && w.position !== '') ? Number(w.position) : undefined,
+    position: (w.position !== undefined && w.position !== null && w.position !== '' && !isNaN(Number(w.position))) ? Number(w.position) : 1,
     status: normStatus,
     notifiedAt: w.notifiedAt || w.notified_at || undefined,
     createdAt: w.createdAt || w.created_at || getLocalDateString()
