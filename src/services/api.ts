@@ -525,6 +525,37 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           },
           ...payload.data
         };
+      } else if (payload.action === 'CANCEL_APPOINTMENT') {
+        const aptId = payload.data?.appointmentId || payload.data?.appointment_id || payload.data?.id;
+        requestBody = {
+          action: 'CANCEL_APPOINTMENT',
+          appointment_id: aptId,
+          appointmentId: aptId,
+          id: aptId,
+          patient_id: payload.data?.patientId || payload.data?.patient_id,
+          patientId: payload.data?.patientId || payload.data?.patient_id,
+          patient_name: payload.data?.patientName || payload.data?.patient_name,
+          patientName: payload.data?.patientName || payload.data?.patient_name,
+          doctor_id: payload.data?.doctorId || payload.data?.doctor_id,
+          doctorId: payload.data?.doctorId || payload.data?.doctor_id,
+          doctor_name: payload.data?.doctorName || payload.data?.doctor_name,
+          doctorName: payload.data?.doctorName || payload.data?.doctor_name,
+          appointment_date: payload.data?.appointmentDate || payload.data?.appointment_date,
+          appointmentDate: payload.data?.appointmentDate || payload.data?.appointment_date,
+          appointment_time: payload.data?.appointmentTime || payload.data?.appointment_time,
+          appointmentTime: payload.data?.appointmentTime || payload.data?.appointment_time,
+          appointment_type: payload.data?.appointmentType || payload.data?.appointment_type || payload.data?.reason || 'Routine Checkup',
+          appointmentType: payload.data?.appointmentType || payload.data?.appointment_type || payload.data?.reason || 'Routine Checkup',
+          email: payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email,
+          phone: payload.data?.phone || payload.data?.patientPhone || payload.data?.patient_phone,
+          data: {
+            ...payload.data,
+            appointment_id: aptId,
+            appointmentId: aptId,
+            id: aptId
+          },
+          ...payload.data
+        };
       } else if (payload.action === 'ACCEPT_WAITLIST_SLOT') {
         const wId = payload.data?.waitlistId || payload.data?.waitlist_id || payload.data?.id;
         requestBody = {
@@ -532,6 +563,20 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           waitlist_id: wId,
           waitlistId: wId,
           id: wId,
+          patient_id: payload.data?.patientId || payload.data?.patient_id,
+          patientId: payload.data?.patientId || payload.data?.patient_id,
+          patient_name: payload.data?.patientName || payload.data?.patient_name,
+          patientName: payload.data?.patientName || payload.data?.patient_name,
+          doctor_id: payload.data?.doctorId || payload.data?.doctor_id,
+          doctorId: payload.data?.doctorId || payload.data?.doctor_id,
+          doctor_name: payload.data?.doctorName || payload.data?.doctor_name,
+          doctorName: payload.data?.doctorName || payload.data?.doctor_name,
+          appointment_date: payload.data?.appointmentDate || payload.data?.appointment_date || payload.data?.requestedDate || payload.data?.requested_date,
+          appointmentDate: payload.data?.appointmentDate || payload.data?.appointment_date || payload.data?.requestedDate || payload.data?.requested_date,
+          appointment_time: payload.data?.appointmentTime || payload.data?.appointment_time || payload.data?.offeredTime || payload.data?.offered_time || payload.data?.requestedTimeSlot || payload.data?.requested_time_slot,
+          appointmentTime: payload.data?.appointmentTime || payload.data?.appointment_time || payload.data?.offeredTime || payload.data?.offered_time || payload.data?.requestedTimeSlot || payload.data?.requested_time_slot,
+          appointment_type: payload.data?.appointmentType || payload.data?.appointment_type || 'Consultation',
+          appointmentType: payload.data?.appointmentType || payload.data?.appointment_type || 'Consultation',
           email: payload.data?.email || payload.data?.patientEmail || payload.data?.patient_email,
           phone: payload.data?.phone || payload.data?.patientPhone || payload.data?.patient_phone,
           data: {

@@ -108,10 +108,27 @@ export const Waitlist: React.FC = () => {
   };
 
   const handleAccept = async (waitlistId: string) => {
+    const item = waitlist.find(w => w.id === waitlistId);
     const res = await callBackend({ 
       action: 'ACCEPT_WAITLIST_SLOT', 
       data: { 
         waitlistId,
+        waitlist_id: waitlistId,
+        id: waitlistId,
+        patientId: item?.patientId || user?.id,
+        patient_id: item?.patientId || user?.id,
+        patientName: item?.patientName || user?.name,
+        patient_name: item?.patientName || user?.name,
+        doctorId: item?.doctorId,
+        doctor_id: item?.doctorId,
+        doctorName: item?.doctorName,
+        doctor_name: item?.doctorName,
+        appointmentDate: (item as any)?.offeredDate || (item as any)?.offered_date || item?.requestedDate,
+        appointment_date: (item as any)?.offeredDate || (item as any)?.offered_date || item?.requestedDate,
+        appointmentTime: (item as any)?.offeredTime || (item as any)?.offered_time || item?.requestedTimeSlot,
+        appointment_time: (item as any)?.offeredTime || (item as any)?.offered_time || item?.requestedTimeSlot,
+        appointmentType: (item as any)?.appointmentType || (item as any)?.appointment_type || 'Consultation',
+        appointment_type: (item as any)?.appointmentType || (item as any)?.appointment_type || 'Consultation',
         email: user?.email,
         phone: user?.phone 
       } 
