@@ -179,6 +179,83 @@ export const BookAppointment: React.FC = () => {
       name: user?.name || ''
     };
 
+function extractBookingResponse(res: any): { isSuccess: boolean; appointmentId?: string; appointmentData?: any; message?: string } {
+  if (!res) return { isSuccess: false };
+
+  // Explicit failure check
+  if (res.success === false && !res.items && !res._responseData && !res.data) {
+    return { isSuccess: false, message: res.message || res.error };
+  }
+
+  let isSuccess = false;
+  let extractedId: string | undefined = undefined;
+  let extractedData: any = null;
+  let extractedMessage: string = (res.message && typeof res.message === 'string') ? res.message : '';
+
+  // 1. Direct checks on root
+  if (res.success === true || res.status === 'success' || res.status === 200 || res.status === 201) {
+    isSuccess = true;
+  }
+  if (res.id || res.appointment_id || res.appointmentId) {
+    extractedId = (res.id || res.appointment_id || res.appointmentId).toString();
+  }
+  if (res.appointment && typeof res.appointment === 'object') {
+    extractedData = res.appointment;
+    extractedId = extractedId || res.appointment.id || res.appointment.appointment_id || res.appointment.appointmentId;
+  }
+  if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
+    extractedData = extractedData || res.data;
+    extractedId = extractedId || res.data.id || res.data.appointment_id || res.data.appointmentId;
+  }
+
+  // 2. Deep recursive search into nested objects (items, json, _responseData, data)
+  const inspectNode = (node: any, depth = 0) => {
+    if (!node || typeof node !== 'object' || depth > 6) return;
+
+    if (node.success === true || node.status === 'success' || node._responseCode === 200 || node._responseCode === 201) {
+      isSuccess = true;
+    }
+    if (node.message && typeof node.message === 'string') {
+      extractedMessage = extractedMessage || node.message;
+    }
+    if (node.id || node.appointment_id || node.appointmentId) {
+      extractedId = extractedId || (node.id || node.appointment_id || node.appointmentId).toString();
+    }
+    if (node.appointment && typeof node.appointment === 'object') {
+      extractedData = extractedData || node.appointment;
+      extractedId = extractedId || node.appointment.id || node.appointment.appointment_id || node.appointment.appointmentId;
+    }
+
+    if (node._responseData) inspectNode(node._responseData, depth + 1);
+    if (node.json) inspectNode(node.json, depth + 1);
+    if (node.data) inspectNode(node.data, depth + 1);
+    if (Array.isArray(node.items)) {
+      for (const it of node.items) {
+        inspectNode(it, depth + 1);
+      }
+    }
+    if (Array.isArray(node)) {
+      for (const it of node) {
+        inspectNode(it, depth + 1);
+      }
+    }
+  };
+
+  inspectNode(res);
+
+  // If no explicit error and we received a response, treat as success if not explicitly false
+  if (!isSuccess && res.success !== false && !res.error && res.status !== 'error') {
+    isSuccess = true;
+  }
+
+  return {
+    isSuccess,
+    appointmentId: extractedId,
+    appointmentData: extractedData,
+    message: extractedMessage || 'Appointment booked successfully!'
+  };
+}
+
     let res: any;
     try {
       res = await callBackend({
@@ -192,24 +269,29 @@ export const BookAppointment: React.FC = () => {
 
     setBookingLoading(false);
 
-    const isSuccess = res && (res.success === true || (res.success !== false && !res.error));
+    // Extract booking success using safe helper supporting all response shapes
+    const parsed = extractBookingResponse(res);
 
-    if (isSuccess) {
-      const respApt = res.appointment || res.data || (res.id ? res : null);
+    if (parsed.isSuccess) {
+      const respApt = res?.appointment || res?.data || parsed.appointmentData || {};
       const confirmedAppointment: Appointment = normalizeAppointment({
         ...bookingPayload,
-        ...(respApt || {}),
-        doctorName: selectedDoctor?.name || respApt?.doctorName,
-        doctorSpecialization: selectedDoctor?.specialization || respApt?.doctorSpecialization
+        ...(typeof respApt === 'object' ? respApt : {}),
+        id: parsed.appointmentId || respApt.id || (bookingPayload as any).id || undefined,
+        doctorName: selectedDoctor?.name || respApt?.doctorName || bookingPayload.doctorName,
+        doctorSpecialization: selectedDoctor?.specialization || respApt?.doctorSpecialization || bookingPayload.doctorSpecialization,
+        appointmentDate: selectedDate,
+        appointmentTime: selectedTimeSlot,
+        appointmentType: appointmentType
       });
 
       setBookingResult(confirmedAppointment);
       setStep(3);
-      showToast(res.message || 'Appointment booked successfully!', 'success');
+      showToast(parsed.message || 'Appointment booked successfully!', 'success');
       // Refresh real-time slots immediately from backend
       fetchSlots();
     } else {
-      showToast(res?.message || res?.error || 'Unable to complete appointment booking.', 'error');
+      showToast(res?.message || res?.error || parsed.message || 'Unable to complete appointment booking.', 'error');
       fetchSlots();
     }
   };
@@ -535,7 +617,33 @@ export const BookAppointment: React.FC = () => {
           </div>
 
           <h2 className="text-2xl font-black text-slate-900">{t('book.step3')}</h2>
-          <p className="text-xs text-slate-600 mt-2 mb-6">Your reservation with {bookingResult.doctorName} for {bookingResult.appointmentDate} at {formatTime(bookingResult.appointmentTime)} has been confirmed by the backend.</p>
+          <p className="text-xs text-slate-600 mt-2 mb-4">Your reservation with {bookingResult.doctorName} for {bookingResult.appointmentDate} at {formatTime(bookingResult.appointmentTime)} has been confirmed by the backend.</p>
+
+          {/* Structured Confirmation Details */}
+          <div className="p-4 rounded-2xl bg-white border border-emerald-200/80 max-w-md mx-auto mb-6 text-left space-y-2.5 text-xs shadow-xs">
+            {bookingResult.id && (
+              <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                <span className="text-slate-500 font-semibold">{t('appointments.col_id') || 'Appointment ID'}</span>
+                <span className="font-mono font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg">{bookingResult.id}</span>
+              </div>
+            )}
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+              <span className="text-slate-500 font-semibold">{t('label.doctor')}</span>
+              <span className="font-bold text-slate-900">{bookingResult.doctorName} {bookingResult.doctorSpecialization ? `(${bookingResult.doctorSpecialization})` : ''}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+              <span className="text-slate-500 font-semibold">{t('label.date')}</span>
+              <span className="font-bold text-slate-900">{bookingResult.appointmentDate}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+              <span className="text-slate-500 font-semibold">{t('label.time')}</span>
+              <span className="font-bold text-slate-900">{formatTime(bookingResult.appointmentTime)} ({bookingResult.appointmentTime})</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 font-semibold">{t('label.reason')}</span>
+              <span className="font-bold text-slate-900">{bookingResult.appointmentType}</span>
+            </div>
+          </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Button variant="primary" onClick={() => navigate('/patient/dashboard')}>
