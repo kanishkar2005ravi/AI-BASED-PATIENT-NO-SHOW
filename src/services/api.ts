@@ -852,18 +852,27 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       if (payload.action === 'CREATE_PATIENT') {
         console.log('[CREATE_PATIENT] Outgoing API Request Body:', JSON.stringify(requestBody, null, 2));
       }
-      if (payload.action === 'BOOK_APPOINTMENT') {
-        console.log('[BOOK_APPOINTMENT] payload:', requestBody);
+      let response: Response;
+      try {
+        response = await fetch(BACKEND_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(requestBody),
+          signal: AbortSignal.timeout(10000)
+        });
+      } catch (fetchErr: any) {
+        console.error(`[callBackend] Network/timeout error for action "${payload.action}":`, fetchErr);
+        const isTimeout = fetchErr.name === 'TimeoutError' || fetchErr.name === 'AbortError' || fetchErr.message?.includes('aborted');
+        return {
+          success: false,
+          message: isTimeout ? 'Backend service request timed out. Please retry.' : 'Unable to connect to healthcare backend.',
+          error: fetchErr.message || 'FetchError',
+          data: (Array.isArray(payload.data) ? [] : null) as any
+        };
       }
-
-      const response = await fetch(BACKEND_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
 
       let resData: any = {};
       try {
@@ -1716,86 +1725,13 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
         risk: resData.risk
       };
     } catch (err: any) {
-      if (payload.action === 'BOOK_APPOINTMENT') {
-        console.warn('Network error intercepted for BOOK_APPOINTMENT. Assuming success due to n8n Wait node bug.');
-        const appointmentObj: Appointment = {
-          id: payload.data?.id || payload.data?.appointment_id || `APT-${Date.now()}`,
-          patientId: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
-          patientName: payload.data?.patientName || payload.data?.patient_name || 'Patient',
-          patientEmail: payload.data?.email || payload.data?.patientEmail || 'patient@example.com',
-          doctorId: payload.data?.doctorId || payload.data?.doctor_id || 'DOC-101',
-          doctorName: payload.data?.doctorName || payload.data?.doctor_name || 'Doctor',
-          doctorSpecialization: 'Specialist',
-          appointmentDate: payload.data?.appointmentDate || payload.data?.appointment_date || '',
-          appointmentTime: payload.data?.appointmentTime || payload.data?.appointment_time || '',
-          appointmentType: payload.data?.appointmentType || payload.data?.reason || 'Routine Checkup',
-          status: 'CONFIRMED',
-          confirmedByPatient: true,
-          risk: { level: 'LOW', probability: 0.1, factors: [] },
-          createdAt: new Date().toISOString()
-        };
-        const appointments = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
-        appointments.push(appointmentObj);
-        setLocalData(STORAGE_KEYS.APPOINTMENTS, appointments);
-
-        return {
-          success: true,
-          message: 'Appointment booked successfully.',
-          data: appointmentObj as any
-        };
-      }
-
-      if (payload.action === 'JOIN_WAITLIST') {
-        console.warn('Network error intercepted for JOIN_WAITLIST. Assuming success due to n8n CORS/Wait node bug.');
-        const waitlistItem: WaitlistItem = {
-          id: `WL-${Date.now()}`,
-          patientId: payload.data?.patientId || payload.data?.patient_id || 'PAT-1001',
-          patientName: payload.data?.patientName || payload.data?.patient_name || 'Patient',
-          doctorId: payload.data?.doctorId || payload.data?.doctor_id || 'DOC-101',
-          doctorName: payload.data?.doctorName || payload.data?.doctor_name || 'Doctor',
-          requestedDate: payload.data?.requestedDate || payload.data?.requested_date || '',
-          requestedTimeSlot: payload.data?.requestedTimeSlot || payload.data?.requested_time_slot || 'Morning',
-          position: 1,
-          status: 'WAITING',
-          notifiedAt: undefined,
-          createdAt: new Date().toISOString()
-        };
-        
-        const waitlist = getLocalData<WaitlistItem[]>(STORAGE_KEYS.WAITLIST, INITIAL_WAITLIST);
-        waitlist.push(waitlistItem);
-        setLocalData(STORAGE_KEYS.WAITLIST, waitlist);
-
-        return {
-          success: true,
-          message: 'Joined waitlist successfully.',
-          data: waitlistItem as any
-        };
-      }
-
-      if (payload.action === 'UPDATE_APPOINTMENT_STATUS' || payload.action === 'CHECK_IN') {
-        console.warn('Network error intercepted for UPDATE_APPOINTMENT_STATUS. Assuming success due to n8n CORS bug.');
-        const aptId = payload.data?.appointmentId || payload.data?.id;
-        const newStatus = payload.data?.status || 'CHECKED_IN';
-        
-        const appointments = getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS);
-        const aptIndex = appointments.findIndex(a => a.id === aptId);
-        
-        if (aptIndex !== -1) {
-          appointments[aptIndex].status = newStatus;
-          setLocalData(STORAGE_KEYS.APPOINTMENTS, appointments);
-        }
-
-        return {
-          success: true,
-          message: `Appointment status updated to ${newStatus}.`,
-          data: appointments[aptIndex] as any
-        };
-      }
-
+      console.error(`[callBackend] Error executing action "${payload.action}":`, err);
+      const isTimeout = err.name === 'TimeoutError' || err.name === 'AbortError' || err.message?.includes('aborted');
       return {
         success: false,
-        message: 'Unable to connect to appointment service. Network request failed.',
-        error: err.message || 'Network request failed'
+        message: isTimeout ? 'Request timed out while contacting healthcare backend.' : (err.message || 'Unable to connect to healthcare service.'),
+        error: isTimeout ? 'Timeout' : (err.message || 'NetworkError'),
+        data: (Array.isArray(payload.data) ? [] : null) as any
       };
     }
   }

@@ -57,7 +57,7 @@ export const PatientProfile: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    const targetPid = (user.id || 'PAT-1').toString().trim();
+    const targetPid = (user.id || '').toString().trim();
     const targetEmail = (user.email || '').toString().trim();
 
     console.log('[PATIENT_PROFILE] PATIENT ID:', targetPid);
@@ -157,20 +157,6 @@ export const PatientProfile: React.FC = () => {
           email: user.email,
           phone: user.phone
         });
-      }
-
-      // Guarantee minimum requirements for PAT-1
-      if (foundPatient && (foundPatient.id.toUpperCase() === 'PAT-1' || targetPid.toUpperCase() === 'PAT-1' || targetEmail.toLowerCase() === 'kanishkar2005ravi@gmail.com')) {
-        if (!foundPatient.id) foundPatient.id = 'PAT-1';
-        if (!foundPatient.name || foundPatient.name === 'Unknown') {
-          foundPatient.name = (user?.name && user.name !== 'Unknown') ? user.name : 'KANISHKAR R';
-        }
-        if (!foundPatient.phone) {
-          foundPatient.phone = user?.phone || '8300096676';
-        }
-        if (!foundPatient.email) {
-          foundPatient.email = user?.email || 'kanishkar2005ravi@gmail.com';
-        }
       }
 
       // 3. Extract and normalize all appointment records

@@ -132,98 +132,129 @@ export const AdminDashboard: React.FC = () => {
     return t('metric.todays_high_risk');
   };
 
-  useEffect(() => {
-    let isMounted = true;
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchDashboardData = React.useCallback(async () => {
     setLoading(true);
+    setError(null);
 
-    Promise.all([
-      callBackend({ action: 'GET_ANALYTICS', data: { dateRange } }),
-      callBackend({ action: 'GET_APPOINTMENTS', data: {} }),
-      callBackend({ action: 'GET_PATIENTS', data: {} }),
-      callBackend({ action: 'GET_DOCTORS', data: {} }),
-      callBackend({ action: 'GET_WAITLIST', data: {} })
-    ]).then(([analyticsRes, aptsRes, patsRes, docsRes, waitRes]) => {
-      if (isMounted) {
-        const aptsList: Appointment[] = (aptsRes.success && Array.isArray(aptsRes.data)) ? aptsRes.data : [];
-        const patsList: Patient[] = (patsRes.success && Array.isArray(patsRes.data)) ? patsRes.data : [];
-        const docsList: Doctor[] = (docsRes.success && Array.isArray(docsRes.data)) ? docsRes.data : [];
-        const waitList: WaitlistItem[] = (waitRes.success && Array.isArray(waitRes.data)) ? waitRes.data : [];
+    try {
+      const [analyticsRes, aptsRes, patsRes, docsRes, waitRes] = await Promise.allSettled([
+        callBackend({ action: 'GET_ANALYTICS', data: { dateRange } }),
+        callBackend({ action: 'GET_APPOINTMENTS', data: {} }),
+        callBackend({ action: 'GET_PATIENTS', data: {} }),
+        callBackend({ action: 'GET_DOCTORS', data: {} }),
+        callBackend({ action: 'GET_WAITLIST', data: {} })
+      ]);
 
-        const todayStr = getLocalDateString();
-        let targetDateStr = todayStr;
+      const aptsVal = aptsRes.status === 'fulfilled' ? aptsRes.value : null;
+      const patsVal = patsRes.status === 'fulfilled' ? patsRes.value : null;
+      const docsVal = docsRes.status === 'fulfilled' ? docsRes.value : null;
+      const waitVal = waitRes.status === 'fulfilled' ? waitRes.value : null;
 
-        if (dateRange === 'yesterday') {
-          const y = new Date();
-          y.setDate(y.getDate() - 1);
-          targetDateStr = getLocalDateString(y);
-        } else if (dateRange === 'custom') {
-          targetDateStr = normalizeDateStr(customDate) || todayStr;
+      const aptsList: Appointment[] = (aptsVal?.success && Array.isArray(aptsVal.data)) ? aptsVal.data : [];
+      const patsList: Patient[] = (patsVal?.success && Array.isArray(patsVal.data)) ? patsVal.data : [];
+      let docsList: Doctor[] = (docsVal?.success && Array.isArray(docsVal.data)) ? docsVal.data : [];
+      const waitList: WaitlistItem[] = (waitVal?.success && Array.isArray(waitVal.data)) ? waitVal.data : [];
+
+      // Extract unique doctors from appointment records if doctors endpoint returned none
+      if (docsList.length === 0 && aptsList.length > 0) {
+        const seenDocs = new Set<string>();
+        for (const a of aptsList) {
+          if (a.doctorId && !seenDocs.has(a.doctorId)) {
+            seenDocs.add(a.doctorId);
+            docsList.push({
+              id: a.doctorId,
+              name: a.doctorName || 'Doctor',
+              specialization: a.doctorSpecialization || 'General Medicine',
+              department: a.doctorSpecialization || 'General Medicine',
+              email: '',
+              phone: '',
+              experience: 5,
+              status: 'Active'
+            });
+          }
         }
-
-        const dateFilteredApts = aptsList.filter(a => normalizeDateStr(a.appointmentDate) === targetDateStr);
-        const dateFilteredWaitlist = waitList.filter(w => normalizeDateStr(w.requestedDate) === targetDateStr || normalizeDateStr(w.createdAt) === targetDateStr);
-        const activeDocsCount = docsList.filter(d => (d.status || '').toUpperCase() === 'ACTIVE').length || docsList.length || 4;
-        const workingDocsCount = new Set(dateFilteredApts.map(a => a.doctorId)).size;
-
-        const dateAttendedCount = dateFilteredApts.filter(a => isAttendedStatus(a.status)).length;
-
-        const calculatedMetrics = {
-          totalPatients: patsList.length,
-          totalAppointments: aptsList.length,
-          totalCancelled: aptsList.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length,
-          totalRescheduled: aptsList.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED').length,
-          totalMissed: aptsList.filter(a => (a.status || '').toUpperCase() === 'NO_SHOW' || (a.status || '').toUpperCase() === 'MISSED').length,
-          totalWaitlistCount: waitList.length,
-          activeDoctors: workingDocsCount > 0 ? workingDocsCount : activeDocsCount,
-          todayAppointments: dateFilteredApts.length,
-          todayAttended: dateAttendedCount,
-          todayCancelled: dateFilteredApts.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length,
-          todayRescheduled: dateFilteredApts.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED').length,
-          todayMissed: dateFilteredApts.filter(a => (a.status || '').toUpperCase() === 'NO_SHOW' || (a.status || '').toUpperCase() === 'MISSED').length,
-          waitlistCount: dateFilteredWaitlist.length,
-          acceptedWaitlistCount: dateFilteredWaitlist.filter(w => (w.status || '').toUpperCase() === 'ACCEPTED' || (w.status || '').toUpperCase() === 'CONFIRMED').length
-        };
-
-        setMetrics(calculatedMetrics);
-
-        const filteredLowCount = dateFilteredApts.filter(a => getRiskLevel(a) === 'LOW').length;
-        const filteredMedCount = dateFilteredApts.filter(a => getRiskLevel(a) === 'MEDIUM').length;
-        const filteredHighCount = dateFilteredApts.filter(a => getRiskLevel(a) === 'HIGH').length;
-
-        const lowCount = aptsList.filter(a => getRiskLevel(a) === 'LOW').length;
-        const medCount = aptsList.filter(a => getRiskLevel(a) === 'MEDIUM').length;
-        const highCount = aptsList.filter(a => getRiskLevel(a) === 'HIGH').length;
-
-        const liveAnalytics: AnalyticsData = {
-          totalPatients: calculatedMetrics.totalPatients,
-          totalDoctors: calculatedMetrics.activeDoctors,
-          totalAppointments: calculatedMetrics.totalAppointments,
-          todayAppointments: calculatedMetrics.todayAppointments,
-          attendanceRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => isAttendedStatus(a.status)).length / aptsList.length) * 100).toFixed(1)) : 0,
-          noShowRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => (a.status || '').toUpperCase() === 'NO_SHOW' || (a.status || '').toUpperCase() === 'MISSED').length / aptsList.length) * 100).toFixed(1)) : 0,
-          cancellationRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length / aptsList.length) * 100).toFixed(1)) : 0,
-          waitlistRecoveryRate: waitList.length > 0 ? parseFloat(((waitList.filter(w => (w.status || '').toUpperCase() === 'ACCEPTED' || (w.status || '').toUpperCase() === 'CONFIRMED').length / waitList.length) * 100).toFixed(1)) : 0,
-          highRiskCount: dateFilteredApts.length > 0 ? filteredHighCount : highCount,
-          mediumRiskCount: dateFilteredApts.length > 0 ? filteredMedCount : medCount,
-          lowRiskCount: dateFilteredApts.length > 0 ? filteredLowCount : lowCount,
-          doctorUtilization: 0,
-          appointmentTrends: [],
-          noShowTrends: [],
-          doctorUtilizationData: [],
-          waitlistRecoveryData: []
-        };
-
-        setAnalytics(liveAnalytics);
-        setAllAppointmentsList(aptsList);
-        setRecentAppointments(aptsList.slice(0, 5));
-        setLoading(false);
       }
-    });
 
-    return () => {
-      isMounted = false;
-    };
+      const todayStr = getLocalDateString();
+      let targetDateStr = todayStr;
+
+      if (dateRange === 'yesterday') {
+        const y = new Date();
+        y.setDate(y.getDate() - 1);
+        targetDateStr = getLocalDateString(y);
+      } else if (dateRange === 'custom') {
+        targetDateStr = normalizeDateStr(customDate) || todayStr;
+      }
+
+      const dateFilteredApts = aptsList.filter(a => normalizeDateStr(a.appointmentDate) === targetDateStr);
+      const dateFilteredWaitlist = waitList.filter(w => normalizeDateStr(w.requestedDate) === targetDateStr || normalizeDateStr(w.createdAt) === targetDateStr);
+      const activeDocsCount = docsList.filter(d => (d.status || '').toUpperCase() === 'ACTIVE').length || docsList.length || 0;
+      const workingDocsCount = new Set(dateFilteredApts.map(a => a.doctorId)).size;
+
+      const dateAttendedCount = dateFilteredApts.filter(a => isAttendedStatus(a.status)).length;
+
+      const calculatedMetrics = {
+        totalPatients: patsList.length,
+        totalAppointments: aptsList.length,
+        totalCancelled: aptsList.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length,
+        totalRescheduled: aptsList.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED').length,
+        totalMissed: aptsList.filter(a => (a.status || '').toUpperCase() === 'NO_SHOW' || (a.status || '').toUpperCase() === 'MISSED').length,
+        totalWaitlistCount: waitList.length,
+        activeDoctors: workingDocsCount > 0 ? workingDocsCount : activeDocsCount,
+        todayAppointments: dateFilteredApts.length,
+        todayAttended: dateAttendedCount,
+        todayCancelled: dateFilteredApts.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length,
+        todayRescheduled: dateFilteredApts.filter(a => (a.status || '').toUpperCase() === 'RESCHEDULED').length,
+        todayMissed: dateFilteredApts.filter(a => (a.status || '').toUpperCase() === 'NO_SHOW' || (a.status || '').toUpperCase() === 'MISSED').length,
+        waitlistCount: dateFilteredWaitlist.length,
+        acceptedWaitlistCount: dateFilteredWaitlist.filter(w => (w.status || '').toUpperCase() === 'ACCEPTED' || (w.status || '').toUpperCase() === 'CONFIRMED').length
+      };
+
+      setMetrics(calculatedMetrics);
+
+      const filteredLowCount = dateFilteredApts.filter(a => getRiskLevel(a) === 'LOW').length;
+      const filteredMedCount = dateFilteredApts.filter(a => getRiskLevel(a) === 'MEDIUM').length;
+      const filteredHighCount = dateFilteredApts.filter(a => getRiskLevel(a) === 'HIGH').length;
+
+      const lowCount = aptsList.filter(a => getRiskLevel(a) === 'LOW').length;
+      const medCount = aptsList.filter(a => getRiskLevel(a) === 'MEDIUM').length;
+      const highCount = aptsList.filter(a => getRiskLevel(a) === 'HIGH').length;
+
+      const liveAnalytics: AnalyticsData = {
+        totalPatients: calculatedMetrics.totalPatients,
+        totalDoctors: calculatedMetrics.activeDoctors,
+        totalAppointments: calculatedMetrics.totalAppointments,
+        todayAppointments: calculatedMetrics.todayAppointments,
+        attendanceRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => isAttendedStatus(a.status)).length / aptsList.length) * 100).toFixed(1)) : 0,
+        noShowRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => (a.status || '').toUpperCase() === 'NO_SHOW' || (a.status || '').toUpperCase() === 'MISSED').length / aptsList.length) * 100).toFixed(1)) : 0,
+        cancellationRate: aptsList.length > 0 ? parseFloat(((aptsList.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length / aptsList.length) * 100).toFixed(1)) : 0,
+        waitlistRecoveryRate: waitList.length > 0 ? parseFloat(((waitList.filter(w => (w.status || '').toUpperCase() === 'ACCEPTED' || (w.status || '').toUpperCase() === 'CONFIRMED').length / waitList.length) * 100).toFixed(1)) : 0,
+        highRiskCount: dateFilteredApts.length > 0 ? filteredHighCount : highCount,
+        mediumRiskCount: dateFilteredApts.length > 0 ? filteredMedCount : medCount,
+        lowRiskCount: dateFilteredApts.length > 0 ? filteredLowCount : lowCount,
+        doctorUtilization: 0,
+        appointmentTrends: [],
+        noShowTrends: [],
+        doctorUtilizationData: [],
+        waitlistRecoveryData: []
+      };
+
+      setAnalytics(liveAnalytics);
+      setAllAppointmentsList(aptsList);
+      setRecentAppointments(aptsList.slice(0, 5));
+    } catch (err: any) {
+      console.error('[AdminDashboard] Fetch error:', err);
+      setError(err.message || 'Unable to connect to healthcare backend service.');
+    } finally {
+      setLoading(false);
+    }
   }, [dateRange, customDate]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const getPatientsForMetricKey = (key: string): Appointment[] => {
     const todayStr = getLocalDateString();
@@ -275,7 +306,29 @@ export const AdminDashboard: React.FC = () => {
     return status;
   };
 
-  if (loading || !analytics) {
+  if (!analytics) {
+    if (error) {
+      return (
+        <div className="space-y-6 pb-12">
+          <Header title={t('nav.dashboard')} />
+          <Card className="text-center py-12">
+            <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4 border border-rose-200">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Unable to Load Hospital Metrics</h3>
+            <p className="text-sm text-slate-500 max-w-md mx-auto mb-6">{error}</p>
+            <button
+              onClick={() => fetchDashboardData()}
+              className="inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-bold bg-teal-600 text-white hover:bg-teal-700 transition-colors gap-2 shadow-sm cursor-pointer"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Retry Now
+            </button>
+          </Card>
+        </div>
+      );
+    }
+
     return (
       <div>
         <Header title={t('nav.dashboard')} />
