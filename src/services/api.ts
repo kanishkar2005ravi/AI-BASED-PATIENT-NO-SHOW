@@ -11,7 +11,7 @@ import {
   INITIAL_USERS
 } from '../utils/mockData';
 import { calculateAIRisk } from '../utils/aiPredictor';
-import { getLocalDateString } from '../utils/helpers';
+import { getLocalDateString, sortPatientsByNumericId } from '../utils/helpers';
 
 const DEFAULT_WEBHOOK_URL = 'https://api.agents.snsihub.ai/webhook/a2918487-c8b3-45ba-aed2-2b725e35b286';
 const BACKEND_URL = "https://api.agents.snsihub.ai/webhook/a2918487-c8b3-45ba-aed2-2b725e35b286";
@@ -1056,18 +1056,6 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           ...(typeof rawNewPat === 'object' ? rawNewPat : {})
         });
 
-        // Sync with local memory & storage only in demo mode
-        if (IS_DEMO_MODE) {
-          const localPats = getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient);
-          const existingIdx = localPats.findIndex(p => p.id === newPat.id || (newPat.email && p.email === newPat.email));
-          if (existingIdx >= 0) {
-            localPats[existingIdx] = newPat;
-          } else {
-            localPats.unshift(newPat);
-          }
-          setLocalData(STORAGE_KEYS.PATIENTS, localPats);
-        }
-
         return {
           success: isSuccess,
           message: resData.message || 'Patient created successfully!',
@@ -1090,11 +1078,11 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           return Boolean(p.id || p.patient_id || p.patientId);
         });
 
-        const patients: Patient[] = remoteRaw.map(normalizePatient).filter(p => p.id);
+        const patients: Patient[] = sortPatientsByNumericId(remoteRaw.map(normalizePatient).filter(p => p.id));
 
         console.log('[GET_PATIENTS] request:', requestBody);
         console.log('[GET_PATIENTS] raw response:', resData);
-        console.log('[GET_PATIENTS] parsed patients:', patients);
+        console.log('[GET_PATIENTS] parsed sorted patients:', patients);
 
         if (isAnalyticsObject && patients.length === 0) {
           console.error('[GET_PATIENTS] Received an analytics object instead of patient rows:', resData);
@@ -1106,14 +1094,10 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
           };
         }
 
-        const finalPats = IS_DEMO_MODE 
-          ? mergeListsById(getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS).map(normalizePatient), patients)
-          : patients;
-
         return {
           success: true,
           message: 'Patients retrieved successfully.',
-          data: finalPats as any
+          data: patients as any
         };
       }
 
@@ -1720,7 +1704,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
       // Default Webhook Fallback for Other Queries
       const responseMessage = resData.message || (isSuccess ? 'Operation completed successfully' : 'Operation failed');
-      const fallbackData = resData.data || (payload.action === 'GET_DOCTORS' ? INITIAL_DOCTORS : payload.action === 'GET_PATIENTS' ? getLocalData<Patient[]>(STORAGE_KEYS.PATIENTS, INITIAL_PATIENTS) : payload.action === 'GET_APPOINTMENTS' ? getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS) : payload.action === 'GET_ANALYTICS' ? INITIAL_ANALYTICS : payload.action === 'GET_WAITLIST' ? INITIAL_WAITLIST : payload.action === 'GET_NOTIFICATIONS' ? getLocalData<NotificationItem[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS).filter(n => n.userId === (payload.data?.userId || 'ADMIN')) : resData);
+      const fallbackData = resData.data || (payload.action === 'GET_DOCTORS' ? INITIAL_DOCTORS : payload.action === 'GET_PATIENTS' ? [] : payload.action === 'GET_APPOINTMENTS' ? getLocalData<Appointment[]>(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS) : payload.action === 'GET_ANALYTICS' ? INITIAL_ANALYTICS : payload.action === 'GET_WAITLIST' ? INITIAL_WAITLIST : payload.action === 'GET_NOTIFICATIONS' ? getLocalData<NotificationItem[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS).filter(n => n.userId === (payload.data?.userId || 'ADMIN')) : resData);
 
       return {
         success: isSuccess,
@@ -1938,7 +1922,7 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
       return {
         success: true,
         message: 'Patients retrieved successfully.',
-        data: patients as any
+        data: sortPatientsByNumericId(patients) as any
       };
     }
 

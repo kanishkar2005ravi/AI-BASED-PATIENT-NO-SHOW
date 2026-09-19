@@ -8,6 +8,7 @@ import { Loading } from '../../components/common/Loading';
 import { EmptyState } from '../../components/common/EmptyState';
 import { callBackend, normalizeAppointment } from '../../services/api';
 import { Patient, Appointment } from '../../types';
+import { sortPatientsByNumericId } from '../../utils/helpers';
 import { UserPlus, Search, Eye, Edit, UserX, UserCheck, ShieldAlert, Trash2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { BackButton } from '../../components/common/BackButton';
@@ -107,8 +108,9 @@ export const Patients: React.FC = () => {
         };
       });
 
-      setPatients(enrichedPatients);
-      setFilteredPatients(enrichedPatients);
+      const sortedPatients = sortPatientsByNumericId(enrichedPatients);
+      setPatients(sortedPatients);
+      setFilteredPatients(sortedPatients);
     } catch (e) {
       console.error('[Patients] Error loading patients and appointments:', e);
     } finally {

@@ -143,3 +143,28 @@ export function getSlotAvailabilityStatus(
   return 'AVAILABLE';
 }
 
+/**
+ * Sorts an array of patient records by the numeric suffix of their IDs in ascending numerical order.
+ * Ensures PAT-1 < PAT-2 < ... < PAT-9 < PAT-10 < PAT-11.
+ */
+export function sortPatientsByNumericId<T extends { id?: string }>(patients: T[]): T[] {
+  if (!Array.isArray(patients)) return [];
+  return [...patients].sort((a, b) => {
+    const idA = (a?.id || '').toString().trim();
+    const idB = (b?.id || '').toString().trim();
+
+    const matchA = idA.match(/\d+/g);
+    const matchB = idB.match(/\d+/g);
+
+    if (matchA && matchB) {
+      const numA = parseInt(matchA[matchA.length - 1], 10);
+      const numB = parseInt(matchB[matchB.length - 1], 10);
+      if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+        return numA - numB;
+      }
+    }
+
+    return idA.localeCompare(idB, undefined, { numeric: true, sensitivity: 'base' });
+  });
+}
+
