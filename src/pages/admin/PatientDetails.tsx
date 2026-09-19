@@ -7,9 +7,10 @@ import { Button } from '../../components/common/Button';
 import { Loading } from '../../components/common/Loading';
 import { AIRiskBadge } from '../../components/ai/AIRiskBadge';
 import { AIRiskExplanationModal } from '../../components/ai/AIRiskExplanationModal';
-import { callBackend } from '../../services/api';
+import { callBackend, normalizePatient, normalizeAppointment } from '../../services/api';
 import { Patient, Appointment, AIRiskAssessment } from '../../types';
-import { ArrowLeft, User, Mail, Phone, Calendar, MapPin, Brain, CheckCircle2, XCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { calculateAIRisk } from '../../utils/aiPredictor';
+import { ArrowLeft, Mail, Phone, Calendar, MapPin, AlertTriangle } from 'lucide-react';
 
 export const PatientDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,63 +20,125 @@ export const PatientDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedRisk, setSelectedRisk] = useState<AIRiskAssessment | null>(null);
 
+  const isAttended = (status: string | undefined): boolean => {
+    if (!status) return false;
+    const s = status.toString().trim().toUpperCase();
+    return s === 'COMPLETED' || s === 'ATTENDED' || s === 'CHECKED_IN' || s === 'CHECKED_OUT';
+  };
+
+  const isNoShow = (status: string | undefined): boolean => {
+    if (!status) return false;
+    const s = status.toString().trim().toUpperCase();
+    return (
+      s === 'NO_SHOW' ||
+      s === 'NO-SHOW' ||
+      s === 'NOSHOW' ||
+      s === 'NOT_ATTENDED' ||
+      s === 'NOT ATTENDED' ||
+      s === 'ABSENT' ||
+      s === 'MISSED'
+    );
+  };
+
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
 
+    const targetId = (id || '').trim().toLowerCase();
+
     Promise.all([
       callBackend({ action: 'GET_PATIENT', data: { patientId: id } }),
       callBackend({ action: 'GET_PATIENTS' }),
-      callBackend({ action: 'GET_APPOINTMENTS', data: { patientId: id } })
+      callBackend({ action: 'GET_APPOINTMENTS', data: { patientId: id, role: 'admin' } })
     ]).then(([patRes, patsRes, aptsRes]) => {
+      if (!isMounted) return;
+
+      // 1. Locate the exact patient matching route ID
+      let foundPat: Patient | null = null;
+
+      // Check specific GET_PATIENT response
+      if (patRes.success && patRes.patient) {
+        const p = patRes.patient;
+        const pid = (p.id || '').toString().trim().toLowerCase();
+        const pEmail = (p.email || '').toString().trim().toLowerCase();
+        if (pid === targetId || (targetId.includes('@') && pEmail === targetId)) {
+          foundPat = p;
+        }
+      }
+
+      // Check GET_PATIENTS list if not yet found
+      if (!foundPat && patsRes.success && Array.isArray(patsRes.data)) {
+        const match = patsRes.data.find((p: Patient) => {
+          if (!p) return false;
+          const pid = (p.id || '').toString().trim().toLowerCase();
+          const pEmail = (p.email || '').toString().trim().toLowerCase();
+          return pid === targetId || (targetId.includes('@') && pEmail === targetId);
+        });
+        if (match) {
+          foundPat = match;
+        }
+      }
+
+      // 2. Extract and filter appointments strictly for this patient
+      let allApts: Appointment[] = [];
+      const rawAptsRes: any = aptsRes;
+      if (aptsRes.success && Array.isArray(aptsRes.data)) {
+        allApts = aptsRes.data;
+      } else if (Array.isArray(rawAptsRes?.data?.items)) {
+        allApts = rawAptsRes.data.items.map((i: any) => normalizeAppointment(i.json || i));
+      } else if (Array.isArray(rawAptsRes?.items)) {
+        allApts = rawAptsRes.items.map((i: any) => normalizeAppointment(i.json || i));
+      } else if (Array.isArray(rawAptsRes)) {
+        allApts = rawAptsRes.map(normalizeAppointment);
+      }
+
+      const patientEmail = (foundPat?.email || '').trim().toLowerCase();
+
+      const patientApts = allApts.filter(a => {
+        if (!a) return false;
+        // Exclude waitlist items
+        if ((a as any).position !== undefined || (a as any).requestedTimeSlot !== undefined || (a.status as any) === 'WAITING' || (a.status as any) === 'NOTIFIED') {
+          return false;
+        }
+        const aPid = (a.patientId || (a as any).patient_id || '').toString().trim().toLowerCase();
+        if (aPid && targetId && aPid === targetId) return true;
+        const aEmail = (a.patientEmail || (a as any).patient_email || (a as any).email || '').toString().trim().toLowerCase();
+        if (patientEmail && aEmail && aEmail === patientEmail) return true;
+        return false;
+      });
+
+      setAppointments(patientApts);
+
+      // 3. Calculate dynamic statistics for this specific patient
+      if (foundPat) {
+        const attendedCount = patientApts.filter(a => isAttended(a.status)).length;
+        const noShowCount = patientApts.filter(a => isNoShow(a.status)).length;
+        const finalAttended = attendedCount > 0 ? attendedCount : (foundPat.attendedAppointments || 0);
+        const finalNoShow = noShowCount > 0 ? noShowCount : (foundPat.noShowAppointments || 0);
+        const totalVisits = (foundPat.totalAppointments && foundPat.totalAppointments >= (finalAttended + finalNoShow))
+          ? foundPat.totalAppointments
+          : (patientApts.length > 0 ? patientApts.length : (finalAttended + finalNoShow));
+        const calculatedRate = totalVisits > 0 ? Math.round((finalNoShow / totalVisits) * 100) : 0;
+        const finalNoShowRate = (finalNoShow > 0 && calculatedRate > 0) ? calculatedRate : (foundPat.noShowRate || 0);
+
+        foundPat = {
+          ...foundPat,
+          name: (foundPat.name && foundPat.name !== 'Unknown') ? foundPat.name : (foundPat.id || 'Patient'),
+          attendedAppointments: finalAttended,
+          noShowAppointments: finalNoShow,
+          totalAppointments: totalVisits,
+          noShowRate: finalNoShowRate
+        };
+
+        setPatient(foundPat);
+      } else {
+        setPatient(null);
+      }
+
+      setLoading(false);
+    }).catch(err => {
+      console.error('[PatientDetails] Error loading patient details:', err);
       if (isMounted) {
-        let foundPat = patRes.patient || (patRes.data && patRes.data.name ? patRes.data : null) || (Array.isArray(patsRes.data) ? patsRes.data.find((p: Patient) => p.id === id) : null);
-        let apts: Appointment[] = [];
-        if (aptsRes.success && Array.isArray(aptsRes.data)) {
-          apts = aptsRes.data;
-          setAppointments(apts);
-        }
-        if (foundPat) {
-          if (apts.length > 0) {
-            const isAttended = (status: string | undefined): boolean => {
-              if (!status) return false;
-              const s = status.toString().trim().toUpperCase();
-              return s === 'COMPLETED' || s === 'ATTENDED' || s === 'CHECKED_IN' || s === 'CHECKED_OUT';
-            };
-            const isNoShow = (status: string | undefined): boolean => {
-              if (!status) return false;
-              const s = status.toString().trim().toUpperCase();
-              return (
-                s === 'NO_SHOW' ||
-                s === 'NO-SHOW' ||
-                s === 'NOSHOW' ||
-                s === 'NOT_ATTENDED' ||
-                s === 'NOT ATTENDED' ||
-                s === 'ABSENT' ||
-                s === 'MISSED'
-              );
-            };
-
-            const attendedCount = apts.filter(a => isAttended(a.status)).length;
-            const noShowCount = apts.filter(a => isNoShow(a.status)).length;
-            const finalAttended = attendedCount > 0 ? attendedCount : (foundPat.attendedAppointments || 0);
-            const finalNoShow = noShowCount > 0 ? noShowCount : (foundPat.noShowAppointments || 0);
-            const totalVisits = (foundPat.totalAppointments && foundPat.totalAppointments >= (finalAttended + finalNoShow))
-              ? foundPat.totalAppointments
-              : (apts.length > 0 ? apts.length : (finalAttended + finalNoShow));
-            const calculatedRate = totalVisits > 0 ? Math.round((finalNoShow / totalVisits) * 100) : 0;
-            const finalNoShowRate = (finalNoShow > 0 && calculatedRate > 0) ? calculatedRate : (foundPat.noShowRate || 0);
-
-            foundPat = {
-              ...foundPat,
-              attendedAppointments: finalAttended,
-              noShowAppointments: finalNoShow,
-              totalAppointments: totalVisits,
-              noShowRate: finalNoShowRate
-            };
-          }
-          setPatient(foundPat);
-        }
         setLoading(false);
       }
     });
@@ -85,7 +148,7 @@ export const PatientDetails: React.FC = () => {
     };
   }, [id]);
 
-  if (loading || !patient) {
+  if (loading) {
     return (
       <div>
         <Header title="Patient Medical Profile" />
@@ -96,13 +159,43 @@ export const PatientDetails: React.FC = () => {
     );
   }
 
+  if (!patient) {
+    return (
+      <div className="space-y-6 pb-12">
+        <Header title="Patient Medical Profile" />
+        <div className="flex items-center space-x-3">
+          <Button variant="ghost" size="sm" icon={<ArrowLeft className="w-4 h-4" />} onClick={() => navigate('/admin/patients')}>
+            Back to Patients List
+          </Button>
+        </div>
+        <Card className="text-center py-12">
+          <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-4 border border-amber-200">
+            <AlertTriangle className="w-8 h-8" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-1">Patient Not Found</h3>
+          <p className="text-sm text-slate-500 max-w-md mx-auto mb-6">
+            No patient record matching ID <span className="font-mono font-bold text-slate-700">{id}</span> was found in the database.
+          </p>
+          <Button variant="primary" onClick={() => navigate('/admin/patients')}>
+            View All Patients
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  // Determine latest risk assessment dynamically for this patient
   const latestRisk: AIRiskAssessment = appointments.length > 0 && appointments[0].risk
     ? appointments[0].risk
     : {
         level: patient.noShowRate > 30 ? 'HIGH' : patient.noShowRate > 10 ? 'MEDIUM' : 'LOW',
-        probability: patient.noShowRate / 100 || 0.15,
+        probability: patient.noShowRate > 0 ? patient.noShowRate / 100 : 0.12,
         factors: [
-          { factor: 'Historical Attendance Rate', impact: patient.noShowRate > 20 ? 'negative' : 'positive', description: `${100 - patient.noShowRate}% historical attendance record.` }
+          {
+            factor: 'Historical Attendance Rate',
+            impact: patient.noShowRate > 20 ? 'negative' : 'positive',
+            description: `${100 - patient.noShowRate}% historical attendance record (${patient.attendedAppointments} attended, ${patient.noShowAppointments} no-shows).`
+          }
         ]
       };
 
@@ -121,29 +214,34 @@ export const PatientDetails: React.FC = () => {
         <Card className="lg:col-span-1">
           <div className="flex flex-col items-center text-center p-4 border-b border-slate-100 mb-4">
             <div className="w-20 h-20 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center text-2xl font-black mb-3 border-2 border-teal-300">
-              {patient.name.charAt(0)}
+              {(patient.name || patient.id || 'P').charAt(0).toUpperCase()}
             </div>
             <h3 className="text-xl font-bold text-slate-900">{patient.name}</h3>
             <p className="text-xs font-mono font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full mt-1">
               ID: {patient.id}
             </p>
+            <div className="mt-2">
+              <Badge variant={patient.status === 'Active' ? 'success' : 'default'} size="sm">
+                {patient.status || 'Active'}
+              </Badge>
+            </div>
           </div>
 
           <div className="space-y-3 text-xs text-slate-700">
             <div className="flex items-center space-x-3">
-              <Mail className="w-4 h-4 text-slate-400" />
-              <span className="font-semibold text-slate-900">{patient.email}</span>
+              <Mail className="w-4 h-4 text-slate-400 shrink-0" />
+              <span className="font-semibold text-slate-900 truncate">{patient.email || 'Not provided'}</span>
             </div>
             <div className="flex items-center space-x-3">
-              <Phone className="w-4 h-4 text-slate-400" />
+              <Phone className="w-4 h-4 text-slate-400 shrink-0" />
               <span>{patient.phone || 'Not provided'}</span>
             </div>
             <div className="flex items-center space-x-3">
-              <Calendar className="w-4 h-4 text-slate-400" />
-              <span>DOB: {patient.dateOfBirth} ({patient.gender})</span>
+              <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
+              <span>DOB: {patient.dateOfBirth || 'Not provided'} ({patient.gender || 'Not specified'})</span>
             </div>
             <div className="flex items-center space-x-3">
-              <MapPin className="w-4 h-4 text-slate-400" />
+              <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
               <span>{patient.address || 'Address not listed'}</span>
             </div>
           </div>
@@ -153,19 +251,19 @@ export const PatientDetails: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Summary KPIs */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-4 bg-white rounded-2xl border border-slate-200 text-center">
+            <div className="p-4 bg-white rounded-2xl border border-slate-200 text-center shadow-sm">
               <p className="text-xs font-semibold text-slate-500 uppercase">Total Visits</p>
               <h4 className="text-2xl font-black text-slate-900 mt-1">{patient.totalAppointments}</h4>
             </div>
-            <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 text-center">
+            <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 text-center shadow-sm">
               <p className="text-xs font-bold text-emerald-800 uppercase">Attended</p>
               <h4 className="text-2xl font-black text-emerald-900 mt-1">{patient.attendedAppointments}</h4>
             </div>
-            <div className="p-4 bg-rose-50/60 rounded-2xl border border-rose-200 text-center">
+            <div className="p-4 bg-rose-50/60 rounded-2xl border border-rose-200 text-center shadow-sm">
               <p className="text-xs font-bold text-rose-800 uppercase">No-Shows</p>
               <h4 className="text-2xl font-black text-rose-900 mt-1">{patient.noShowAppointments}</h4>
             </div>
-            <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200 text-center">
+            <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200 text-center shadow-sm">
               <p className="text-xs font-bold text-amber-800 uppercase">No-Show Rate</p>
               <h4 className="text-2xl font-black text-amber-900 mt-1">{patient.noShowRate}%</h4>
             </div>
@@ -177,7 +275,7 @@ export const PatientDetails: React.FC = () => {
               <div>
                 <span className="text-xs font-bold text-teal-400 uppercase tracking-wider">Predictive Score</span>
                 <h4 className="text-3xl font-black text-white mt-0.5">
-                  {Math.round((latestRisk.probability || 0.15) * 100)}% Risk
+                  {Math.round((latestRisk.probability || 0.12) * 100)}% Risk
                 </h4>
               </div>
               <AIRiskBadge

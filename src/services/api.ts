@@ -329,14 +329,6 @@ export function normalizePatient(inputP: any): Patient {
   const genderVal = (rawGender && rawGender.toLowerCase() !== 'null' && rawGender.toLowerCase() !== 'undefined')
     ? (rawGender.toLowerCase().startsWith('f') ? 'Female' : 'Male')
     : 'Male';
-
-  // Fallback defaults for PAT-1
-  if (idVal.toUpperCase() === 'PAT-1' || emailVal.toLowerCase() === 'kanishkar2005ravi@gmail.com') {
-    if (!nameVal) nameVal = 'KANISHKAR R';
-    if (!phoneVal) phoneVal = '8300096676';
-    if (!emailVal) emailVal = 'kanishkar2005ravi@gmail.com';
-  }
-
   return {
     ...p,
     id: idVal,
@@ -1125,37 +1117,48 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
         let found: any = null;
         const unwrapped = unwrapN8nData(resData);
+        const normTargetId = pId ? pId.toString().trim().toLowerCase() : '';
+        const normTargetEmail = pEmail ? pEmail.toString().trim().toLowerCase() : '';
+
         if (unwrapped.length > 0) {
-          found = unwrapped.find((p: any) =>
-            (pId && (
-              p.id?.toString().toLowerCase() === pId.toString().toLowerCase() ||
-              p.patient_id?.toString().toLowerCase() === pId.toString().toLowerCase() ||
-              p.patientId?.toString().toLowerCase() === pId.toString().toLowerCase()
-            )) ||
-            (pEmail && (
-              p.email?.toString().toLowerCase() === pEmail.toString().toLowerCase() ||
-              p.patient_email?.toString().toLowerCase() === pEmail.toString().toLowerCase()
-            ))
-          ) || unwrapped[0];
+          found = unwrapped.find((p: any) => {
+            if (!p || typeof p !== 'object') return false;
+            const candId = (p.id || p.patient_id || p.patientId || p.patient_ID || p.userId || p.user_id || '').toString().trim().toLowerCase();
+            const candEmail = (p.email || p.patient_email || p.patientEmail || p.user_email || p.userEmail || '').toString().trim().toLowerCase();
+            if (normTargetId && candId === normTargetId) return true;
+            if (normTargetEmail && candEmail === normTargetEmail) return true;
+            return false;
+          });
         }
 
         if (!found) {
-          if (resData.patient && typeof resData.patient === 'object') found = resData.patient;
-          else if (resData.data && typeof resData.data === 'object' && !Array.isArray(resData.data)) found = resData.data;
-          else if (resData.items?.[0]?.json?.data) found = resData.items[0].json.data;
-          else if (resData.items?.[0]?.json) found = resData.items[0].json;
-          else if (resData._responseData?.data?.items?.[0]?.json) found = resData._responseData.data.items[0].json;
+          const checkCandidate = (cand: any): any => {
+            if (!cand || typeof cand !== 'object') return null;
+            const actual = cand.json ? cand.json : cand;
+            const candId = (actual.id || actual.patient_id || actual.patientId || actual.patient_ID || actual.userId || actual.user_id || '').toString().trim().toLowerCase();
+            const candEmail = (actual.email || actual.patient_email || actual.patientEmail || actual.user_email || actual.userEmail || '').toString().trim().toLowerCase();
+            if ((normTargetId && candId === normTargetId) || (normTargetEmail && candEmail === normTargetEmail)) {
+              return actual;
+            }
+            return null;
+          };
+
+          found = checkCandidate(resData.patient) ||
+                  checkCandidate(resData.data) ||
+                  checkCandidate(resData.items?.[0]?.json?.data) ||
+                  checkCandidate(resData.items?.[0]?.json) ||
+                  checkCandidate(resData._responseData?.data?.items?.[0]?.json);
         }
 
         if (found && found.json) found = found.json;
 
         const normPat = found ? normalizePatient(found) : null;
-        const isValid = normPat && (Boolean(normPat.id) || (Boolean(normPat.name) && normPat.name !== 'Unknown'));
+        const isValid = Boolean(normPat && normPat.id && (!normTargetId || normPat.id.toLowerCase() === normTargetId));
 
         return {
-          success: Boolean(isValid),
+          success: isValid,
           message: isValid ? 'Patient retrieved successfully.' : 'Patient not found.',
-          patient: isValid ? normPat : undefined,
+          patient: (isValid && normPat) ? normPat : undefined,
           data: isValid ? (normPat as any) : null
         };
       }
