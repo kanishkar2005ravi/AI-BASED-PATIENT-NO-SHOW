@@ -315,7 +315,7 @@ export function normalizePatient(inputP: any): Patient {
   ).toString().trim();
 
   const dobVal = (rawDob && rawDob.toLowerCase() !== 'null' && rawDob.toLowerCase() !== 'undefined')
-    ? rawDob
+    ? (rawDob.includes('T') ? rawDob.split('T')[0] : rawDob)
     : '';
 
   const rawGender = (
@@ -329,6 +329,52 @@ export function normalizePatient(inputP: any): Patient {
   const genderVal = (rawGender && rawGender.toLowerCase() !== 'null' && rawGender.toLowerCase() !== 'undefined')
     ? (rawGender.toLowerCase().startsWith('f') ? 'Female' : 'Male')
     : 'Male';
+
+  const totalVisitsCount = Number(
+    p.totalAppointments ??
+    p.total_appointments ??
+    p.appointments_count ??
+    0
+  );
+
+  const attendedVisitsCount = Number(
+    p.attendedAppointments ??
+    p.attended_appointments ??
+    p.attended_visits ??
+    p.attendedVisits ??
+    p.attended_count ??
+    p.attendedCount ??
+    0
+  );
+
+  const noShowVisitsCount = Number(
+    p.noShowAppointments ??
+    p.no_show_appointments ??
+    p.noshow_appointments ??
+    p.no_shows ??
+    p.noshows ??
+    p.no_show_visits ??
+    p.noShowVisits ??
+    p.missed_appointments ??
+    p.missedAppointments ??
+    p.missed_visits ??
+    p.missedVisits ??
+    p.not_attended_appointments ??
+    p.notAttendedAppointments ??
+    p.not_attended ??
+    p.notAttended ??
+    p.no_show_count ??
+    p.noshow_count ??
+    p.missed_count ??
+    p.noShowCount ??
+    0
+  );
+
+  const rawRate = p.noShowRate ?? p.no_show_rate ?? p.noshow_rate;
+  const finalRate = (rawRate !== undefined && rawRate !== null && rawRate !== '')
+    ? Number(rawRate)
+    : (totalVisitsCount > 0 ? Math.round((noShowVisitsCount / totalVisitsCount) * 100) : 0);
+
   return {
     ...p,
     id: idVal,
@@ -340,43 +386,9 @@ export function normalizePatient(inputP: any): Patient {
     gender: genderVal,
     address: addressVal,
     status: (p.status === 'Inactive' || p.is_active === false) ? 'Inactive' : 'Active',
-    totalAppointments: Number(
-      p.totalAppointments ??
-      p.total_appointments ??
-      p.appointments_count ??
-      0
-    ),
-    attendedAppointments: Number(
-      p.attendedAppointments ??
-      p.attended_appointments ??
-      p.attended_visits ??
-      p.attendedVisits ??
-      p.attended_count ??
-      p.attendedCount ??
-      0
-    ),
-    noShowAppointments: Number(
-      p.noShowAppointments ??
-      p.no_show_appointments ??
-      p.noshow_appointments ??
-      p.no_shows ??
-      p.noshows ??
-      p.no_show_visits ??
-      p.noShowVisits ??
-      p.missed_appointments ??
-      p.missedAppointments ??
-      p.missed_visits ??
-      p.missedVisits ??
-      p.not_attended_appointments ??
-      p.notAttendedAppointments ??
-      p.not_attended ??
-      p.notAttended ??
-      p.no_show_count ??
-      p.noshow_count ??
-      p.missed_count ??
-      p.noShowCount ??
-      0
-    ),
+    totalAppointments: totalVisitsCount,
+    attendedAppointments: attendedVisitsCount,
+    noShowAppointments: noShowVisitsCount,
     cancelledAppointments: Number(
       p.cancelledAppointments ??
       p.cancelled_appointments ??
@@ -387,12 +399,7 @@ export function normalizePatient(inputP: any): Patient {
       p.rescheduled_appointments ??
       0
     ),
-    noShowRate: Number(
-      p.noShowRate ??
-      p.no_show_rate ??
-      p.noshow_rate ??
-      0
-    ),
+    noShowRate: finalRate,
     createdAt: p.createdAt || p.created_at || getLocalDateString()
   } as Patient;
 }
@@ -1152,7 +1159,48 @@ export async function callBackend<T = any>(payload: { action: string; data?: any
 
         if (found && found.json) found = found.json;
 
-        const normPat = found ? normalizePatient(found) : null;
+        let normPat = found ? normalizePatient(found) : null;
+        const isFullPatient = Boolean(
+          normPat &&
+          normPat.id &&
+          (
+            (normPat.name && normPat.name !== 'Unknown') ||
+            Boolean(normPat.email) ||
+            Boolean(normPat.phone) ||
+            Boolean(normPat.address) ||
+            Boolean(normPat.dateOfBirth) ||
+            (normPat.totalAppointments && normPat.totalAppointments > 0)
+          )
+        );
+
+        // If the single GET_PATIENT webhook returned only an echo without DB fields, query GET_PATIENTS to get the full record
+        if (!isFullPatient && (normTargetId || normTargetEmail)) {
+          try {
+            const listRes = await fetch(BACKEND_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({ action: 'GET_PATIENTS' })
+            });
+            if (listRes.ok) {
+              const listData = await listRes.json();
+              const listUnwrapped = unwrapN8nData(listData);
+              const foundInList = listUnwrapped.find((p: any) => {
+                if (!p || typeof p !== 'object') return false;
+                const actual = p.json ? p.json : p;
+                const candId = (actual.id || actual.patient_id || actual.patientId || actual.patient_ID || actual.userId || actual.user_id || '').toString().trim().toLowerCase();
+                const candEmail = (actual.email || actual.patient_email || actual.patientEmail || actual.user_email || actual.userEmail || '').toString().trim().toLowerCase();
+                return (normTargetId && candId === normTargetId) || (normTargetEmail && candEmail === normTargetEmail);
+              });
+              if (foundInList) {
+                const actualFound = foundInList.json ? foundInList.json : foundInList;
+                normPat = normalizePatient(actualFound);
+              }
+            }
+          } catch (e) {
+            console.error('[GET_PATIENT] Fallback to GET_PATIENTS failed:', e);
+          }
+        }
+
         const isValid = Boolean(normPat && normPat.id && (!normTargetId || normPat.id.toLowerCase() === normTargetId));
 
         return {

@@ -8,8 +8,7 @@ import { Loading } from '../../components/common/Loading';
 import { AIRiskBadge } from '../../components/ai/AIRiskBadge';
 import { AIRiskExplanationModal } from '../../components/ai/AIRiskExplanationModal';
 import { callBackend, normalizePatient, normalizeAppointment } from '../../services/api';
-import { Patient, Appointment, AIRiskAssessment } from '../../types';
-import { calculateAIRisk } from '../../utils/aiPredictor';
+import { Patient, Appointment, AIRiskAssessment, RiskLevel } from '../../types';
 import { ArrowLeft, Mail, Phone, Calendar, MapPin, AlertTriangle } from 'lucide-react';
 
 export const PatientDetails: React.FC = () => {
@@ -53,11 +52,48 @@ export const PatientDetails: React.FC = () => {
     ]).then(([patRes, patsRes, aptsRes]) => {
       if (!isMounted) return;
 
-      // 1. Locate the exact patient matching route ID
-      let foundPat: Patient | null = null;
+      // 1. Gather all candidate patient objects from all response branches
+      const candidateObjects: any[] = [];
+      const visited = new Set<any>();
 
-      // Check specific GET_PATIENT response
-      if (patRes.success && patRes.patient) {
+      const collectCandidates = (node: any, depth = 0) => {
+        if (!node || typeof node !== 'object' || depth > 8 || visited.has(node)) return;
+        visited.add(node);
+
+        if (Array.isArray(node)) {
+          for (const it of node) {
+            if (it && typeof it === 'object') collectCandidates(it, depth + 1);
+          }
+          return;
+        }
+
+        if (node.json && typeof node.json === 'object') collectCandidates(node.json, depth + 1);
+        if (node.data && typeof node.data === 'object') collectCandidates(node.data, depth + 1);
+        if (node.items && typeof node.items === 'object') collectCandidates(node.items, depth + 1);
+        if (node.rows && typeof node.rows === 'object') collectCandidates(node.rows, depth + 1);
+        if (node.patient && typeof node.patient === 'object') collectCandidates(node.patient, depth + 1);
+
+        const hasPid = Boolean(node.id || node.patient_id || node.patientId || node.patient_ID || node.userId || node.user_id);
+        const hasDetails = Boolean(node.name || node.patient_name || node.email || node.patient_email || node.phone || node.phone_number || node.address || node.date_of_birth || node.total_appointments !== undefined);
+        if (hasPid && hasDetails) {
+          candidateObjects.push(node);
+        }
+      };
+
+      collectCandidates(patsRes);
+      collectCandidates(patRes);
+
+      // Search candidates for the matched patient
+      const foundRaw = candidateObjects.find((p: any) => {
+        const pid = (p.id || p.patient_id || p.patientId || p.patient_ID || p.userId || p.user_id || '').toString().trim().toLowerCase();
+        const pEmail = (p.email || p.patient_email || p.patientEmail || p.user_email || p.userEmail || '').toString().trim().toLowerCase();
+        return (targetId && pid === targetId) || (targetId.includes('@') && pEmail === targetId);
+      });
+
+      let foundPat: Patient | null = foundRaw ? normalizePatient(foundRaw) : null;
+
+      // Fallback: If not in collected candidates, check normalized patRes or patsRes
+      if (!foundPat && patRes.success && patRes.patient) {
         const p = patRes.patient;
         const pid = (p.id || '').toString().trim().toLowerCase();
         const pEmail = (p.email || '').toString().trim().toLowerCase();
@@ -66,7 +102,6 @@ export const PatientDetails: React.FC = () => {
         }
       }
 
-      // Check GET_PATIENTS list if not yet found
       if (!foundPat && patsRes.success && Array.isArray(patsRes.data)) {
         const match = patsRes.data.find((p: Patient) => {
           if (!p) return false;
@@ -115,11 +150,13 @@ export const PatientDetails: React.FC = () => {
         const noShowCount = patientApts.filter(a => isNoShow(a.status)).length;
         const finalAttended = attendedCount > 0 ? attendedCount : (foundPat.attendedAppointments || 0);
         const finalNoShow = noShowCount > 0 ? noShowCount : (foundPat.noShowAppointments || 0);
-        const totalVisits = (foundPat.totalAppointments && foundPat.totalAppointments >= (finalAttended + finalNoShow))
-          ? foundPat.totalAppointments
-          : (patientApts.length > 0 ? patientApts.length : (finalAttended + finalNoShow));
+        const totalVisits = patientApts.length > 0
+          ? Math.max(patientApts.length, (foundPat.totalAppointments || 0))
+          : (foundPat.totalAppointments || (finalAttended + finalNoShow));
         const calculatedRate = totalVisits > 0 ? Math.round((finalNoShow / totalVisits) * 100) : 0;
-        const finalNoShowRate = (finalNoShow > 0 && calculatedRate > 0) ? calculatedRate : (foundPat.noShowRate || 0);
+        const finalNoShowRate = (finalNoShow > 0 && calculatedRate > 0)
+          ? calculatedRate
+          : (foundPat.noShowRate || calculatedRate || 0);
 
         foundPat = {
           ...foundPat,
@@ -184,18 +221,32 @@ export const PatientDetails: React.FC = () => {
     );
   }
 
-  // Determine latest risk assessment dynamically for this patient
+  // Determine risk assessment dynamically for this patient
+  const rawRiskTier = (patient as any).risk_tier || (patient as any).riskTier;
+  const inferredLevel: RiskLevel = rawRiskTier === 'HIGH' || rawRiskTier === 'MEDIUM' || rawRiskTier === 'LOW'
+    ? rawRiskTier
+    : (patient.noShowRate > 30 ? 'HIGH' : patient.noShowRate > 10 ? 'MEDIUM' : 'LOW');
+
+  const riskProb = patient.noShowRate > 0 ? (patient.noShowRate / 100) : (inferredLevel === 'HIGH' ? 0.40 : inferredLevel === 'MEDIUM' ? 0.25 : 0.12);
+
   const latestRisk: AIRiskAssessment = appointments.length > 0 && appointments[0].risk
     ? appointments[0].risk
     : {
-        level: patient.noShowRate > 30 ? 'HIGH' : patient.noShowRate > 10 ? 'MEDIUM' : 'LOW',
-        probability: patient.noShowRate > 0 ? patient.noShowRate / 100 : 0.12,
+        level: inferredLevel,
+        probability: riskProb,
         factors: [
           {
             factor: 'Historical Attendance Rate',
             impact: patient.noShowRate > 20 ? 'negative' : 'positive',
             description: `${100 - patient.noShowRate}% historical attendance record (${patient.attendedAppointments} attended, ${patient.noShowAppointments} no-shows).`
-          }
+          },
+          ...(patient.totalAppointments > 0 ? [
+            {
+              factor: 'Total Lifetime Visits',
+              impact: (patient.totalAppointments >= 3 ? 'positive' : 'negative') as 'positive' | 'negative',
+              description: `Patient has ${patient.totalAppointments} recorded visits in the hospital database.`
+            }
+          ] : [])
         ]
       };
 
